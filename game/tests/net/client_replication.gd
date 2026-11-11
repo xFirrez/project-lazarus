@@ -12,6 +12,8 @@ var _samples: Array = []
 var _sent: bool = false
 var _last_render: Vector3 = Vector3.INF
 var _max_step: float = 0.0
+var _min_hp: float = 1000.0
+var _hit_angle: float = INF
 
 
 func _ready() -> void:
@@ -30,6 +32,11 @@ func _physics_process(_delta: float) -> void:
 		_record_start = elapsed() + WARMUP_S
 		var me: PlayerCharacter = s.local_avatar()
 		me.bot_driver = circle_driver(1.7)
+		me.health.damaged.connect(
+			func(_a: float, src: Vector3, _t: int) -> void:
+				_hit_angle = rad_to_deg(DamageHud.relative_angle(me.global_position, me.get_yaw(), src))
+		)
+	_min_hp = minf(_min_hp, s.local_avatar().health.health)
 	if elapsed() < _record_start:
 		return
 	var host_avatar: PlayerCharacter = s.avatars.get(1, null)
@@ -44,6 +51,10 @@ func _physics_process(_delta: float) -> void:
 	_samples.append([t, p.x, p.y, p.z])
 	if elapsed() > _record_start + RECORD_S:
 		_sent = true
+		var hp: float = s.local_avatar().health.health
+		check("client_took_host_damage", is_equal_approx(_min_hp, 60.0), "min hp %.0f" % _min_hp)
+		check("damage_indicator_on_left", absf(_hit_angle - 90.0) < 30.0, "%.1f deg" % _hit_angle)
+		check("client_regenerated", is_equal_approx(hp, 100.0), "hp %.0f" % hp)
 		Net.send_reliable(1, &"_autotest_report", [_connect_time, _samples, true, host_avatar.buffer.delay, _max_step])
 		_leave_soon.call_deferred()
 

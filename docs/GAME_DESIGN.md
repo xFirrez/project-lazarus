@@ -490,3 +490,5 @@ Video presets (Low/Medium/High/Ultra + individual: resolution scale/FSR, shadows
 | Date | Step | Parameter | Old → New | Reason |
 |---|---|---|---|---|
 | 2026-11-11 | 0 | (initial values) | — | Planning baseline |
+| 2026-11-11 | 2 | Values not specified in §3.1 (new, in `content/player/player_tuning.tres`) | — → gravity 20 m/s², stop speed 1.5 m/s, coyote 0.1 s, jump buffer 0.12 s, slide end speed 3.0 m/s, slide steer 2 rad/s, mantle 0.32 s, eye height 1.62 / 0.95 (crouch) / 0.80 (slide) m, bob 1.8 Hz × 0.045 m, strafe tilt 1.2°, pitch limit 89°, shake max 3°, gamepad look 220°/s, deadzone 0.15, curve 2.0; host validation 10.5 m/s horizontal, 12 m/s up, 4 m teleport, 1.5 m slack | Step 2 controller needed concrete values; all live-tunable with `tune` and pending the AC-2.7 feel review |
+| 2026-11-11 | 2 | Sprint restart rule | — → after exhausting stamina, sprint must be released and needs ≥ 10% stamina to restart | Prevents sprint stutter when holding Shift at 0 stamina |

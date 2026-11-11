@@ -15,6 +15,8 @@ var _left_at: float = -1.0
 var _removed_at: float = -1.0
 var _saw_two: bool = false
 var _client_corrections: int = 0
+var _two_at: float = -1.0
+var _damaged: bool = false
 
 
 func _ready() -> void:
@@ -41,6 +43,14 @@ func _physics_process(_delta: float) -> void:
 				_client_id = id
 		check("host_sees_two_capsules", true, s.avatars.keys())
 		s.corrected.connect(func(_id: int, _r: String) -> void: _client_corrections += 1)
+		_two_at = elapsed()
+	# Host-authoritative damage to the client from its left (AC-2.4 over the network).
+	if _two_at >= 0.0 and not _damaged and elapsed() > _two_at + 2.0 and s.avatars.has(_client_id):
+		_damaged = true
+		var c: PlayerCharacter = s.avatars[_client_id]
+		var src: Vector3 = c.global_position + Basis(Vector3.UP, c.rotation.y + PI / 2.0) * Vector3.FORWARD * 6.0
+		var applied: float = s.damage_player(_client_id, 40.0, src, HealthComponent.DamageType.ZOMBIE)
+		check("host_applied_damage", applied == 40.0, applied)
 	if _left_at >= 0.0 and _removed_at < 0.0 and not s.avatars.has(_client_id):
 		_removed_at = elapsed()
 		check("client_capsule_removed_on_disconnect", true, "%.3f s after peer_left" % (_removed_at - _left_at))

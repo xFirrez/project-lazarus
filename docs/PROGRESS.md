@@ -11,11 +11,11 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | Step 1 complete — no milestone reached yet (M0 after Step 3) |
-| Next step to start | **Step 2 — Player controller & movement feel** |
+| Current milestone | Step 2 complete — no milestone reached yet (M0 after Step 3) |
+| Next step to start | **Step 3 — Weapon framework & gunplay feel** |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-11 (Step 1 session) |
-| Main branch playable? | Sandbox only (capsules, solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-11 (Step 2 session) |
+| Main branch playable? | Test maps only (sandbox, movement course; first-person movement, solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -25,7 +25,7 @@
 |---|---|---|---|---|
 | 0 | Planning & design documents | **Complete** | — | 2026-11-11 |
 | 1 | Foundation, toolchain & networked skeleton | **Complete** | — | 2026-11-11 |
-| 2 | Player controller & movement feel | Not started | — | — |
+| 2 | Player controller & movement feel | **Complete** (AC-2.7 awaiting human) | — | 2026-11-11 |
 | 3 | Weapon framework & gunplay feel (→ M0) | Not started | — | — |
 | 4 | Art direction, asset pipeline & look development | Not started | 4A / 4B | — |
 | 5 | Zombie AI, animation & networked enemies | Not started | 5A / 5B | — |
@@ -60,13 +60,13 @@
 - [x] AC-1.7 Screenshot pipeline works in container (opengl3 fallback, D-013)
 
 ### Step 2 — Player controller
-- [ ] AC-2.1 Bot completes movement course (solo + client @100 ms)
-- [ ] AC-2.2 Speeds / stamina within tolerance
-- [ ] AC-2.3 Zero tunneling over 10k random frames
-- [ ] AC-2.4 Damage/regen timing + feedback
-- [ ] AC-2.5 Smooth remote motion under NetSim; speed-hack corrected
-- [ ] AC-2.6 Crouch ceiling + slide edge cases
-- [ ] AC-2.7 [HUMAN] Movement feel review
+- [x] AC-2.1 Bot completes movement course (solo from all 4 spawns: `test_movement_course.gd`; client @100 ms ±20 ms, 2% loss: `net_tests.sh course`, 0 host corrections)
+- [x] AC-2.2 Speeds / stamina within tolerance (`test_player_motor.gd`)
+- [x] AC-2.3 Zero tunneling over 10k random frames (`test_player_tunneling.gd`, static geometry; moving platforms excluded — see test note)
+- [x] AC-2.4 Damage/regen timing + feedback (`test_health_regen.gd`; `tools/visual_tests.sh` screenshots; host→client damage in `net_tests.sh replication`)
+- [x] AC-2.5 Smooth remote motion under NetSim; speed-hack corrected (`net_tests.sh replication`, `speedhack`)
+- [x] AC-2.6 Crouch ceiling + slide edge cases (`test_movement_course.gd`)
+- [H] AC-2.7 [HUMAN] Movement feel review
 
 ### Step 3 — Weapons
 - [ ] AC-3.1 Damage/falloff/penetration/RPM unit tests
@@ -207,6 +207,11 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-11 | 2 | `tools/check.sh` | Pass | 13 scripts / 64 tests / 1395 asserts |
+| 2026-11-11 | 2 | `tools/run_tests.sh integration` (`--fixed-fps 60`) | Pass | 3 scripts / 16 tests. Walk 4.60, sprint 6.60, crouch 2.40 m/s (±3%); sprint 4.0 s, recharge 3.8 s (0.8 + 3.0, ±0.1); apex 1.0 m; slide 0.7 s + 1.0 s cooldown; bot course from all 4 spawns in 28.0 s (2 mantles, 1 slide, elevator, 5 m drops, no damage); 1.5 m ledge not mantleable; 1.5 m ceiling keeps crouch; slide ends crouched in the 1.3 m tunnel; shuttle carries the player; 10,000 random frames: 0 static overlaps, 0 fall-through (also checked with 7 other seeds) |
+| 2026-11-11 | 2 | `tools/net_tests.sh` (solo, replication, host_loss, speedhack, course) | Pass | NetSim 100 ms ±20 ms, 2% loss. Replication: remote sprint-circle max error 0.007–0.015 m, max per-frame step 0.15–0.17 m (no snapping), 0 corrections for a legit client; host damage 40 from the client's left → client HP 60, indicator at ~105°, regen to 100. Speed hack ×3: 4 corrections in 3 s, validated speed 8.6–9.1 m/s (limit 10.5) while the client tried ~14 m/s. Client course run: completed in 27.9 s, RTT ~210 ms, 0 corrections |
+| 2026-11-11 | 2 | `tools/visual_tests.sh` | Pass | Indicator redness left/right 0.64/0.00 (hit from left), 0.00/0.71 (from right); corner vignette −0.15 → +0.05 and stronger at 70% missing. Frames: `docs/screenshots/damage_hud_*.png` |
+| 2026-11-11 | 2 | `tools/run_sim.sh smoke`, `tools/screenshot.sh movement_course` | Pass | `docs/screenshots/movement_course_shot_*.png` |
 | 2026-11-11 | 1 | `tools/check.sh` (import, gdlint, gdformat, boundary, prints, unit) | Pass | 9 scripts / 36 tests / 1092 asserts |
 | 2026-11-11 | 1 | `tools/net_tests.sh` solo / replication / host_loss | Pass | NetSim 100 ms ±20 ms, 2% loss on both peers. Connect 0.43 s; replicated host capsule max error 0.011–0.016 m (mean 0.001 m, 301 samples); client capsule removed 0.017 s after peer_left; client back in menu with "Host disconnected" ~1.9 s after host kill -9 |
 | 2026-11-11 | 1 | `tools/run_coop_local.sh 3 --netsim=100,20,0.02` | Pass | both clients see 3 capsules ~0.55 s after launch |
@@ -224,6 +229,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Peers | NetSim profile | KB/s per client | Desyncs | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-11 | 2 | 2 (loopback) | 100 ms ±20 ms, 2% loss | ~1 (player state 30 Hz: pos, yaw, pitch, flags, seq; snapshots 20 Hz) | 0 | Replication error max 0.015 m; 0 false corrections |
 | 2026-11-11 | 1 | 2 (loopback) | 100 ms ±20 ms, 2% loss | < 1 (capsule state 30 Hz + snapshots 20 Hz, float32 positions) | 0 | Replication error max 0.016 m; quantization deferred to Step 5 |
 
 ---
@@ -232,6 +238,8 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | ID | Severity (S1–S4) | Step found | Description | Owner/plan |
 |---|---|---|---|---|
+| I-002 | S4 | 2 | Headless `--fixed-fps` integration runs sometimes log "Jolt Physics job system exceeded the maximum number of jobs … Waiting for jobs" (engine warning; physics continues). Not seen in real-time runs | Marked benign in `tests/integration/player_test_helper.gd`; re-check after engine upgrades |
+| I-003 | S3 | 2 | Test-map moving platforms (course elevator/shuttle) are simulated locally per peer, so a remote player riding one is seen on the host's copy of the platform only approximately | Step 8 makes traversal machines host-driven (D-020) |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
 Severity: **S1** crash / data loss / progress-blocking · **S2** major feature broken · **S3** minor feature issue / visual bug · **S4** polish.
@@ -240,7 +248,9 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 
 | AC / item | Deferred to | Reason |
 |---|---|---|
-| Owner-movement validation (speed limits / teleport clamp) | Step 2 | Needs the real player controller; Step 1 capsules are trusted |
+| ~~Owner-movement validation~~ | — | Done in Step 2 (D-016) |
+| Settings UI for sensitivity / ADS multiplier / FOV / bob / shake / hold-toggle | Step 15 (15A menus) | Settings exist in `Config` and are live-editable with the `setting` console command; the menu screens are Step 15 work |
+| Downed state (last stand) | Step 6 | Step 2 provides the hook: at 0 HP the host restores the player after 3 s (placeholder) |
 | `NetId` entity registry + reliable spawn/despawn | Step 5 | First needed for zombies; player avatars are keyed by peer id |
 | Snapshot quantization | Step 5 | Bandwidth is negligible with ≤ 4 capsules |
 
@@ -267,6 +277,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Any | Monitor Git LFS storage/bandwidth quota | Recurring |
 | Step 1 | Quick desktop check: `godot --path game`, Solo, press `~` (console: try `help`, `net_status`, Tab completion, Up/Down history), F3 overlay; then `tools/run_coop_local.sh 2 --windowed` and walk both capsules | Open |
 | Step 1 | Confirm the first GitHub Actions run of `.github/workflows/ci.yml` is green (Actions tab) | Open |
+| Step 2 | AC-2.7 movement feel review on the movement course (steps in `docs/sessions/2026-11-11_step-2.md`); record any `tune` changes in the GAME_DESIGN tuning log | Open |
 
 ---
 
@@ -278,3 +289,4 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 |---|---|---|---|
 | 2026-11-11 | 0 | Planning: architecture, roadmap, game design, map design, tracker, agent guide | (planning commit) |
 | 2026-11-11 | 1 | Godot 4.7.2 project, autoloads, Net layer v1 (Offline/ENet, NetSim, clock sync, uid), console + overlay, sandbox with replicated capsules, tool scripts, CI | [2026-11-11_step-1.md](sessions/2026-11-11_step-1.md) |
+| 2026-11-11 | 2 | PlayerCharacter (motor, camera rig, health + damage HUD, footsteps), PlayerTuning, movement course, host movement validation, health replication, bot/random drivers, integration + net + visual tests | [2026-11-11_step-2.md](sessions/2026-11-11_step-2.md) |
