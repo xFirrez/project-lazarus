@@ -1,30 +1,49 @@
 #!/usr/bin/env bash
-# Rendered (xvfb) visual checks that need real frames, e.g. the damage HUD direction test (AC-2.4).
+# Rendered (xvfb) visual checks that need real frames:
+#   damage_direction  damage HUD direction + vignette (AC-2.4), 1280x720
+#   viewmodel_ads     ADS sight alignment within 1 px at 1920x1080 + viewmodel over walls (AC-3.5)
 # Same renderer selection as screenshot.sh: Vulkan if an ICD exists, otherwise opengl3 (D-013).
-# Usage: tools/visual_tests.sh [out_dir]   (frames go to docs/screenshots by default)
+# Usage: tools/visual_tests.sh [out_dir] [test...]   (frames go to docs/screenshots by default)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
 OUT="${1:-$ROOT/docs/screenshots}"
+shift || true
 mkdir -p "$OUT" "$ROOT/.test-results"
 OUT="$(cd "$OUT" && pwd)"
 DRIVER=()
 if ! ls /usr/share/vulkan/icd.d/*.json >/dev/null 2>&1; then DRIVER=(--rendering-driver opengl3); fi
-RUNNER=()
-if [[ -z "${DISPLAY:-}" ]]; then RUNNER=(xvfb-run -a -s "-screen 0 1280x720x24"); fi
-LOG="$ROOT/.test-results/visual_damage.log"
-JSON="$ROOT/.test-results/visual_damage.json"
-rm -f "$JSON"
-set +e
-timeout 90 "${RUNNER[@]}" "$GODOT" --path "$GAME_DIR" --audio-driver Dummy "${DRIVER[@]}" --resolution 1280x720 \
-  -- --solo --map=movement_course --profile=visual --autotest=res://tests/visual/damage_direction.gd \
-  --autotest-out="$JSON" --autotest-shots="$OUT" >"$LOG" 2>&1
-set -e
-if [[ -f "$JSON" ]] && python3 -c 'import json,sys; sys.exit(0 if json.load(open(sys.argv[1]))["pass"] else 1)' "$JSON" \
-  && ! godot_log_has_errors "$LOG"; then
-  echo "[visual:damage_direction] PASS $(grep -E 'autotest: (PASS|FAIL)' "$LOG" | sed 's/.*autotest: //' | tr '\n' ';')"
-else
-  echo "[visual:damage_direction] FAIL; log: $LOG" >&2
-  grep -E "autotest|ERROR" "$LOG" | tail -20 >&2
-  exit 1
-fi
+
+run_visual() { # name map resolution
+  local name="$1" map="$2" res="$3"
+  local w="${res%x*}" h="${res#*x}"
+  local runner=()
+  if [[ -z "${DISPLAY:-}" ]]; then runner=(xvfb-run -a -s "-screen 0 ${w}x${h}x24"); fi
+  local log="$ROOT/.test-results/visual_${name}.log" json="$ROOT/.test-results/visual_${name}.json"
+  rm -f "$json"
+  set +e
+  timeout 150 "${runner[@]}" "$GODOT" --path "$GAME_DIR" --audio-driver Dummy "${DRIVER[@]}" --resolution "$res" \
+    -- --solo --map="$map" --profile=visual --autotest="res://tests/visual/${name}.gd" \
+    --autotest-out="$json" --autotest-shots="$OUT" >"$log" 2>&1
+  set -e
+  if [[ -f "$json" ]] && python3 -c 'import json,sys; sys.exit(0 if json.load(open(sys.argv[1]))["pass"] else 1)' "$json" \
+    && ! godot_log_has_errors "$log"; then
+    echo "[visual:$name] PASS $(grep -E 'autotest: (PASS|FAIL)' "$log" | sed 's/.*autotest: //' | tr '\n' ';')"
+  else
+    echo "[visual:$name] FAIL; log: $log" >&2
+    grep -E "autotest|ERROR" "$log" | tail -20 >&2
+    return 1
+  fi
+}
+
+TESTS=("$@")
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(damage_direction viewmodel_ads)
+fail=0
+for t in "${TESTS[@]}"; do
+  case "$t" in
+    damage_direction) run_visual damage_direction movement_course 1280x720 || fail=1 ;;
+    viewmodel_ads) run_visual viewmodel_ads gun_range 1920x1080 || fail=1 ;;
+    *) echo "unknown visual test $t" >&2; fail=1 ;;
+  esac
+done
+exit $fail
