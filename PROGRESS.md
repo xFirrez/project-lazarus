@@ -7,7 +7,7 @@ Short hand-off file for the **sequential cloud sessions** implementing `docs/DEV
 - Each session: read this file + `git log`, implement **exactly one step**, run `tools/check.sh` + relevant tests, update this file and `docs/PROGRESS.md`, add `docs/sessions/<date>_step-N.md`, commit, push, then start the next session (`create_session`, `source_revision` and `outcome_branch` = `claude/project-lazarus`, effort `medium`).
 - Never redo a step listed as done below. If a step can't be completed or verified, record the blocker here, push, and stop the chain.
 - **Step count:** the owner's instructions say "15 steps", but `docs/DEVELOPMENT_PLAN.md` defines **16** (Step 16 = balance/optimization/QA/release candidate). Decision (Step 1 session): the chain implements all 16 plan steps, and the PR into `main` is opened after the final step (16). Do not merge.
-- Environment setup in a fresh container: `tools/install_godot.sh` (Godot 4.7.2 → `~/.local/bin/godot`) and `pip install gdtoolkit==4.5.0`, then `export PATH=$HOME/.local/bin:$PATH`.
+- Environment setup in a fresh container: `tools/install_godot.sh` (Godot 4.7.2 → `~/.local/bin/godot`) and `pip install gdtoolkit==4.5.0`, then `export PATH=$HOME/.local/bin:$PATH`. Optional (Step 4+): `pip install bpy` (Blender generators) and `apt-get install -y mesa-vulkan-drivers` (Forward+ screenshots via lavapipe).
 
 ## Status
 | Step | Status | Commit summary / notes |
@@ -15,10 +15,18 @@ Short hand-off file for the **sequential cloud sessions** implementing `docs/DEV
 | 1 Foundation, toolchain & networked skeleton | ✅ Done (2026-11-11) | Godot 4.7.2 project, autoloads, Net v1 (Offline/ENet, NetSim, clock sync, uid), console/overlay, sandbox with replicated capsules, tools, CI |
 | 2 Player controller & movement feel | ✅ Done (2026-11-11) | PlayerCharacter + components, PlayerTuning, movement course, MovementValidator (D-016), health events (D-017), integration/net/visual tests; AC-2.7 feel review awaits the owner |
 | 3 Weapon framework & gunplay feel | ✅ Done (2026-11-11) | WeaponDefinition/Runtime, hitscan/pellet/melee (+ projectile stub), inventory + frags, viewmodel (SubViewport layer 2), FX rings, weapon HUD, HitTarget/TargetRegistry, HitValidator + WeaponSync (D-021…D-026), 4 weapons + knife + frag, gun range; M0 reached (AC-3.7 feel review awaits the owner) |
-| 4 Art direction, asset pipeline & look development | ⏭ Next | |
-| 5 – 16 | Not started | |
+| 4 Art direction, asset pipeline & look development | ✅ Done (2026-11-11) | STYLE_GUIDE + ART_PIPELINE, Blender (`bpy`) generators: 16-piece kit, 7 props, zombie + 12-clip retargeted library, M1911 hero model; post-import material remap; 4 shaders / 31 materials; 4 environment presets; `Graphics` autoload + 4 quality presets; camera snow; ambience; look-dev map (`--map=lookdev`); Forward+ screenshots via lavapipe (D-027…D-032). AC-4.3/4.4 await the owner |
+| 5 Zombie AI, animation & networked enemies | ⏭ Next | |
+| 6 – 16 | Not started | |
 
-## Context for the next session (Step 4)
+## Context for the next session (Step 5)
+- Zombie visual: `content/enemies/zombie/zombie_{orderly,orderly_pallid,orderly_frostbitten}.tscn` = `ZombieModel` (`core/enemies/zombie_model.gd`): `play(clip, blend, speed)`, `clips()`, `hurtboxes` (14, bone-attached, physics layer 3, registered on the parent `HitTarget`), `skeleton` (`%GeneralSkeleton`, SkeletonProfileHumanoid names). Clips (in place): idle, walk, run, crawl (loop), attack_swipe (0.45 s wind-up), hit_react_head/left/right/stomach, death_back, barricade_tear, window_climb. Hitbox map: `zombie_hitboxes.tres` (`HitboxProfile`/`HitboxDef`).
+- More clips: add pose functions in `tools/blender/characters/build_zombie.py` → `tools/blender/build_characters.sh` (needs `pip install bpy`, see Environment setup). The anim GLB imports as an AnimationLibrary through `content/characters/humanoid_bone_map.tres` (loop flags in its `.import`). See `docs/ART_PIPELINE.md` §5.
+- Kit for the nav torture map: `content/kits/vesper/*.glb` (2 m grid; `stairs_2m` rises 2 m over 4 m toward −Z; `wall_window_2m` has `Socket_Barricade_0..5` + `Socket_WindowClimb`; colliders carry `surface` meta). Large floors: MultiMesh + one box collider (see `tools/lookdev/build_lookdev.gd`, which must run with a renderer: `tools/lookdev/build_lookdev.sh`).
+- Rendering: the `Graphics` autoload applies quality presets; shadow-casting lights must be in group `shadow_light` (+ `shadow_priority` meta) to be budgeted; particles in group `density_scaled`. Console: `quality`, `render_stats`, `env`, `snow`, `zombie_anim`.
+- Container setup additions: `pip install bpy` (Blender 5.3 module, ~430 MB) for the generators; `apt-get install -y mesa-vulkan-drivers` (lavapipe) makes `tools/screenshot.sh` / `visual_tests.sh` render Forward+ (otherwise opengl3 fallback). `tools/visual_tests.sh` now includes `lookdev_perf` (~2 min on lavapipe).
+
+## Context from Step 3
 - Weapons: `game/core/weapons/` (definition, runtime, behaviors/, controller, viewmodel, viewmodel_animations, greybox_gun, weapon_sync, hit_validator, target_registry, hit_target, target_dummy, hurtbox, grenade), data in `content/weapons/<id>/<id>.tres`. A real weapon model plugs in through `WeaponDefinition.viewmodel_scene`; the scene must have `Mag`, `Action`, `Muzzle`, `Eject`, `Sight` nodes (Sight = point that lands on screen centre in ADS) and use render layer 2 (`Viewmodel.LAYER`).
 - Viewmodel renders in a transparent SubViewport with its own Environment (ambient only; Compatibility renderer verified, Forward+ not — I-004). The main camera culls layer 2. Screenshot shots hide CanvasLayers in group `hide_for_shots`.
 - Hit targets: anything weapons damage extends `HitTarget` and adds `Hurtbox`es (physics layer 3); map-placed targets get ids from `TargetRegistry.scan` (tree order); zombies (Step 5) need host-assigned ids. Damage applies only on the host via `TargetRegistry.host_damage`.

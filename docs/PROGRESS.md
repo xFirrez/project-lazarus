@@ -11,11 +11,11 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | **M0** (Step 3 complete: move + shoot in the gun range, solo and co-op; LAN play with a friend = human check) |
-| Next step to start | **Step 4 — Art direction, asset pipeline & look development** |
+| Current milestone | **M0** (Step 3 complete: move + shoot in the gun range, solo and co-op; LAN play with a friend = human check). Step 4 added the art pipeline and look-dev scene (no milestone) |
+| Next step to start | **Step 5 — Zombie AI, animation & networked enemies** (5A first) |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-11 (Step 3 session) |
-| Main branch playable? | Test maps only (sandbox, movement course, gun range; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-11 (Step 4 session) |
+| Main branch playable? | Test maps only (sandbox, movement course, gun range, **lookdev** courtyard; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -27,7 +27,7 @@
 | 1 | Foundation, toolchain & networked skeleton | **Complete** | — | 2026-11-11 |
 | 2 | Player controller & movement feel | **Complete** (AC-2.7 awaiting human) | — | 2026-11-11 |
 | 3 | Weapon framework & gunplay feel (→ M0) | **Complete** (AC-3.7 awaiting human) | — | 2026-11-11 |
-| 4 | Art direction, asset pipeline & look development | Not started | 4A / 4B | — |
+| 4 | Art direction, asset pipeline & look development | **Complete** (AC-4.3 / AC-4.4 awaiting human) | 4A + 4B | 2026-11-11 |
 | 5 | Zombie AI, animation & networked enemies | Not started | 5A / 5B | — |
 | 6 | Core survival loop (→ M1 First Playable) | Not started | 6A / 6B | — |
 | 7 | Online co-op, lobby & player characters (→ M2) | Not started | 7A / 7B | — |
@@ -79,12 +79,12 @@
 - [x] **M0 reached** (automated: move + shoot in the gun range, 2 peers at 100 ms; [H] LAN session with a friend)
 
 ### Step 4 — Art direction & pipeline
-- [ ] AC-4.1 Scripted kit, correct collision, grid snapping
-- [ ] AC-4.2 Retargeted zombie animations + bone hitboxes
-- [ ] AC-4.3 [HUMAN] Look-dev perf (High ≥120 FPS ref, Medium ≥60 FPS min) + automated draw-call/light checks
-- [ ] AC-4.4 [HUMAN] Reference screenshots approved
-- [ ] AC-4.5 ASSET_LICENSES complete
-- [ ] AC-4.6 Runtime quality preset switching
+- [x] AC-4.1 Scripted kit, correct collision, grid snapping (`tools/blender/build_kit.sh`, 16 pieces; `test_kit_grid.gd`)
+- [x] AC-4.2 Retargeted zombie animations + bone hitboxes (BoneMap → SkeletonProfileHumanoid; 12-clip library; `test_zombie_model.gd`)
+- [H] AC-4.3 [HUMAN] Look-dev perf (High ≥120 FPS ref, Medium ≥60 FPS min) — automated part met: ≤ 780 draw calls (budget 1500), shadow lights 5/8 (High), 4/4 (Medium) (`visual_tests.sh lookdev_perf`)
+- [H] AC-4.4 [HUMAN] Reference screenshots approved — 5 shots + first-person M1911 committed in `docs/screenshots/step4/`
+- [x] AC-4.5 ASSET_LICENSES complete (all Step 4 assets generated in-house; tools listed)
+- [x] AC-4.6 Runtime quality preset switching (`Graphics` autoload; `test_quality_presets.gd`; only the renderer needs a restart)
 
 ### Step 5 — Zombie AI
 - [ ] AC-5.1 32 zombies reach targets on all floors; no permanent stuck
@@ -207,6 +207,11 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-11 | 4 | `tools/check.sh` | Pass | 19 scripts / 107 tests / 2068 asserts (no new unit suites; Step 4 tests are integration/visual) |
+| 2026-11-11 | 4 | `tools/run_tests.sh integration` | Pass | 8 scripts / 40 tests / 431 asserts. **Kit:** 16 pieces match manifest bounds (±1 cm), colliders on layer 1 with surface tags; wall run (3 walls + window + door) blocks all 174 rays across seams, window/door openings open, 7 window sockets; 3×3 exterior floor patch: 0 holes in 529 samples, all `snow`; stair ramp monotonic and meets the 2 m landing. **Zombie:** 22 humanoid-profile bones (`%GeneralSkeleton`), 12 clips (idle/walk/run/crawl loop), 14 hitboxes follow the head bone within 2 mm over 7 clips × 3 times, head < 0.7 m at the end of `death_back`, 3 skin variants; 7.8k triangles. **Quality:** Low/Medium/High/Ultra switch at runtime (scale 0.75 FSR → 1.0, FXAA/MSAA, SSAO + vol. fog off on Low, shadow lights 2/4/8/12 by priority, particles 0.35→1.0, far 120→400 m) |
+| 2026-11-11 | 4 | `tools/visual_tests.sh` (damage_direction, viewmodel_ads, **lookdev_perf**) | Pass | Now rendered with **Forward+ on lavapipe** (D-030). Look-dev (High / Medium): draw calls 546–780 (budget 1500), objects ≤ 1,332, primitives ≤ 320k; shadow-casting lights 5 ≤ 8 / 4 ≤ 4. ADS alignment still (0, 0) px for all 4 weapons incl. the new M1911 model. CSV: `docs/screenshots/step4/lookdev_perf.csv` |
+| 2026-11-11 | 4 | `tools/net_tests.sh` (all), `tools/run_sim.sh smoke` (sandbox, gun_range, lookdev), `tools/run_coop_local.sh 2 --map=lookdev --netsim=100,20,0.02` | Pass | Third-person M1911 world model on puppets; no new shared state |
+| 2026-11-11 | 4 | Blender generators (`tools/blender/build_all.sh`, Blender 5.3 `bpy`) | Pass | Re-runs reproduce identical geometry, colours and triangle sets; most GLBs byte-identical (multi-material joined meshes can differ in triangle order only) |
 | 2026-11-11 | 3 | `tools/check.sh` | Pass | 19 scripts / 107 tests / 2068 asserts |
 | 2026-11-11 | 3 | `tools/run_tests.sh integration` | Pass | 5 scripts / 28 tests. Per-hitzone damage exact for M1911 / MP40 / Kar98k at 10 m (head ×3 / ×4 / ×5, neck ×2, torso, limb ×0.75), MP40 24.0 at 40 m (60%), Model 37 pellets 4–8 hits at 5 m each = 130 × zone; penetration lane: Kar98k 4 dummies (400 / 300 / 225 / 168.75), MP40 and M1911 exactly 1; wood wall passes at ×0.75; knife lunge 2.3 m kills the 150 HP dummy, respawn 3 s; frag splash kills it; cooked frag explodes in hand at 3.5 s; ADS sight error < 1 px (1080p) for all 4; MP40 60+ s full-auto: decals 128 (cap), impacts 32, shells 40, tracers 32, flashes 12 — node growth 0, objects +17, static memory +49 KiB over 50 s |
 | 2026-11-11 | 3 | Unit: fire rate (60 Hz ticks, 100 shots) | Pass | Average interval within ±1 ms of 60/RPM for M1911 (semi, clicking), MP40 (auto), Model 37 (pump), Kar98k (bolt) |
@@ -229,7 +234,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Scene | Preset | Hardware | Avg FPS | p99 frame ms | AI ms | Notes |
 |---|---|---|---|---|---|---|---|---|
-| — | — | — | — | — | — | — | — | — |
+| 2026-11-11 | 4 | lookdev (5 shots) | High / Medium | container (lavapipe, CPU) | ~7–8 (CPU rasterizer, not meaningful) | — | — | Render-cost proxies: ≤ 780 draw calls, ≤ 320k primitives, 5 shadow lights. GPU FPS = [HUMAN] AC-4.3 |
 
 ### Network baselines
 
@@ -247,7 +252,9 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 |---|---|---|---|---|
 | I-002 | S4 | 2 | Headless `--fixed-fps` integration runs sometimes log "Jolt Physics job system exceeded the maximum number of jobs … Waiting for jobs" (engine warning; physics continues). Not seen in real-time runs | Marked benign in `tests/integration/player_test_helper.gd`; re-check after engine upgrades |
 | I-003 | S3 | 2 | Test-map moving platforms (course elevator/shuttle) are simulated locally per peer, so a remote player riding one is seen on the host's copy of the platform only approximately | Step 8 makes traversal machines host-driven (D-020) |
-| I-004 | S4 | 3 | Viewmodel and impact particles render with the Compatibility renderer in the container only; the Forward+ look (lighting of the viewmodel viewport, particle sizes) is unverified | Human check with AC-3.7; Step 4 look-dev |
+| ~~I-004~~ | S4 | 3 | ~~Viewmodel/particles verified only with the Compatibility renderer~~ — **Fixed in Step 4:** container renders Forward+ via lavapipe (D-030); metallic viewmodels were black in Forward+ and now reflect a neutral sky (D-031). A GPU look check stays part of AC-3.7 | Closed |
+| I-006 | S4 | 4 | Camera snow also falls inside interiors in the look-dev scene (per-zone `CameraSnow.intensity` is not driven yet) | Step 8/13 zone volumes set the intensity (0 indoors, light under skylights) |
+| I-007 | S3 | 4 | Zombie v1 model is built from rigidly skinned primitive segments (reads as "puffy" at the torso; joints crease) — fine for Step 5 AI work, below the final art bar | Step 5B / 13: sculpted or CC0 replacement through the same BoneMap/HitboxProfile (drop-in, ART_PIPELINE §5) |
 | I-005 | S3 | 3 | Frag grenades are simulated on every peer; a client's cosmetic copy can rest in a slightly different spot than the host's authoritative one (the explosion is shown at the host's position) | Acceptable for co-op; revisit with Step 9 projectiles |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
@@ -263,7 +270,10 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | `NetId` entity registry + reliable spawn/despawn | Step 5 | First needed for zombies; player avatars are keyed by peer id |
 | Snapshot quantization | Step 5 | Bandwidth is negligible with ≤ 4 capsules |
 | Full `ProjectileBehavior` (launchers, crossbow, Ray Pistol) | Step 9 | Plan scope: stub interface now (`core/weapons/behaviors/projectile_behavior.gd`) |
-| Authored viewmodel/arms models and animation clips | Step 4 (first model) / Step 9 | Greybox models + code-built AnimationPlayer clips now (`GreyboxGun`, `ViewmodelAnimations`); `WeaponDefinition.viewmodel_scene` takes a real scene |
+| Authored viewmodel/arms models and animation clips | Step 9 | Step 4 delivered the M1911 hero model (viewmodel + world); the other weapons stay greybox; clips are still code-built from the definition timings (`ViewmodelAnimations`) |
+| Hand-authored textures (256 px/m trims) | Step 13 | Step 4 kit/props use world-space triplanar detail noise + vertex-colour grime (no UVs); unique hero textures come with the art pass |
+| Explicit LOD meshes / HLOD | Step 13 | Importer auto-LOD on every mesh now (`meshes/generate_lods`); HLOD/visibility ranges for the full map in 13D |
+| Zombie animation set beyond 12 clips (3 walks, 2 jogs, lunge, rise, vent drop, electrocuted …, ARCHITECTURE §11.3) | Step 5B | The pipeline + 12-clip library exist; Step 5B extends `build_zombie.py` (or imports CC0/Mixamo clips through the BoneMap) |
 | Recorded weapon audio | Step 9 / 15 | Synthesized per-weapon placeholders (`WeaponAudio`), distinct per weapon |
 | Tactical / placeable slots, Pack Mule third slot | Steps 9–10 | `WeaponInventory.slot_count` is config-driven; lethal (frag) implemented |
 
@@ -285,8 +295,9 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Step 0 | Review and approve the planning documents; confirm original naming approach (GAME_DESIGN §1.3) | Open |
 | Step 2+ | Run local playtests for [HUMAN] criteria (feel, visuals, performance on real GPU) | Recurring |
 | Step 4 | Confirm the reference hardware (min + recommended GPUs) available for testing | Open |
-| Step 4 | Optional: download Mixamo animations (requires Adobe account) if CC0 libraries are insufficient | Open |
-| Step 4 | Confirm Blender availability (container install or local run of `tools/blender/` scripts) | Open |
+| Step 4 | Optional: download Mixamo animations (requires Adobe account) if the scripted library is insufficient (import path: ART_PIPELINE §5) | Open |
+| Step 4 | ~~Confirm Blender availability~~ — resolved: the container installs Blender 5.3 as the `bpy` pip module (`pip install bpy`); a local Blender 4.2+ also works (`$BLENDER`) | Done |
+| Step 4 | AC-4.3 GPU performance on the look-dev scene and AC-4.4 art-direction approval (steps in `docs/sessions/2026-11-11_step-4.md`) | Open |
 | Step 7 | Have a friend available for an internet co-op test; install Steam client if Steam transport is used | Open |
 | Step 13 | Optional: LightmapGI bakes on a desktop GPU | Open |
 | Step 15 | Provide or approve music (jingles, EE song), VO approach (recorded vs. TTS), and fonts | Open |
@@ -308,3 +319,4 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 | 2026-11-11 | 1 | Godot 4.7.2 project, autoloads, Net layer v1 (Offline/ENet, NetSim, clock sync, uid), console + overlay, sandbox with replicated capsules, tool scripts, CI | [2026-11-11_step-1.md](sessions/2026-11-11_step-1.md) |
 | 2026-11-11 | 2 | PlayerCharacter (motor, camera rig, health + damage HUD, footsteps), PlayerTuning, movement course, host movement validation, health replication, bot/random drivers, integration + net + visual tests | [2026-11-11_step-2.md](sessions/2026-11-11_step-2.md) |
 | 2026-11-11 | 3 | Weapon framework: WeaponDefinition/Runtime, hitscan/pellet/melee behaviors (+ projectile stub), inventory + frags, viewmodel (own camera/layer, procedural layers, clips), pooled FX, weapon HUD, Hurtbox/HitTarget/TargetRegistry, HitValidator + WeaponSync networking, 4 weapons + knife + frag, gun range, unit/integration/net/visual tests | [2026-11-11_step-3.md](sessions/2026-11-11_step-3.md) |
+| 2026-11-11 | 4 | Art direction & pipeline: STYLE_GUIDE + ART_PIPELINE, Blender generators (16-piece kit, 7 props, zombie + 12-clip retargeted library, M1911 hero model), post-import material remap, 4 shaders + 31 materials, 4 environment presets, Graphics autoload + 4 quality presets, camera snow, ambience, look-dev scene + 5 reference shots, Forward+ screenshots via lavapipe | [2026-11-11_step-4.md](sessions/2026-11-11_step-4.md) |

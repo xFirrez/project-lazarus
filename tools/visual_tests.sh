@@ -2,6 +2,7 @@
 # Rendered (xvfb) visual checks that need real frames:
 #   damage_direction  damage HUD direction + vignette (AC-2.4), 1280x720
 #   viewmodel_ads     ADS sight alignment within 1 px at 1920x1080 + viewmodel over walls (AC-3.5)
+#   lookdev_perf      look-dev shots: draw calls / shadow-light budget per preset + reference PNGs (AC-4.3/4.4)
 # Same renderer selection as screenshot.sh: Vulkan if an ICD exists, otherwise opengl3 (D-013).
 # Usage: tools/visual_tests.sh [out_dir] [test...]   (frames go to docs/screenshots by default)
 set -euo pipefail
@@ -22,7 +23,7 @@ run_visual() { # name map resolution
   local log="$ROOT/.test-results/visual_${name}.log" json="$ROOT/.test-results/visual_${name}.json"
   rm -f "$json"
   set +e
-  timeout 150 "${runner[@]}" "$GODOT" --path "$GAME_DIR" --audio-driver Dummy "${DRIVER[@]}" --resolution "$res" \
+  timeout 280 "${runner[@]}" "$GODOT" --path "$GAME_DIR" --audio-driver Dummy "${DRIVER[@]}" --resolution "$res" \
     -- --solo --map="$map" --profile=visual --autotest="res://tests/visual/${name}.gd" \
     --autotest-out="$json" --autotest-shots="$OUT" >"$log" 2>&1
   set -e
@@ -37,12 +38,13 @@ run_visual() { # name map resolution
 }
 
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(damage_direction viewmodel_ads)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(damage_direction viewmodel_ads lookdev_perf)
 fail=0
 for t in "${TESTS[@]}"; do
   case "$t" in
     damage_direction) run_visual damage_direction movement_course 1280x720 || fail=1 ;;
     viewmodel_ads) run_visual viewmodel_ads gun_range 1920x1080 || fail=1 ;;
+    lookdev_perf) run_visual lookdev_perf lookdev 1280x720 || fail=1 ;;
     *) echo "unknown visual test $t" >&2; fail=1 ;;
   esac
 done
