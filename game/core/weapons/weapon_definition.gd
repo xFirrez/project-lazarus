@@ -97,6 +97,7 @@ enum Hitzone { HEAD, NECK, TORSO, LIMB }
 
 @export_group("Viewmodel & presentation")
 @export var viewmodel_scene: PackedScene = null  # null -> greybox built from `viewmodel_style`
+@export var world_scene: PackedScene = null  # third-person / world model (null -> greybox box); needs Muzzle
 @export var viewmodel_style: StringName = &"pistol"  # pistol | smg | shotgun | rifle_scoped
 @export var viewmodel_color: Color = Color(0.25, 0.25, 0.27)
 @export var viewmodel_offset: Vector3 = Vector3(0.16, -0.16, -0.32)  # hip position in camera space

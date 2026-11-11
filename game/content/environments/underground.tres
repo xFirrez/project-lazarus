@@ -1,0 +1,53 @@
+[gd_resource type="Environment" load_steps=3 format=3]
+
+[sub_resource type="Gradient" id="g"]
+offsets = PackedFloat32Array(0, 0.45, 1)
+colors = PackedColorArray(0.02, 0.015, 0.01, 1, 0.4, 0.36, 0.3, 1, 1.0, 0.92, 0.8, 1)
+
+[sub_resource type="GradientTexture1D" id="lut"]
+gradient = SubResource("g")
+width = 128
+
+[resource]
+resource_name = "underground"
+background_mode = 1
+background_color = Color(0.01, 0.01, 0.01, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.18, 0.16, 0.14, 1)
+ambient_light_energy = 0.25
+ambient_light_sky_contribution = 0.0
+tonemap_mode = 4
+tonemap_exposure = 1.1
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 1.5
+ssao_intensity = 2.2
+glow_enabled = true
+glow_levels/1 = 0.3
+glow_levels/2 = 0.6
+glow_levels/3 = 1.0
+glow_levels/5 = 0.6
+glow_intensity = 0.8
+glow_bloom = 0.040
+glow_blend_mode = 1
+glow_hdr_threshold = 1.1
+fog_enabled = true
+fog_mode = 0
+fog_light_color = Color(0.08, 0.07, 0.06, 1)
+fog_density = 0.01
+fog_aerial_perspective = 0.0
+fog_sky_affect = 0.0
+fog_height = 0.0
+fog_height_density = 0.0
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.025
+volumetric_fog_albedo = Color(0.6, 0.55, 0.48, 1)
+volumetric_fog_emission = Color(0.004, 0.003, 0.002, 1)
+volumetric_fog_anisotropy = 0.4
+volumetric_fog_length = 48.0
+volumetric_fog_ambient_inject = 0.4
+adjustment_enabled = true
+adjustment_contrast = 1.12
+adjustment_saturation = 0.85
+adjustment_color_correction = SubResource("lut")
+metadata/description = "Maintenance/labs: soot and rust, sodium + emergency red accents, thick dusty fog, strong AO."

@@ -74,6 +74,16 @@ func setup(p_player: PlayerCharacter, canvas: CanvasLayer) -> void:
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.62, 0.64, 0.7)
 	env.ambient_light_energy = 1.0
+	# Metals need something to reflect (I-004): a neutral studio sky used only for reflections;
+	# the background stays transparent so the world shows through.
+	var sky_mat: ProceduralSkyMaterial = ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color(0.55, 0.6, 0.7)
+	sky_mat.sky_horizon_color = Color(0.75, 0.75, 0.75)
+	sky_mat.ground_horizon_color = Color(0.35, 0.33, 0.3)
+	sky_mat.ground_bottom_color = Color(0.12, 0.11, 0.1)
+	env.sky = Sky.new()
+	env.sky.sky_material = sky_mat
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	camera.environment = env
 	viewport.add_child(camera)
@@ -102,9 +112,13 @@ func set_weapon(p_def: WeaponDefinition, p_runtime: WeaponRuntime) -> void:
 	if gun != null:
 		gun.visible = false
 	if not _guns.has(def.id):
-		var g: Node3D = (
-			def.viewmodel_scene.instantiate() as Node3D if def.viewmodel_scene != null else GreyboxGun.build(def)
-		)
+		var g: Node3D = null
+		if def.viewmodel_scene != null:
+			# Authored models import on render layer 1; the viewmodel camera only sees layer 2.
+			g = def.viewmodel_scene.instantiate() as Node3D
+			GreyboxGun.set_layers(g, LAYER)
+		else:
+			g = GreyboxGun.build(def)
 		anim_root.add_child(g)
 		_guns[def.id] = g
 		var lib_name: StringName = StringName(String(def.id))

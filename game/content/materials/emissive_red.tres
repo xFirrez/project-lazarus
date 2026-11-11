@@ -1,0 +1,15 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://content/shaders/lazarus_surface.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://content/materials/textures/noise_detail.tres" id="2"]
+
+[resource]
+resource_name = "emissive_red"
+shader = ExtResource("1")
+shader_parameter/detail_noise = ExtResource("2")
+shader_parameter/albedo = Color(0.3, 0.02, 0.02, 1)
+shader_parameter/roughness = 0.3
+shader_parameter/emission_color = Color(1, 0.08, 0.04, 1)
+shader_parameter/emission_energy = 4.0
+shader_parameter/grime_strength = 0.0
+metadata/surface = &"metal"

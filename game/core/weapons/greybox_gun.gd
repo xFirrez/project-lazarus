@@ -79,7 +79,7 @@ static func build(def: WeaponDefinition, layer: int = VIEWMODEL_LAYER) -> Node3D
 	_marker(root, "Sight", Vector3(0, h, front if def.viewmodel_style != &"rifle_scoped" else -0.2))
 	_marker(root, "Muzzle", Vector3(0, 0.01, _muzzle_z(def)))
 	_marker(root, "Eject", Vector3(0.03, 0.03, -0.05))
-	_set_layers(root, layer)
+	set_layers(root, layer)
 	return root
 
 
@@ -189,8 +189,8 @@ static func _mat(c: Color) -> StandardMaterial3D:
 	return m
 
 
-static func _set_layers(node: Node, layer: int) -> void:
+static func set_layers(node: Node, layer: int) -> void:
 	if node is VisualInstance3D:
 		(node as VisualInstance3D).layers = layer
 	for c: Node in node.get_children():
-		_set_layers(c, layer)
+		set_layers(c, layer)

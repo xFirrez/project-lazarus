@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://content/shaders/zombie_skin.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://content/materials/textures/noise_detail.tres" id="2"]
+
+[resource]
+resource_name = "zombie_skin"
+shader = ExtResource("1")
+shader_parameter/detail_noise = ExtResource("2")
+metadata/surface = &"flesh"

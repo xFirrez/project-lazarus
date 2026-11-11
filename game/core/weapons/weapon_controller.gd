@@ -40,6 +40,7 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _vm_layer: CanvasLayer = null
 var _tp_weapon: Node3D = null
 var _tp_muzzle: Node3D = null
+var _tp_model: Node3D = null
 
 
 func setup(p_player: PlayerCharacter) -> void:
@@ -422,6 +423,19 @@ func set_remote_weapon(def: WeaponDefinition) -> void:
 	if _tp_weapon == null:
 		return
 	var mesh: MeshInstance3D = _tp_weapon.get_child(0) as MeshInstance3D
+	if _tp_model != null:
+		_tp_model.queue_free()
+		_tp_model = null
+	if def != null and def.world_scene != null:
+		# Authored world model: hide the greybox block and fire from the model's Muzzle marker.
+		_tp_model = def.world_scene.instantiate() as Node3D
+		_tp_model.scale = Vector3.ONE * 1.15
+		_tp_weapon.add_child(_tp_model)
+		mesh.visible = false
+		var m: Node3D = _tp_model.get_node_or_null(^"Muzzle") as Node3D
+		_tp_muzzle.position = m.position * _tp_model.scale if m != null else Vector3(0, 0.02, -0.22)
+		return
+	mesh.visible = true
 	var length: float = 0.22
 	match def.viewmodel_style if def != null else &"pistol":
 		&"smg":
