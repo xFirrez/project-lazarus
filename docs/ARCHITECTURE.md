@@ -362,4 +362,12 @@ The main menu's map select lists every `MapDefinition` found under `maps/` (excl
 | D-007 | 2026-11-11 | In-place animation, no root motion | Network determinism, simpler blending |
 | D-008 | 2026-11-11 | `core/` ↔ `maps/` hard boundary | Future maps without rewrites |
 
+| D-009 | 2026-11-11 | Pinned Godot **4.7.2-stable** (`tools/godot_version.txt`), GUT 9.7.1, gdtoolkit 4.5.0 (line length 120) | Step 1: latest stable at the time; one version everywhere (local, CI, agents) |
+| D-010 | 2026-11-11 | All game traffic goes through `Net.send_reliable` (one `@rpc` message channel with registered handlers) and `Net.send_unreliable` (`send_bytes` streams with a 1-byte stream id). NetSim shapes these at the sender. | Lets NetSim delay/drop *everything* without wrapping the `MultiplayerPeer`; keeps transports swappable |
+| D-011 | 2026-11-11 | Snapshot entries carry their own host-clock stamp; interpolation playback is `arrival offset − delay` (100 ms base, +2×jitter, capped +100 ms) | Relayed client positions are not mis-stamped; delay is independent of latency (Step 1 test: max error 0.011–0.016 m at 100±20 ms, 2% loss) |
+| D-012 | 2026-11-11 | `core/autoload/input_defaults.gd` is the source of truth for the input map; `tools/gen_input_map.sh` writes it into `project.godot`; a unit test detects drift | Text-friendly bindings (`key:W`, `joy:0`, `axis:1:-1`) that Config persists for rebinding |
+| D-013 | 2026-11-11 | Container screenshots use `--rendering-driver opengl3` under xvfb when no Vulkan ICD exists (no lavapipe in the image) | Plan's documented fallback; screenshots are for composition/regression only |
+| D-014 | 2026-11-11 | Host-loss detection: ENet peer timeout 1–3 s plus a 4 s application-level host-silence timeout (pings every 0.5 s) | Client returns to the menu ~2 s after the host dies instead of ENet's ~30 s default |
+| D-015 | 2026-11-11 | `--profile=<name>` selects separate `user://settings_<name>.cfg` and `identity_<name>.cfg` | Several local instances (co-op tests) need distinct `player_uid`s |
+
 *(Agents append new rows; never delete old ones — supersede them.)*

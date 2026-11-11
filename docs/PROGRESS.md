@@ -11,11 +11,11 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | Planning complete — no milestone reached yet |
-| Next step to start | **Step 1 — Foundation, toolchain & networked skeleton** |
-| Engine version | *(to be pinned in Step 1)* |
-| Last updated | 2026-11-11 (planning session) |
-| Main branch playable? | No (no code yet) |
+| Current milestone | Step 1 complete — no milestone reached yet (M0 after Step 3) |
+| Next step to start | **Step 2 — Player controller & movement feel** |
+| Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
+| Last updated | 2026-11-11 (Step 1 session) |
+| Main branch playable? | Sandbox only (capsules, solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -24,7 +24,7 @@
 | Step | Title | Status | Checkpoint | Last session |
 |---|---|---|---|---|
 | 0 | Planning & design documents | **Complete** | — | 2026-11-11 |
-| 1 | Foundation, toolchain & networked skeleton | Not started | — | — |
+| 1 | Foundation, toolchain & networked skeleton | **Complete** | — | 2026-11-11 |
 | 2 | Player controller & movement feel | Not started | — | — |
 | 3 | Weapon framework & gunplay feel (→ M0) | Not started | — | — |
 | 4 | Art direction, asset pipeline & look development | Not started | 4A / 4B | — |
@@ -51,13 +51,13 @@
 - [H] Human review and approval of the plan
 
 ### Step 1 — Foundation
-- [ ] AC-1.1 Headless import clean; `check.sh` passes locally + CI
-- [ ] AC-1.2 Unit tests: Config, NetSim, player_uid
-- [ ] AC-1.3 Two-peer loopback sandbox, replicated positions within 0.2 m @100 ms
-- [ ] AC-1.4 Solo via OfflineTransport, no special-case branches
-- [ ] AC-1.5 Console commands + net overlay
-- [ ] AC-1.6 Clean disconnect / host-loss handling
-- [ ] AC-1.7 Screenshot pipeline works in container
+- [x] AC-1.1 Headless import clean; `check.sh` passes locally + CI (CI workflow `.github/workflows/ci.yml`; see test log for the first CI run)
+- [x] AC-1.2 Unit tests: Config, NetSim, player_uid
+- [x] AC-1.3 Two-peer loopback sandbox, replicated positions within 0.2 m @100 ms
+- [x] AC-1.4 Solo via OfflineTransport, no special-case branches
+- [x] AC-1.5 Console commands + net overlay (interactive `~` console UI: [H] quick check, see human tasks)
+- [x] AC-1.6 Clean disconnect / host-loss handling
+- [x] AC-1.7 Screenshot pipeline works in container (opengl3 fallback, D-013)
 
 ### Step 2 — Player controller
 - [ ] AC-2.1 Bot completes movement course (solo + client @100 ms)
@@ -207,6 +207,11 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-11 | 1 | `tools/check.sh` (import, gdlint, gdformat, boundary, prints, unit) | Pass | 9 scripts / 36 tests / 1092 asserts |
+| 2026-11-11 | 1 | `tools/net_tests.sh` solo / replication / host_loss | Pass | NetSim 100 ms ±20 ms, 2% loss on both peers. Connect 0.43 s; replicated host capsule max error 0.011–0.016 m (mean 0.001 m, 301 samples); client capsule removed 0.017 s after peer_left; client back in menu with "Host disconnected" ~1.9 s after host kill -9 |
+| 2026-11-11 | 1 | `tools/run_coop_local.sh 3 --netsim=100,20,0.02` | Pass | both clients see 3 capsules ~0.55 s after launch |
+| 2026-11-11 | 1 | `tools/run_sim.sh smoke` | Pass | 5 s solo, no errors, 0 orphan nodes |
+| 2026-11-11 | 1 | `tools/screenshot.sh sandbox` | Pass | `docs/screenshots/sandbox_overview.png`, `sandbox_ramps.png` (opengl3/llvmpipe, overlay visible) |
 | 2026-11-11 | 0 | Documentation review | Pass | Planning docs created; no code yet |
 
 ### Performance baselines
@@ -219,7 +224,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Peers | NetSim profile | KB/s per client | Desyncs | Notes |
 |---|---|---|---|---|---|---|
-| — | — | — | — | — | — | — |
+| 2026-11-11 | 1 | 2 (loopback) | 100 ms ±20 ms, 2% loss | < 1 (capsule state 30 Hz + snapshots 20 Hz, float32 positions) | 0 | Replication error max 0.016 m; quantization deferred to Step 5 |
 
 ---
 
@@ -227,7 +232,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | ID | Severity (S1–S4) | Step found | Description | Owner/plan |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
 Severity: **S1** crash / data loss / progress-blocking · **S2** major feature broken · **S3** minor feature issue / visual bug · **S4** polish.
 
@@ -235,13 +240,15 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 
 | AC / item | Deferred to | Reason |
 |---|---|---|
-| — | — | — |
+| Owner-movement validation (speed limits / teleport clamp) | Step 2 | Needs the real player controller; Step 1 capsules are trusted |
+| `NetId` entity registry + reliable spawn/despawn | Step 5 | First needed for zombies; player avatars are keyed by peer id |
+| Snapshot quantization | Step 5 | Bandwidth is negligible with ≤ 4 capsules |
 
 ## Proposed design changes (awaiting human decision)
 
 | Date | Proposed by (step) | Change | Rationale | Decision |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| 2026-11-11 | 1 | Work is implemented on branch `claude/project-lazarus` (created from the planning branch `claude/lazarus-dev-roadmap-h093ya`, since `main` holds no plan), one cloud session per step, with a PR into `main` after the final step | Owner's instruction for sequential cloud sessions | Owner instruction |
 
 ---
 
@@ -258,6 +265,8 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Step 13 | Optional: LightmapGI bakes on a desktop GPU | Open |
 | Step 15 | Provide or approve music (jingles, EE song), VO approach (recorded vs. TTS), and fonts | Open |
 | Any | Monitor Git LFS storage/bandwidth quota | Recurring |
+| Step 1 | Quick desktop check: `godot --path game`, Solo, press `~` (console: try `help`, `net_status`, Tab completion, Up/Down history), F3 overlay; then `tools/run_coop_local.sh 2 --windowed` and walk both capsules | Open |
+| Step 1 | Confirm the first GitHub Actions run of `.github/workflows/ci.yml` is green (Actions tab) | Open |
 
 ---
 
@@ -267,4 +276,5 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 
 | Date | Step | Summary | Report |
 |---|---|---|---|
-| 2026-11-11 | 0 | Planning: architecture, roadmap, game design, map design, tracker, agent guide | (this commit) |
+| 2026-11-11 | 0 | Planning: architecture, roadmap, game design, map design, tracker, agent guide | (planning commit) |
+| 2026-11-11 | 1 | Godot 4.7.2 project, autoloads, Net layer v1 (Offline/ENet, NetSim, clock sync, uid), console + overlay, sandbox with replicated capsules, tool scripts, CI | [2026-11-11_step-1.md](sessions/2026-11-11_step-1.md) |
