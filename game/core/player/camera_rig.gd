@@ -16,6 +16,10 @@ var yaw: float = 0.0
 var pitch: float = 0.0
 var trauma: float = 0.0
 var eye_height: float = 1.62
+# Weapon feedback: view punch (radians, springs back) and aim offset (scope breathing sway).
+var aim_offset: Vector2 = Vector2.ZERO
+var _punch: Vector2 = Vector2.ZERO
+var _punch_vel: Vector2 = Vector2.ZERO
 
 var _step_offset: float = 0.0
 var _dip: float = 0.0
@@ -48,6 +52,16 @@ func add_look(delta_rad: Vector2) -> void:
 	yaw = wrapf(yaw + delta_rad.x, -PI, PI)
 	var limit: float = deg_to_rad(tuning.pitch_limit_deg)
 	pitch = clampf(pitch + delta_rad.y, -limit, limit)
+
+
+# Camera kick per shot (degrees: x = yaw, y = pitch up); a stiff spring returns it to zero.
+func add_punch(deg: Vector2) -> void:
+	_punch_vel += Vector2(deg_to_rad(deg.x), deg_to_rad(deg.y)) * 30.0
+
+
+# Effective view direction including punch and aim offset (shots use yaw/pitch + aim_offset).
+func view_basis() -> Basis:
+	return Basis.from_euler(Vector3(pitch + aim_offset.y, yaw + aim_offset.x, 0.0), EULER_ORDER_YXZ)
 
 
 func add_trauma(amount: float) -> void:
@@ -114,7 +128,11 @@ func update_view(delta: float) -> void:
 	var origin: Vector3 = body.get_global_transform_interpolated().origin
 	if motor.stance == MotorComponent.Stance.MANTLE:
 		origin = body.global_position
-	var basis: Basis = Basis.from_euler(Vector3(pitch + sx, yaw + sy, _tilt + sz), EULER_ORDER_YXZ)
+	var pk: float = 400.0
+	_punch_vel += (-pk * _punch - 2.0 * sqrt(pk) * _punch_vel) * minf(delta, 0.05)
+	_punch += _punch_vel * minf(delta, 0.05)
+	var px: float = pitch + sx + _punch.y + aim_offset.y
+	var basis: Basis = Basis.from_euler(Vector3(px, yaw + sy + _punch.x + aim_offset.x, _tilt + sz), EULER_ORDER_YXZ)
 	var head: Vector3 = origin + Vector3(0.0, eye_height + _step_offset + _dip + bob.y, 0.0)
 	head += Basis(Vector3.UP, yaw) * Vector3(bob.x, 0.0, 0.0)
 	camera.global_transform = Transform3D(basis, head)

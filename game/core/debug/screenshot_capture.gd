@@ -24,6 +24,9 @@ func _capture() -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	var cams: Array[Node] = get_tree().get_nodes_in_group(&"screenshot_shot")
 	cams.sort_custom(func(a: Node, b: Node) -> bool: return String(a.name) < String(b.name))
+	# First-person overlays (viewmodel viewport, weapon HUD) don't belong in map shots.
+	for layer: Node in get_tree().get_nodes_in_group(&"hide_for_shots"):
+		(layer as CanvasLayer).visible = false
 	var written: int = 0
 	for node: Node in cams:
 		var cam: Camera3D = node as Camera3D

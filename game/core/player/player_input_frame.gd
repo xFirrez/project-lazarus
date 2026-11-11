@@ -14,6 +14,11 @@ var crouch: bool = false  # wants to be crouched (hold or toggle resolved)
 var crouch_pressed: bool = false  # edge, starts a slide while sprinting
 var fire: bool = false
 var aim: bool = false
+var reload_pressed: bool = false
+var melee_pressed: bool = false
+var lethal_held: bool = false
+var switch_slot: int = -1  # 0-based slot requested this frame (keys 1-3), -1 = none
+var switch_delta: int = 0  # +1 next / -1 previous (wheel, gamepad)
 
 
 func duplicate_frame() -> PlayerInputFrame:
@@ -27,4 +32,9 @@ func duplicate_frame() -> PlayerInputFrame:
 	f.crouch_pressed = crouch_pressed
 	f.fire = fire
 	f.aim = aim
+	f.reload_pressed = reload_pressed
+	f.melee_pressed = melee_pressed
+	f.lethal_held = lethal_held
+	f.switch_slot = switch_slot
+	f.switch_delta = switch_delta
 	return f

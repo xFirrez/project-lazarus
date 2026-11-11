@@ -12,6 +12,7 @@ var _mouse_accum: Vector2 = Vector2.ZERO
 var _sprint_toggled: bool = false
 var _crouch_toggled: bool = false
 var _aiming: bool = false
+var _switch_delta: int = 0
 
 
 func _init(t: PlayerTuning) -> void:
@@ -22,6 +23,10 @@ func handle_event(event: InputEvent) -> void:
 	var motion: InputEventMouseMotion = event as InputEventMouseMotion
 	if motion != null and (Input.mouse_mode == Input.MOUSE_MODE_CAPTURED or not mouse_captured_required):
 		_mouse_accum += motion.screen_relative
+	elif event.is_action_pressed(&"weapon_next"):
+		_switch_delta += 1
+	elif event.is_action_pressed(&"weapon_prev"):
+		_switch_delta -= 1
 
 
 # Clears toggles (e.g. when the motor cancels sprint because stamina ran out or the player stopped).
@@ -41,6 +46,14 @@ func gather() -> PlayerInputFrame:
 	f.jump_pressed = Input.is_action_just_pressed(&"jump")
 	f.jump_held = Input.is_action_pressed(&"jump")
 	f.crouch_pressed = Input.is_action_just_pressed(&"crouch")
+	f.reload_pressed = Input.is_action_just_pressed(&"reload")
+	f.melee_pressed = Input.is_action_just_pressed(&"melee")
+	f.lethal_held = Input.is_action_pressed(&"lethal")
+	for i: int in 3:
+		if Input.is_action_just_pressed(StringName("weapon_slot_%d" % (i + 1))):
+			f.switch_slot = i
+	f.switch_delta = signi(_switch_delta)
+	_switch_delta = 0
 	var toggle_sprint: bool = bool(Config.get_value(&"input", &"toggle_sprint", false))
 	var toggle_crouch: bool = bool(Config.get_value(&"input", &"toggle_crouch", true))
 	if toggle_sprint:

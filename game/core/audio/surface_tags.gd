@@ -6,7 +6,7 @@ class_name SurfaceTags
 extends RefCounted
 
 const DEFAULT: StringName = &"concrete"
-const KNOWN: Array[StringName] = [&"concrete", &"metal", &"wood", &"snow", &"gravel", &"tile"]
+const KNOWN: Array[StringName] = [&"concrete", &"metal", &"wood", &"snow", &"gravel", &"tile", &"flesh"]
 
 
 static func of(collider: Object) -> StringName:

@@ -4,8 +4,8 @@
 extends Node
 
 const BUSES: PackedStringArray = ["Music", "SFX", "Weapons", "Zombies", "UI", "VO", "Ambience"]
-const PLAYER_POOL: int = 16
-const PLAYER_POOL_3D: int = 16
+const PLAYER_POOL: int = 32
+const PLAYER_POOL_3D: int = 24
 const MUFFLED_BUSES: PackedStringArray = ["SFX", "Weapons", "Zombies"]
 const MUFFLE_OPEN_HZ: float = 20000.0
 const MUFFLE_CLOSED_HZ: float = 900.0

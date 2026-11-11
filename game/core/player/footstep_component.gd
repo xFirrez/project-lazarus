@@ -47,6 +47,13 @@ func update(grounded: bool, sprinting: bool, crouched: bool) -> bool:
 	return false
 
 
+# 0..1 progress towards the next footstep (viewmodel bob is synced to it); `steps_played`
+# parity gives the foot side.
+func stride_phase(sprinting: bool, crouched: bool) -> float:
+	var stride: float = SPRINT_STRIDE if sprinting else (CROUCH_STRIDE if crouched else WALK_STRIDE)
+	return clampf(_distance / stride, 0.0, 1.0)
+
+
 func play(kind: StringName) -> void:
 	last_surface = _surface_below()
 	steps_played += 1

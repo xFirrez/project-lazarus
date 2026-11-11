@@ -8,3 +8,5 @@ extends Resource
 @export_file("*.tscn") var scene_path: String = ""
 @export var is_test_map: bool = false
 @export var max_players: int = 4
+# Weapons every player spawns with (GAME_DESIGN §4.1: M1911; test maps may add more).
+@export var starting_weapons: Array[StringName] = [&"m1911"]

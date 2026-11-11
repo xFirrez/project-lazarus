@@ -33,6 +33,10 @@ var grounded: bool = true
 var current_height: float = 1.8
 var last_floor_y: float = 0.0
 var wish_dir: Vector3 = Vector3.ZERO
+var weapon_speed_multiplier: float = 1.0  # held weapon's move speed (WeaponDefinition)
+
+var _lunge_velocity: Vector3 = Vector3.ZERO
+var _lunge_time: float = 0.0
 
 var _recharge_wait: float = 0.0
 var _need_sprint_release: bool = false
@@ -101,6 +105,9 @@ func physics_step(f: PlayerInputFrame, delta: float) -> void:
 		hvel = _ground_velocity(hvel, delta)
 	else:
 		hvel = _air_velocity(hvel, delta)
+	if _lunge_time > 0.0:
+		_lunge_time -= delta
+		hvel = _lunge_velocity
 	body.velocity.x = hvel.x
 	body.velocity.z = hvel.z
 	if on_floor or _coyote > 0.0:
@@ -120,6 +127,12 @@ func physics_step(f: PlayerInputFrame, delta: float) -> void:
 	else:
 		body.move_and_slide()
 	_post_move(on_floor)
+
+
+# Melee lunge: overrides horizontal velocity for `duration` seconds (knife lunge, GAME_DESIGN §3.4).
+func lunge(velocity: Vector3, duration: float) -> void:
+	_lunge_velocity = Vector3(velocity.x, 0.0, velocity.z)
+	_lunge_time = duration
 
 
 func teleport(pos: Vector3, keep_velocity: bool = false) -> void:
@@ -252,7 +265,7 @@ func target_speed() -> float:
 		s = tuning.crouch_speed
 	elif sprinting:
 		s = tuning.sprint_speed
-	return s * speed_multiplier
+	return s * speed_multiplier * weapon_speed_multiplier
 
 
 func _ground_velocity(hvel: Vector3, delta: float) -> Vector3:

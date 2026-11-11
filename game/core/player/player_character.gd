@@ -1,5 +1,5 @@
 # PlayerCharacter — the player avatar (ARCHITECTURE §6.1), composed of MotorComponent,
-# CameraRig, HealthComponent and FootstepComponent. The local player reads input once per
+# CameraRig, HealthComponent, FootstepComponent and WeaponController (Step 3). The local player reads input once per
 # physics tick into a PlayerInputFrame (or takes frames from `bot_driver`), simulates its own
 # motion and renders a first-person camera + DamageHud. Remote players are puppets: positioned
 # from the InterpolationBuffer, drawn as a third-person capsule + head, with spatial footsteps.
@@ -27,6 +27,7 @@ var bot_driver: Callable = Callable()
 var input_source: PlayerInputSource = null
 var last_frame: PlayerInputFrame = PlayerInputFrame.new()
 var hud: DamageHud = null
+var weapons: WeaponController = null
 # Replicated presentation state (remote puppets).
 var remote_flags: int = 0
 var remote_pitch: float = 0.0
@@ -78,6 +79,9 @@ func _ready() -> void:
 		collision_layer = 0
 		collision_mask = 0
 		camera.current = false
+	weapons = WeaponController.new()
+	add_child(weapons)
+	weapons.setup(self)
 
 
 func get_yaw() -> float:
@@ -115,10 +119,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if not is_local:
+		weapons.render_update(delta)
 		return
 	if not bot_driver.is_valid():
 		camera_rig.add_look(input_source.consume_look(delta))
 	camera_rig.update_view(delta)
+	weapons.render_update(delta)
 
 
 func _physics_process(delta: float) -> void:
@@ -139,6 +145,7 @@ func _simulate(delta: float) -> void:
 	camera_rig.add_look(f.look_delta)
 	rotation.y = camera_rig.yaw
 	motor.physics_step(f, delta)
+	weapons.physics_step(f, delta)
 	footsteps.update(motor.grounded, motor.sprinting, motor.is_crouched())
 
 

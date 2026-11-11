@@ -12,6 +12,7 @@ const VIGNETTE_SHADER: String = "res://content/shaders/damage_vignette.gdshader"
 
 var player: PlayerCharacter = null
 var indicators: Array[Dictionary] = []  # {source: Vector3, age: float}
+var show_crosshair: bool = true  # off once the WeaponHud draws the weapon crosshair
 
 var _vignette: ColorRect = null
 var _material: ShaderMaterial = null
@@ -78,11 +79,11 @@ func _exit_tree() -> void:
 
 func _draw() -> void:
 	var center: Vector2 = size * 0.5
-	# Placeholder crosshair until the weapon HUD (Step 3).
-	draw_line(center + Vector2(-8, 0), center + Vector2(-3, 0), _crosshair_color, 2.0)
-	draw_line(center + Vector2(3, 0), center + Vector2(8, 0), _crosshair_color, 2.0)
-	draw_line(center + Vector2(0, -8), center + Vector2(0, -3), _crosshair_color, 2.0)
-	draw_line(center + Vector2(0, 3), center + Vector2(0, 8), _crosshair_color, 2.0)
+	if show_crosshair:  # fallback crosshair when no weapon HUD exists
+		draw_line(center + Vector2(-8, 0), center + Vector2(-3, 0), _crosshair_color, 2.0)
+		draw_line(center + Vector2(3, 0), center + Vector2(8, 0), _crosshair_color, 2.0)
+		draw_line(center + Vector2(0, -8), center + Vector2(0, -3), _crosshair_color, 2.0)
+		draw_line(center + Vector2(0, 3), center + Vector2(0, 8), _crosshair_color, 2.0)
 	for ind: Dictionary in indicators:
 		var rel: float = relative_angle(player.global_position, player.camera_rig.yaw, ind["source"])
 		var alpha: float = 1.0 - float(ind["age"]) / INDICATOR_TIME
