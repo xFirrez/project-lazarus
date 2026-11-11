@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/world/map_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"nav_torture"
+display_name = "Nav torture (test)"
+scene_path = "res://maps/_test/nav_torture.tscn"
+is_test_map = true
+max_players = 4
+starting_weapons = Array[StringName]([&"m1911", &"mp40"])

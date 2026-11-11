@@ -1,5 +1,6 @@
 # Match — per-match root: instances the map scene and per-match systems (PlayerSync,
-# TargetRegistry, WeaponSync, WeaponFx now; RoundDirector, Economy, ... in later steps).
+# TargetRegistry, WeaponSync, WeaponFx, WorldSync, ZombieSync + CrowdDirector now; RoundDirector,
+# Economy, ... in later steps).
 # Reachable via Match.current.
 # Authority: exists on every peer; host-only systems check Net.is_host().
 class_name Match
@@ -13,6 +14,8 @@ var players: PlayerSync = null
 var targets: TargetRegistry = null
 var weapons: WeaponSync = null
 var fx: WeaponFx = null
+var world: WorldSync = null
+var zombies: ZombieSync = null
 
 
 func setup(def: MapDefinition) -> Error:
@@ -30,6 +33,9 @@ func setup(def: MapDefinition) -> Error:
 	targets = TargetRegistry.new()
 	add_child(targets)
 	targets.scan(map_root)
+	world = WorldSync.new()
+	add_child(world)
+	world.scan(map_root)
 	players = PlayerSync.new()
 	for node: Node in map_root.find_children("*", "Marker3D", true, false):
 		if node.is_in_group(&"player_spawn"):
@@ -41,6 +47,11 @@ func setup(def: MapDefinition) -> Error:
 	weapons.targets = targets
 	weapons.starting_weapons = def.starting_weapons
 	add_child(weapons)
+	zombies = ZombieSync.new()
+	zombies.players = players
+	zombies.targets = targets
+	add_child(zombies)
+	zombies.scan_spawners(map_root)
 	Log.info(&"match", "Match started on '%s'" % def.id)
 	return OK
 

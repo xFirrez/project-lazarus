@@ -36,8 +36,16 @@ func register(t: HitTarget, forced_id: int = -1) -> int:
 	t.target_id = forced_id if forced_id > 0 else _next_id
 	_next_id = maxi(_next_id, t.target_id + 1)
 	targets[t.target_id] = t
-	t.tree_exiting.connect(func() -> void: targets.erase(t.target_id))
+	if not t.has_meta(&"_target_registry"):
+		t.set_meta(&"_target_registry", true)
+		t.tree_exiting.connect(unregister.bind(t))
 	return t.target_id
+
+
+# Removes a target (dead zombies leave as corpses; their id may be reused by a new spawn).
+func unregister(t: HitTarget) -> void:
+	if targets.get(t.target_id, null) == t:
+		targets.erase(t.target_id)
 
 
 func get_target(id: int) -> HitTarget:

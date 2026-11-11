@@ -55,3 +55,8 @@ func _process(delta: float) -> void:
 			Net.sim.describe()
 		]
 	)
+	var zs: ZombieSync = Match.current.zombies if Match.current != null else null
+	if zs != null and zs.crowd != null and ZombieSync.is_authority():
+		text += "\n" + zs.crowd.overlay_text()
+	elif zs != null:
+		text += "\nzombies %d  snapshots in %.1f KB" % [zs.alive_count(), zs.snapshot_bytes_in / 1024.0]

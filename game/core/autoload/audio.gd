@@ -88,7 +88,7 @@ func play_event(event: StringName) -> void:
 
 
 # Spatialized one-shot (remote players' footsteps, later zombies and weapons of others).
-func play_event_3d(event: StringName, position: Vector3) -> void:
+func play_event_3d(event: StringName, position: Vector3, pitch: float = 1.0) -> void:
 	if _shut_down:
 		return
 	if not _events.has(event):
@@ -101,6 +101,7 @@ func play_event_3d(event: StringName, position: Vector3) -> void:
 	player.bus = def["bus"]
 	player.volume_db = def["volume_db"]
 	player.global_position = position
+	player.pitch_scale = pitch
 	player.play()
 
 

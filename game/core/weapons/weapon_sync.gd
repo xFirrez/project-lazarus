@@ -358,6 +358,7 @@ func _on_grenade_exploded(g: Grenade, pos: Vector3) -> void:
 				amount, WeaponDefinition.Hitzone.TORSO, DamageInfo.Kind.EXPLOSIVE, def.id, g.peer_id
 			)
 			info.distance = d
+			info.position = pos
 			targets.host_damage(t, info)
 	if players != null and players.avatars.has(g.peer_id):
 		var thrower: PlayerCharacter = players.avatars[g.peer_id]

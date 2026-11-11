@@ -219,6 +219,11 @@ toggle_net_overlay={
 3d_physics/layer_7="trigger"
 3d_physics/layer_8="nav_obstacle"
 
+[navigation]
+
+3d/default_cell_size=0.15
+3d/default_cell_height=0.1
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

@@ -63,6 +63,7 @@ func _register_builtin_commands() -> void:
 	PlayerCommands.register(commands)
 	WeaponCommands.register(commands)
 	RenderCommands.register(commands)
+	ZombieCommands.register(commands)
 
 
 func _cmd_help(_args: Array) -> String:
