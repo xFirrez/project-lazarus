@@ -25,7 +25,7 @@
 
 Shared helpers: `tools/blender/lazarus_bpy.py` (scene reset, palette preview materials, box / cylinder / sphere / prism builders, collision helpers, vertex-colour grime and sway weights, join, deterministic export).
 
-**Determinism.** No unseeded randomness. Grime noise is seeded per object name (CRC32), `PYTHONHASHSEED=0` is set by `_run.sh`, colours are per-vertex, and meshes are triangulated before export. Re-running a generator reproduces the same geometry, colours and triangles. Pieces with several materials joined into one mesh can still come out with their triangles in a different *order* (a glTF exporter detail), so compare content, not bytes. Generated GLBs are committed, so CI and other sessions never need Blender.
+**Determinism.** No unseeded randomness. Grime noise is seeded per object name (CRC32), `PYTHONHASHSEED=0` is set by `_run.sh`, colours are per-vertex, and meshes are triangulated before export. Re-running a generator reproduces the same geometry, colours and triangles. Pieces with several materials joined into one mesh can still come out with their triangles in a different *order* (a glTF exporter detail), so compare content, not bytes. Generated GLBs are committed as **normal git blobs, not LFS** (`.gitattributes` exemptions: the cloud sessions' git proxy rejects LFS uploads), so CI and other sessions never need Blender. Hand-authored binaries still go to LFS; a cloud session cannot push those (owner task).
 
 ## 3. Modular kit conventions (Vesper kit v1)
 

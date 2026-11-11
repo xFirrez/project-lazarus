@@ -24,6 +24,7 @@ Short hand-off file for the **sequential cloud sessions** implementing `docs/DEV
 - More clips: add pose functions in `tools/blender/characters/build_zombie.py` → `tools/blender/build_characters.sh` (needs `pip install bpy`, see Environment setup). The anim GLB imports as an AnimationLibrary through `content/characters/humanoid_bone_map.tres` (loop flags in its `.import`). See `docs/ART_PIPELINE.md` §5.
 - Kit for the nav torture map: `content/kits/vesper/*.glb` (2 m grid; `stairs_2m` rises 2 m over 4 m toward −Z; `wall_window_2m` has `Socket_Barricade_0..5` + `Socket_WindowClimb`; colliders carry `surface` meta). Large floors: MultiMesh + one box collider (see `tools/lookdev/build_lookdev.gd`, which must run with a renderer: `tools/lookdev/build_lookdev.sh`).
 - Rendering: the `Graphics` autoload applies quality presets; shadow-casting lights must be in group `shadow_light` (+ `shadow_priority` meta) to be budgeted; particles in group `density_scaled`. Console: `quality`, `render_stats`, `env`, `snow`, `zombie_anim`.
+- Git LFS uploads are refused by the cloud git proxy (403): keep committed binaries out of LFS (`.gitattributes` exemptions for screenshots and generated GLBs).
 - Container setup additions: `pip install bpy` (Blender 5.3 module, ~430 MB) for the generators; `apt-get install -y mesa-vulkan-drivers` (lavapipe) makes `tools/screenshot.sh` / `visual_tests.sh` render Forward+ (otherwise opengl3 fallback). `tools/visual_tests.sh` now includes `lookdev_perf` (~2 min on lavapipe).
 
 ## Context from Step 3
