@@ -6,7 +6,9 @@
 #   speedhack    client runs `speed_hack 3`; the host's MovementValidator corrects it (AC-2.5)
 #   course       client walks the whole movement course at --netsim latency, no corrections (AC-2.1)
 #   weapons      gun range at --netsim: hit markers, host damage + replication, forged claims rejected (AC-3.4)
-# Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons]...   (default: all)
+#   zombies      nav torture at --netsim: 32 zombies, late join, bandwidth, smoothness, hit claims on
+#                moving zombies accepted >= 98%, barricade replication (AC-5.3, AC-5.6)
+# Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies]...   (default: all)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
@@ -111,9 +113,10 @@ pair_test() { # name map host_script client_script
 test_speedhack() { pair_test speedhack sandbox host_speedhack.gd client_speedhack.gd; }
 test_course() { pair_test course movement_course host_course.gd client_course.gd; }
 test_weapons() { pair_test weapons gun_range host_weapons.gd client_weapons.gd; }
+test_zombies() { pair_test zombies nav_torture host_zombies.gd client_zombies.gd; }
 
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies)
 fail=0
 for t in "${TESTS[@]}"; do
   "test_$t" || fail=1

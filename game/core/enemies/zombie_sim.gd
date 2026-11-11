@@ -504,7 +504,7 @@ func _check_stuck(dt: float) -> void:
 	else:
 		stuck_timer = 0.0
 		stuck_ref = pos
-	if target_path_length > FAR_DISTANCE:
+	if target_path_length > FAR_DISTANCE and target_path_length < INF:
 		far_timer += dt
 		if far_timer >= FAR_TIME:
 			requeue_reason = "far (%.0f m path)" % target_path_length

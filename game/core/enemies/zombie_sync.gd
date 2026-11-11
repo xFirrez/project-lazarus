@@ -243,8 +243,15 @@ func _create(spawn: Array) -> ZombieActor:
 	if targets != null:
 		targets.register(a, TARGET_ID_BASE + id)
 	a.died.connect(_on_actor_died.bind(a))
+	a.tree_exiting.connect(_on_actor_exiting.bind(a))
 	zombie_spawned.emit(a)
 	return a
+
+
+# Safety net: an actor leaving the tree by any path never stays registered or simulated.
+func _on_actor_exiting(a: ZombieActor) -> void:
+	if actors.get(a.net_id, null) == a:
+		_remove(a, false)
 
 
 func _remove(a: ZombieActor, free_now: bool) -> void:
