@@ -1,6 +1,8 @@
-[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+[ext_resource type="PackedScene" path="res://content/weapons/m1911/m1911_viewmodel.glb" id="2"]
+[ext_resource type="PackedScene" path="res://content/weapons/m1911/m1911_world.glb" id="3"]
 
 [sub_resource type="Curve2D" id="recoil"]
 _data = {
@@ -52,6 +54,8 @@ recoil_recovery_speed = 8.0
 view_kick = 0.8
 vm_kick_back = 0.05
 vm_kick_rot = 6.0
+viewmodel_scene = ExtResource("2")
+world_scene = ExtResource("3")
 viewmodel_style = &"pistol"
 viewmodel_color = Color(0.24, 0.24, 0.26, 1)
 viewmodel_offset = Vector3(0.15, -0.15, -0.33)

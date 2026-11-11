@@ -24,3 +24,10 @@
 game/addons/** -filter -diff -merge
 docs/screenshots/**/*.png -filter -diff -merge -text
 *.svg text
+# Script-generated GLBs (tools/blender, Step 4) are small and regenerable: normal git blobs
+# (the cloud sessions' git proxy cannot upload LFS objects). Hand-authored GLBs stay in LFS.
+game/content/kits/**/*.glb -filter -diff -merge -text
+game/content/props/**/*.glb -filter -diff -merge -text
+game/content/characters/**/*.glb -filter -diff -merge -text
+game/content/enemies/**/*.glb -filter -diff -merge -text
+game/content/weapons/m1911/*.glb -filter -diff -merge -text
