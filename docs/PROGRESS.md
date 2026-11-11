@@ -11,11 +11,11 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | Step 2 complete — no milestone reached yet (M0 after Step 3) |
-| Next step to start | **Step 3 — Weapon framework & gunplay feel** |
+| Current milestone | **M0** (Step 3 complete: move + shoot in the gun range, solo and co-op; LAN play with a friend = human check) |
+| Next step to start | **Step 4 — Art direction, asset pipeline & look development** |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-11 (Step 2 session) |
-| Main branch playable? | Test maps only (sandbox, movement course; first-person movement, solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-11 (Step 3 session) |
+| Main branch playable? | Test maps only (sandbox, movement course, gun range; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -26,7 +26,7 @@
 | 0 | Planning & design documents | **Complete** | — | 2026-11-11 |
 | 1 | Foundation, toolchain & networked skeleton | **Complete** | — | 2026-11-11 |
 | 2 | Player controller & movement feel | **Complete** (AC-2.7 awaiting human) | — | 2026-11-11 |
-| 3 | Weapon framework & gunplay feel (→ M0) | Not started | — | — |
+| 3 | Weapon framework & gunplay feel (→ M0) | **Complete** (AC-3.7 awaiting human) | — | 2026-11-11 |
 | 4 | Art direction, asset pipeline & look development | Not started | 4A / 4B | — |
 | 5 | Zombie AI, animation & networked enemies | Not started | 5A / 5B | — |
 | 6 | Core survival loop (→ M1 First Playable) | Not started | 6A / 6B | — |
@@ -69,14 +69,14 @@
 - [H] AC-2.7 [HUMAN] Movement feel review
 
 ### Step 3 — Weapons
-- [ ] AC-3.1 Damage/falloff/penetration/RPM unit tests
-- [ ] AC-3.2 Reload state machine edge cases
-- [ ] AC-3.3 Range integration: per-hitzone damage, penetration count
-- [ ] AC-3.4 Net hit claims + host validation
-- [ ] AC-3.5 No viewmodel clipping; ADS alignment
-- [ ] AC-3.6 Pools/decals capped, no memory growth
-- [ ] AC-3.7 [HUMAN] Gunplay feel review
-- [ ] **M0 reached**
+- [x] AC-3.1 Damage/falloff/penetration/RPM unit tests (`test_damage_model.gd`, `test_weapon_fire_rate.gd`, `test_weapon_definitions.gd`)
+- [x] AC-3.2 Reload state machine edge cases (`test_weapon_reload.gd`)
+- [x] AC-3.3 Range integration: per-hitzone damage, penetration count (`test_gun_range.gd`)
+- [x] AC-3.4 Net hit claims + host validation (`net_tests.sh weapons`, `test_hit_validator.gd`)
+- [x] AC-3.5 No viewmodel clipping; ADS alignment (`visual_tests.sh viewmodel_ads` at 1920×1080: 0.0 px error ×4; `test_weapon_presentation.gd`)
+- [x] AC-3.6 Pools/decals capped, no memory growth (`test_mp40_60s_pools_capped_no_growth`)
+- [H] AC-3.7 [HUMAN] Gunplay feel review
+- [x] **M0 reached** (automated: move + shoot in the gun range, 2 peers at 100 ms; [H] LAN session with a friend)
 
 ### Step 4 — Art direction & pipeline
 - [ ] AC-4.1 Scripted kit, correct collision, grid snapping
@@ -207,6 +207,12 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-11 | 3 | `tools/check.sh` | Pass | 19 scripts / 107 tests / 2068 asserts |
+| 2026-11-11 | 3 | `tools/run_tests.sh integration` | Pass | 5 scripts / 28 tests. Per-hitzone damage exact for M1911 / MP40 / Kar98k at 10 m (head ×3 / ×4 / ×5, neck ×2, torso, limb ×0.75), MP40 24.0 at 40 m (60%), Model 37 pellets 4–8 hits at 5 m each = 130 × zone; penetration lane: Kar98k 4 dummies (400 / 300 / 225 / 168.75), MP40 and M1911 exactly 1; wood wall passes at ×0.75; knife lunge 2.3 m kills the 150 HP dummy, respawn 3 s; frag splash kills it; cooked frag explodes in hand at 3.5 s; ADS sight error < 1 px (1080p) for all 4; MP40 60+ s full-auto: decals 128 (cap), impacts 32, shells 40, tracers 32, flashes 12 — node growth 0, objects +17, static memory +49 KiB over 50 s |
+| 2026-11-11 | 3 | Unit: fire rate (60 Hz ticks, 100 shots) | Pass | Average interval within ±1 ms of 60/RPM for M1911 (semi, clicking), MP40 (auto), Model 37 (pump), Kar98k (bolt) |
+| 2026-11-11 | 3 | `tools/net_tests.sh` (solo, replication, host_loss, speedhack, course, **weapons**) | Pass | weapons @ 100 ms ±20 ms, 2% loss: hit marker in the same physics frame as the shot; Dummy_Kill 150 → 70 replicated to the client, kill replicated; host rejected forged claims DEAD_TARGET 1, RANGE 2 (claimed 300 m; knife at 12 m), RATE 3 (5 ms apart), 0 rejections during legit play; client saw the host's relayed fire burst |
+| 2026-11-11 | 3 | `tools/visual_tests.sh` (damage_direction, **viewmodel_ads**) | Pass | 1920×1080 opengl3: ADS sight centroid error (0.0, 0.0) px for all 4 weapons; viewmodel covers 20.8% of the lower-right quadrant while standing 0.4 m from a wall; frames `docs/screenshots/viewmodel_*.png` |
+| 2026-11-11 | 3 | `tools/run_sim.sh smoke` (sandbox, gun_range), `tools/screenshot.sh gun_range` | Pass | `docs/screenshots/gun_range_shot_*.png` |
 | 2026-11-11 | 2 | `tools/check.sh` | Pass | 13 scripts / 64 tests / 1395 asserts |
 | 2026-11-11 | 2 | `tools/run_tests.sh integration` (`--fixed-fps 60`) | Pass | 3 scripts / 16 tests. Walk 4.60, sprint 6.60, crouch 2.40 m/s (±3%); sprint 4.0 s, recharge 3.8 s (0.8 + 3.0, ±0.1); apex 1.0 m; slide 0.7 s + 1.0 s cooldown; bot course from all 4 spawns in 28.0 s (2 mantles, 1 slide, elevator, 5 m drops, no damage); 1.5 m ledge not mantleable; 1.5 m ceiling keeps crouch; slide ends crouched in the 1.3 m tunnel; shuttle carries the player; 10,000 random frames: 0 static overlaps, 0 fall-through (also checked with 7 other seeds) |
 | 2026-11-11 | 2 | `tools/net_tests.sh` (solo, replication, host_loss, speedhack, course) | Pass | NetSim 100 ms ±20 ms, 2% loss. Replication: remote sprint-circle max error 0.007–0.015 m, max per-frame step 0.15–0.17 m (no snapping), 0 corrections for a legit client; host damage 40 from the client's left → client HP 60, indicator at ~105°, regen to 100. Speed hack ×3: 4 corrections in 3 s, validated speed 8.6–9.1 m/s (limit 10.5) while the client tried ~14 m/s. Client course run: completed in 27.9 s, RTT ~210 ms, 0 corrections |
@@ -229,6 +235,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Peers | NetSim profile | KB/s per client | Desyncs | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-11 | 3 | 2 (loopback) | 100 ms ±20 ms, 2% loss | ~1–2 while firing (MP40: 9 reliable shot claims/s batched per frame, ≈60 B each + 41 B unreliable fire burst relayed per shot) | 0 | Claims carry no damage; host recomputes |
 | 2026-11-11 | 2 | 2 (loopback) | 100 ms ±20 ms, 2% loss | ~1 (player state 30 Hz: pos, yaw, pitch, flags, seq; snapshots 20 Hz) | 0 | Replication error max 0.015 m; 0 false corrections |
 | 2026-11-11 | 1 | 2 (loopback) | 100 ms ±20 ms, 2% loss | < 1 (capsule state 30 Hz + snapshots 20 Hz, float32 positions) | 0 | Replication error max 0.016 m; quantization deferred to Step 5 |
 
@@ -240,6 +247,8 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 |---|---|---|---|---|
 | I-002 | S4 | 2 | Headless `--fixed-fps` integration runs sometimes log "Jolt Physics job system exceeded the maximum number of jobs … Waiting for jobs" (engine warning; physics continues). Not seen in real-time runs | Marked benign in `tests/integration/player_test_helper.gd`; re-check after engine upgrades |
 | I-003 | S3 | 2 | Test-map moving platforms (course elevator/shuttle) are simulated locally per peer, so a remote player riding one is seen on the host's copy of the platform only approximately | Step 8 makes traversal machines host-driven (D-020) |
+| I-004 | S4 | 3 | Viewmodel and impact particles render with the Compatibility renderer in the container only; the Forward+ look (lighting of the viewmodel viewport, particle sizes) is unverified | Human check with AC-3.7; Step 4 look-dev |
+| I-005 | S3 | 3 | Frag grenades are simulated on every peer; a client's cosmetic copy can rest in a slightly different spot than the host's authoritative one (the explosion is shown at the host's position) | Acceptable for co-op; revisit with Step 9 projectiles |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
 Severity: **S1** crash / data loss / progress-blocking · **S2** major feature broken · **S3** minor feature issue / visual bug · **S4** polish.
@@ -253,11 +262,18 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Downed state (last stand) | Step 6 | Step 2 provides the hook: at 0 HP the host restores the player after 3 s (placeholder) |
 | `NetId` entity registry + reliable spawn/despawn | Step 5 | First needed for zombies; player avatars are keyed by peer id |
 | Snapshot quantization | Step 5 | Bandwidth is negligible with ≤ 4 capsules |
+| Full `ProjectileBehavior` (launchers, crossbow, Ray Pistol) | Step 9 | Plan scope: stub interface now (`core/weapons/behaviors/projectile_behavior.gd`) |
+| Authored viewmodel/arms models and animation clips | Step 4 (first model) / Step 9 | Greybox models + code-built AnimationPlayer clips now (`GreyboxGun`, `ViewmodelAnimations`); `WeaponDefinition.viewmodel_scene` takes a real scene |
+| Recorded weapon audio | Step 9 / 15 | Synthesized per-weapon placeholders (`WeaponAudio`), distinct per weapon |
+| Tactical / placeable slots, Pack Mule third slot | Steps 9–10 | `WeaponInventory.slot_count` is config-driven; lethal (frag) implemented |
 
 ## Proposed design changes (awaiting human decision)
 
 | Date | Proposed by (step) | Change | Rationale | Decision |
 |---|---|---|---|---|
+| 2026-11-11 | 3 | Frag damage "250 + splash 1200 at centre (r = 5 m)" interpreted as linear splash from 1200 at the centre to 250 at the 5 m edge; own frag deals up to 60 to the thrower (§3.2) | The table is ambiguous; this keeps both numbers meaningful | Agent decision (reversible in `frag.tres`) |
+| 2026-11-11 | 3 | Sprinting does not cancel a reload (the reload continues while running); weapon switch and melee cancel it (ammo-in rule applies) | AC-3.2 asks for "behaves as specified" without a spec; this is the friendlier classic-Zombies-like choice | Agent decision |
+| 2026-11-11 | 3 | Thin props (wood, sheet metal, tagged `thin_prop`) pass bullets with −25% damage per prop (max 2) | GAME_DESIGN §4.2 allows thin-prop penetration without a number | Agent decision |
 | 2026-11-11 | 1 | Work is implemented on branch `claude/project-lazarus` (created from the planning branch `claude/lazarus-dev-roadmap-h093ya`, since `main` holds no plan), one cloud session per step, with a PR into `main` after the final step | Owner's instruction for sequential cloud sessions | Owner instruction |
 
 ---
@@ -277,6 +293,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Any | Monitor Git LFS storage/bandwidth quota | Recurring |
 | Step 1 | Quick desktop check: `godot --path game`, Solo, press `~` (console: try `help`, `net_status`, Tab completion, Up/Down history), F3 overlay; then `tools/run_coop_local.sh 2 --windowed` and walk both capsules | Open |
 | Step 1 | Confirm the first GitHub Actions run of `.github/workflows/ci.yml` is green (Actions tab) | Open |
+| Step 3 | AC-3.7 gunplay feel review + M0 LAN check (steps in `docs/sessions/2026-11-11_step-3.md`); log `wtune` changes in the GAME_DESIGN tuning log | Open |
 | Step 2 | AC-2.7 movement feel review on the movement course (steps in `docs/sessions/2026-11-11_step-2.md`); record any `tune` changes in the GAME_DESIGN tuning log | Open |
 
 ---
@@ -290,3 +307,4 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 | 2026-11-11 | 0 | Planning: architecture, roadmap, game design, map design, tracker, agent guide | (planning commit) |
 | 2026-11-11 | 1 | Godot 4.7.2 project, autoloads, Net layer v1 (Offline/ENet, NetSim, clock sync, uid), console + overlay, sandbox with replicated capsules, tool scripts, CI | [2026-11-11_step-1.md](sessions/2026-11-11_step-1.md) |
 | 2026-11-11 | 2 | PlayerCharacter (motor, camera rig, health + damage HUD, footsteps), PlayerTuning, movement course, host movement validation, health replication, bot/random drivers, integration + net + visual tests | [2026-11-11_step-2.md](sessions/2026-11-11_step-2.md) |
+| 2026-11-11 | 3 | Weapon framework: WeaponDefinition/Runtime, hitscan/pellet/melee behaviors (+ projectile stub), inventory + frags, viewmodel (own camera/layer, procedural layers, clips), pooled FX, weapon HUD, Hurtbox/HitTarget/TargetRegistry, HitValidator + WeaponSync networking, 4 weapons + knife + frag, gun range, unit/integration/net/visual tests | [2026-11-11_step-3.md](sessions/2026-11-11_step-3.md) |

@@ -14,10 +14,19 @@ Short hand-off file for the **sequential cloud sessions** implementing `docs/DEV
 |---|---|---|
 | 1 Foundation, toolchain & networked skeleton | ✅ Done (2026-11-11) | Godot 4.7.2 project, autoloads, Net v1 (Offline/ENet, NetSim, clock sync, uid), console/overlay, sandbox with replicated capsules, tools, CI |
 | 2 Player controller & movement feel | ✅ Done (2026-11-11) | PlayerCharacter + components, PlayerTuning, movement course, MovementValidator (D-016), health events (D-017), integration/net/visual tests; AC-2.7 feel review awaits the owner |
-| 3 Weapon framework & gunplay feel | ⏭ Next | |
-| 4 – 16 | Not started | |
+| 3 Weapon framework & gunplay feel | ✅ Done (2026-11-11) | WeaponDefinition/Runtime, hitscan/pellet/melee (+ projectile stub), inventory + frags, viewmodel (SubViewport layer 2), FX rings, weapon HUD, HitTarget/TargetRegistry, HitValidator + WeaponSync (D-021…D-026), 4 weapons + knife + frag, gun range; M0 reached (AC-3.7 feel review awaits the owner) |
+| 4 Art direction, asset pipeline & look development | ⏭ Next | |
+| 5 – 16 | Not started | |
 
-## Context for the next session (Step 3)
+## Context for the next session (Step 4)
+- Weapons: `game/core/weapons/` (definition, runtime, behaviors/, controller, viewmodel, viewmodel_animations, greybox_gun, weapon_sync, hit_validator, target_registry, hit_target, target_dummy, hurtbox, grenade), data in `content/weapons/<id>/<id>.tres`. A real weapon model plugs in through `WeaponDefinition.viewmodel_scene`; the scene must have `Mag`, `Action`, `Muzzle`, `Eject`, `Sight` nodes (Sight = point that lands on screen centre in ADS) and use render layer 2 (`Viewmodel.LAYER`).
+- Viewmodel renders in a transparent SubViewport with its own Environment (ambient only; Compatibility renderer verified, Forward+ not — I-004). The main camera culls layer 2. Screenshot shots hide CanvasLayers in group `hide_for_shots`.
+- Hit targets: anything weapons damage extends `HitTarget` and adds `Hurtbox`es (physics layer 3); map-placed targets get ids from `TargetRegistry.scan` (tree order); zombies (Step 5) need host-assigned ids. Damage applies only on the host via `TargetRegistry.host_damage`.
+- FX: `WeaponFx` rings (decals 128 …), impact look per surface in `core/vfx/impact_library.gd` (surface from `SurfaceTags`; `flesh` added). Step 4 materials should set PhysicsMaterial names / `surface` meta so impacts and footsteps pick the right surface.
+- Tests: `tests/integration/weapon_test_helper.gd` (standalone gun range rig), `tools/net_tests.sh weapons`, `tools/visual_tests.sh [out_dir] [damage_direction|viewmodel_ads]`.
+- Console (Step 3): `give`, `weapons`, `weapon_info`, `ammo`, `infinite_ammo`, `damage_numbers`, `wtune`, `recoil`, `spread`, `dummy_reset`, `hit_stats`.
+
+## Context from Step 2
 - Player: `game/core/player/player_character.tscn` (+ `motor_component.gd`, `camera_rig.gd`, `health_component.gd`, `footstep_component.gd`), tuning in `content/player/player_tuning.tres`. Input arrives as `PlayerInputFrame` (`fire`, `aim` already captured; sprint ends on fire/ADS). The camera is top-level (`player.camera`, horizontal FOV); add the viewmodel camera/layer there. `camera_rig.add_trauma()` for recoil shake. ADS sensitivity multiplier is applied when `aim` is held.
 - Host damage API: `Match.current.players.damage_player(peer_id, amount, source_pos, type)`; hit claims should follow the same host-authoritative pattern. Test arenas live in `maps/_test/` (the course builder in `movement_course.gd` shows the box/waypoint helpers).
 - Tests: integration suites run with `--fixed-fps 60`; use `tests/integration/player_test_helper.gd` (`spawn_player`, `step(self, n)` which also ignores the benign Jolt job warning). Net pair tests: `pair_test` in `tools/net_tests.sh`. Visual checks: `tools/visual_tests.sh`.
