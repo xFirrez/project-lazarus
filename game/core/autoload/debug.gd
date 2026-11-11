@@ -60,6 +60,7 @@ func _register_builtin_commands() -> void:
 	commands.register("overlay", _cmd_overlay, [["on", TYPE_BOOL]], "Show/hide the FPS + net overlay")
 	commands.register("log_level", _cmd_log_level, [["level", TYPE_STRING]], "debug|info|warn|error")
 	commands.register("quit", _cmd_quit, [], "Quit the game")
+	PlayerCommands.register(commands)
 
 
 func _cmd_help(_args: Array) -> String:

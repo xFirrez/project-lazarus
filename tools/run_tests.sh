@@ -8,6 +8,10 @@ SUITE="${1:-unit}"
 
 run_gut() {
   local dir="$1"
+  local extra=()
+  # Integration suites step physics: --fixed-fps makes every frame exactly 1/60 s and lets
+  # headless runs go as fast as the CPU allows (deterministic, faster than real time).
+  if [[ "$dir" == "integration" ]]; then extra=(--fixed-fps 60); fi
   if [[ -z "$(find "$GAME_DIR/tests/$dir" -name 'test_*.gd' 2>/dev/null)" ]]; then
     echo "[run_tests] no tests in tests/$dir"
     return 0
@@ -15,7 +19,7 @@ run_gut() {
   local log
   log="$(mktemp)"
   set +e
-  "$GODOT" --headless --path "$GAME_DIR" -s res://addons/gut/gut_cmdln.gd \
+  "$GODOT" --headless "${extra[@]}" --path "$GAME_DIR" -s res://addons/gut/gut_cmdln.gd \
     -gdir="res://tests/$dir" -gprefix=test_ -gsuffix=.gd -ginclude_subdirs -gexit \
     -glog=1 -gdisable_colors >"$log" 2>&1
   local code=$?

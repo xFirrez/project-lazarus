@@ -3,7 +3,9 @@
 #   replication  host+client @ --netsim, replicated position error, connect time, clean disconnect
 #   host_loss    client returns to menu with "Host disconnected" when the host is killed
 #   solo         OfflineTransport runs the same sandbox path; console commands work
-# Usage: tools/net_tests.sh [replication|host_loss|solo]...   (default: all)
+#   speedhack    client runs `speed_hack 3`; the host's MovementValidator corrects it (AC-2.5)
+#   course       client walks the whole movement course at --netsim latency, no corrections (AC-2.1)
+# Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course]...   (default: all)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
@@ -90,8 +92,26 @@ test_solo() {
   grep -q "Quitting" "$OUT/solo.log" || { echo "[net:solo] quit command did not run" >&2; return 1; }
 }
 
+pair_test() { # name map host_script client_script
+  local name="$1" map="$2" host_script="$3" client_script="$4" port
+  port="$(free_port)"
+  rm -f "$OUT"/"$name"_*.json
+  launch host "$OUT/${name}_host.log" -- --host="$port" --map="$map" --netsim="$NETSIM" \
+    --autotest="res://tests/net/$host_script" --autotest-out="$OUT/${name}_host.json" --profile=nethost
+  wait_for_log "$OUT/${name}_host.log" "Match started" 15
+  launch client "$OUT/${name}_client.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest="res://tests/net/$client_script" --autotest-out="$OUT/${name}_client.json" --profile=netclient1
+  wait "$PID_client" || true
+  wait "$PID_host" || true
+  report "${name}_client" "$OUT/${name}_client.json" "$OUT/${name}_client.log"
+  report "${name}_host" "$OUT/${name}_host.json" "$OUT/${name}_host.log"
+}
+
+test_speedhack() { pair_test speedhack sandbox host_speedhack.gd client_speedhack.gd; }
+test_course() { pair_test course movement_course host_course.gd client_course.gd; }
+
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course)
 fail=0
 for t in "${TESTS[@]}"; do
   "test_$t" || fail=1

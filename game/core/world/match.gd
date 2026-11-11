@@ -24,6 +24,7 @@ func setup(def: MapDefinition) -> Error:
 	for node: Node in map_root.find_children("*", "Marker3D", true, false):
 		if node.is_in_group(&"player_spawn"):
 			players.spawn_points.append((node as Marker3D).global_position)
+			players.spawn_yaw = (node as Marker3D).global_rotation.y
 	add_child(players)
 	current = self
 	Log.info(&"match", "Match started on '%s'" % def.id)

@@ -4,7 +4,8 @@
 # removed after the client disconnects.
 extends "res://tests/net/autotest_base.gd"
 
-const MAX_ERROR_M: float = 0.2
+const MAX_ERROR_M: float = 0.3  # AC-2.5 steady-state bound
+const MAX_FRAME_STEP_M: float = 0.25  # > ~15 m/s in one frame would read as a visible snap
 
 var _history_t: PackedFloat64Array = []
 var _history_p: PackedVector3Array = []
@@ -13,6 +14,7 @@ var _client_id: int = 0
 var _left_at: float = -1.0
 var _removed_at: float = -1.0
 var _saw_two: bool = false
+var _client_corrections: int = 0
 
 
 func _ready() -> void:
@@ -25,11 +27,11 @@ func _physics_process(_delta: float) -> void:
 	var s: PlayerSync = sync()
 	if s == null:
 		return
-	var me: TempCapsule = s.local_avatar()
+	var me: PlayerCharacter = s.local_avatar()
 	if me == null:
 		return
 	if not me.bot_driver.is_valid():
-		me.bot_driver = circle_driver(0.0)
+		me.bot_driver = circle_driver(0.0, true)
 	_history_t.append(Net.host_time())
 	_history_p.append(me.global_position)
 	if s.avatars.size() == 2 and not _saw_two:
@@ -38,6 +40,7 @@ func _physics_process(_delta: float) -> void:
 			if id != Net.local_id():
 				_client_id = id
 		check("host_sees_two_capsules", true, s.avatars.keys())
+		s.corrected.connect(func(_id: int, _r: String) -> void: _client_corrections += 1)
 	if _left_at >= 0.0 and _removed_at < 0.0 and not s.avatars.has(_client_id):
 		_removed_at = elapsed()
 		check("client_capsule_removed_on_disconnect", true, "%.3f s after peer_left" % (_removed_at - _left_at))
@@ -89,6 +92,9 @@ func _evaluate() -> void:
 	result["mean_error_m"] = mean_err
 	result["samples"] = samples.size()
 	result["interp_delay_s"] = float(_report[3])
+	result["max_frame_step_m"] = float(_report[4])
+	check("no_visible_snapping", float(_report[4]) < MAX_FRAME_STEP_M, "max per-frame step %.3f m" % float(_report[4]))
+	check("legit_client_never_corrected", _client_corrections == 0, _client_corrections)
 	check("enough_samples", samples.size() > 120, samples.size())
 	check(
 		"replicated_within_%.1fm" % MAX_ERROR_M,

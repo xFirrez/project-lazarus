@@ -59,8 +59,11 @@ func sync() -> PlayerSync:
 	return Match.current.players
 
 
-# Circle bot: deterministic wish direction from the local clock.
-static func circle_driver(phase: float) -> Callable:
-	return func() -> Vector3:
-		var t: float = Time.get_ticks_msec() / 1000.0 * 1.2 + phase
-		return Vector3(cos(t), 0.0, sin(t))
+# Circle bot: deterministic wish direction from the local clock (fed through PlayerInputFrames).
+static func circle_driver(phase: float, sprint: bool = false) -> Callable:
+	return BotInputDriver.direction_driver(
+		func() -> Vector3:
+			var t: float = Time.get_ticks_msec() / 1000.0 * 1.2 + phase
+			return Vector3(cos(t), 0.0, sin(t)),
+		sprint
+	)

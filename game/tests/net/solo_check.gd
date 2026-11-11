@@ -14,7 +14,7 @@ func _physics_process(_delta: float) -> void:
 	var s: PlayerSync = sync()
 	if s == null or s.local_avatar() == null:
 		return
-	var me: TempCapsule = s.local_avatar()
+	var me: PlayerCharacter = s.local_avatar()
 	if _started < 0.0:
 		_started = elapsed()
 		_start_pos = me.global_position
