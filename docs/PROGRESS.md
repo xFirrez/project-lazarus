@@ -12,10 +12,10 @@
 | Field | Value |
 |---|---|
 | Current milestone | **M0** (Step 3 complete: move + shoot in the gun range, solo and co-op; LAN play with a friend = human check). Step 4 added the art pipeline and look-dev scene (no milestone) |
-| Next step to start | **Step 5 — Zombie AI, animation & networked enemies** (5A first) |
+| Next step to start | **Step 6 — Core survival loop → M1 First Playable** (6A first) |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-11 (Step 4 session) |
-| Main branch playable? | Test maps only (sandbox, movement course, gun range, **lookdev** courtyard; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-11 (Step 5 session) |
+| Main branch playable? | Test maps only (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -28,7 +28,7 @@
 | 2 | Player controller & movement feel | **Complete** (AC-2.7 awaiting human) | — | 2026-11-11 |
 | 3 | Weapon framework & gunplay feel (→ M0) | **Complete** (AC-3.7 awaiting human) | — | 2026-11-11 |
 | 4 | Art direction, asset pipeline & look development | **Complete** (AC-4.3 / AC-4.4 awaiting human) | 4A + 4B | 2026-11-11 |
-| 5 | Zombie AI, animation & networked enemies | Not started | 5A / 5B | — |
+| 5 | Zombie AI, animation & networked enemies | **Complete (with deferrals)** (AC-5.5 desktop + AC-5.8 awaiting human) | 5A + 5B | 2026-11-11 |
 | 6 | Core survival loop (→ M1 First Playable) | Not started | 6A / 6B | — |
 | 7 | Online co-op, lobby & player characters (→ M2) | Not started | 7A / 7B | — |
 | 8 | Vesper Peak full greybox (→ M3) | Not started | 8A / 8B | — |
@@ -87,14 +87,14 @@
 - [x] AC-4.6 Runtime quality preset switching (`Graphics` autoload; `test_quality_presets.gd`; only the renderer needs a restart)
 
 ### Step 5 — Zombie AI
-- [ ] AC-5.1 32 zombies reach targets on all floors; no permanent stuck
-- [ ] AC-5.2 Multi-floor pursuit; path-distance targeting
-- [ ] AC-5.3 Barricade tear/climb flow, replicated
-- [ ] AC-5.4 Hit reactions, gibs, crawlers, ragdoll pool
-- [ ] AC-5.5 AI+nav ≤ 1.5 ms avg / ≤ 3 ms p99 @32 ([HUMAN] desktop confirm)
-- [ ] AC-5.6 ≤ 15 KB/s zombie snapshots; ≥ 98% hit-claim acceptance on moving targets
-- [ ] AC-5.7 10-minute soak, clean log
-- [ ] AC-5.8 [HUMAN] Threatening, readable zombies
+- [x] AC-5.1 32 zombies reach targets on all floors; no permanent stuck (`test_zombie_nav.gd`: 32/32 on F1 / F2 / F3, last arrival 19 / 28 / 24 s; 3–10 stuck/far re-queues per run respawn near the target)
+- [x] AC-5.2 Multi-floor pursuit; path-distance targeting (`test_zombie_pursuit.gd`: wall case picks the path-nearer player, door re-bake retargets; height gained only on the stairs; balcony drop link used; bot route F1→F2→F3 pursued, attacked on all 3 floors, 0 re-queues)
+- [x] AC-5.3 Barricade tear/climb flow, replicated (`test_zombie_barricade.gd`: 6 planks at 1.00 s / 0.80 s (run), climb, pursue, second zombie waits; `net_tests.sh zombies`: plank counts match on the client)
+- [x] AC-5.4 Hit reactions, gibs, crawlers, ragdoll pool (`test_zombie_reactions.gd`; `visual_tests.sh zombie_showcase`)
+- [x] AC-5.5 AI+nav ≤ 1.5 ms avg / ≤ 3 ms p99 @32 — container: 0.89 ms avg / 1.57 ms p99 (`run_sim.sh perf_arena`); [H] desktop confirm
+- [x] AC-5.6 ≤ 15 KB/s zombie snapshots (9.4–9.5 KB/s @32, 100 ms / 2% loss); ≥ 98% hit-claim acceptance on moving targets (77/77) (`net_tests.sh zombies`)
+- [x] AC-5.7 10-minute soak, clean log (`run_sim.sh soak`: 600 simulated s, 316 kills, 383 spawns, 0 errors / AI warnings)
+- [H] AC-5.8 [HUMAN] Threatening, readable zombies
 
 ### Step 6 — Core survival loop
 - [ ] AC-6.1 Round formulas rounds 1–50 × 1–4 players
@@ -207,6 +207,12 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-11 | 5 | `tools/check.sh` | Pass | 21 scripts / 116 tests (new: `test_zombie_snapshot`, `test_zombie_archetype`: 15 B per zombie, 2 cm round trip, tick wrap, 32 zombies < 15 KB/s; GDD health curve / speeds / attack / tear numbers; voice cap 10 with nearest-steals) |
+| 2026-11-11 | 5 | `tools/run_tests.sh integration` | Pass | 12 scripts / 53 tests / 518 asserts. **Nav (AC-5.1):** 32 jog zombies from random spawners (risers on 3 floors + 2 barricaded windows) reach Target_F1 / F2 / F3: 32/32 each, median 12 / 14 / 11 s, last 19 / 28 / 24 s; windows, vent and balcony drop all used; path budget peak 6/frame; AI 0.7–0.8 ms avg. **Pursuit (AC-5.2):** wall test picks B (9 m path) over A (2 m straight, 33 m path); opening D1 re-bakes and retargets to A; F1→F2 climb only on the stair footprint; balcony → atrium via the drop link in < 8 s; scripted bot route across 3 floors: attacked on floors 0/1/2, 0 re-queues. **Barricade (AC-5.3):** planks 6→0 at 1.00 s (walk) / 0.80 s (run) intervals, climb after the last, 2nd zombie WAITs then follows. **Reactions (AC-5.4):** head / stomach / left-right reacts; 400 dmg on 1000 HP staggers 0.6 s; lethal headshot gibs the head (bone collapsed, chunks); explosion at the legs → crawler (1.0 m/s, crawl state, legs gibbed), above the hips or bullets → no crawler; 10 deaths: ≤ 6 simulating ragdolls, 4 frozen, settled on the floor, all corpses freed after fade |
+| 2026-11-11 | 5 | `tools/run_sim.sh perf_arena` (AC-5.5) | Pass | 60 s @ 60 Hz after 5 s warm-up, 32 zombies (walk/jog/run/sprint) pursuing the local avatar + 3 looping bots on F1/F2/F3: **AI + nav 0.89 ms avg, 1.57 ms p99**, 9.3 ms max (single spike); 12,244 path queries, peak 6/frame, 0 re-queues (11 in an earlier run); CSV `docs/screenshots/step5/perf_arena.csv` |
+| 2026-11-11 | 5 | `tools/run_sim.sh soak` (AC-5.7) | Pass | 600 simulated s (`--fixed-fps 60`, 2.5 min wall): 24–31 alive, kill every 1.5 s (head/torso/limb, 25% explosive), barricades rebuilt every 40 s, doors toggled every 60 s: 316 kills, 383 spawns, 43 re-queues, 21 crawlers, 316 ragdolls, 492 gib chunks, 0 errors, 0 AI warnings, no leaked actors; AI 0.65 ms avg / 1.09 p99 in the last window |
+| 2026-11-11 | 5 | `tools/net_tests.sh zombies` (AC-5.3, AC-5.6) + all earlier net tests | Pass | nav_torture, 100 ms ±20 ms, 2% loss: 8 zombies before the join arrive via `_zfull`, 32 total; **zombie snapshots 9.4–9.5 KB/s**; interpolated max step 0.16–0.21 m/frame over 37k samples; client M1911 with scripted aim at moving zombies' torso hurtboxes: **77/77 claims accepted** (0 rejections); barricade planks and count match; host kill_all → 32 corpses, 0 alive on the client |
+| 2026-11-11 | 5 | `tools/visual_tests.sh zombie_showcase` | Pass | opengl3: posed line-up (walk, attack wind-up, crawler, head look, head gib, ragdoll), 14 runners surround the player in rings (14/14 within 2.4 m), window planks torn with a zombie waiting; `docs/screenshots/step5/zombies_*.png` |
 | 2026-11-11 | 4 | `tools/check.sh` | Pass | 19 scripts / 107 tests / 2068 asserts (no new unit suites; Step 4 tests are integration/visual) |
 | 2026-11-11 | 4 | `tools/run_tests.sh integration` | Pass | 8 scripts / 40 tests / 431 asserts. **Kit:** 16 pieces match manifest bounds (±1 cm), colliders on layer 1 with surface tags; wall run (3 walls + window + door) blocks all 174 rays across seams, window/door openings open, 7 window sockets; 3×3 exterior floor patch: 0 holes in 529 samples, all `snow`; stair ramp monotonic and meets the 2 m landing. **Zombie:** 22 humanoid-profile bones (`%GeneralSkeleton`), 12 clips (idle/walk/run/crawl loop), 14 hitboxes follow the head bone within 2 mm over 7 clips × 3 times, head < 0.7 m at the end of `death_back`, 3 skin variants; 7.8k triangles. **Quality:** Low/Medium/High/Ultra switch at runtime (scale 0.75 FSR → 1.0, FXAA/MSAA, SSAO + vol. fog off on Low, shadow lights 2/4/8/12 by priority, particles 0.35→1.0, far 120→400 m) |
 | 2026-11-11 | 4 | `tools/visual_tests.sh` (damage_direction, viewmodel_ads, **lookdev_perf**) | Pass | Now rendered with **Forward+ on lavapipe** (D-030). Look-dev (High / Medium): draw calls 546–780 (budget 1500), objects ≤ 1,332, primitives ≤ 320k; shadow-casting lights 5 ≤ 8 / 4 ≤ 4. ADS alignment still (0, 0) px for all 4 weapons incl. the new M1911 model. CSV: `docs/screenshots/step4/lookdev_perf.csv` |
@@ -234,12 +240,14 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Scene | Preset | Hardware | Avg FPS | p99 frame ms | AI ms | Notes |
 |---|---|---|---|---|---|---|---|---|
+| 2026-11-11 | 5 | perf_arena (nav_torture, 32 zombies, 4 bots) | headless | container CPU (4 vCPU) | — | — | 0.89 avg / 1.57 p99 | Host AI + navigation only (CrowdDirector accounting); visuals/animation not included. Desktop = [HUMAN] AC-5.5 (`ai_stats`, F3 overlay AI line) |
 | 2026-11-11 | 4 | lookdev (5 shots) | High / Medium | container (lavapipe, CPU) | ~7–8 (CPU rasterizer, not meaningful) | — | — | Render-cost proxies: ≤ 780 draw calls, ≤ 320k primitives, 5 shadow lights. GPU FPS = [HUMAN] AC-4.3 |
 
 ### Network baselines
 
 | Date | Step | Peers | NetSim profile | KB/s per client | Desyncs | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-11 | 5 | 2 (loopback) | 100 ms ±20 ms, 2% loss | 9.4–9.5 for 32 zombies (stream 19 only; 489 B per 20 Hz packet) | 0 | Plus reliable spawn/death events; 100% of client hit claims on moving zombies accepted |
 | 2026-11-11 | 3 | 2 (loopback) | 100 ms ±20 ms, 2% loss | ~1–2 while firing (MP40: 9 reliable shot claims/s batched per frame, ≈60 B each + 41 B unreliable fire burst relayed per shot) | 0 | Claims carry no damage; host recomputes |
 | 2026-11-11 | 2 | 2 (loopback) | 100 ms ±20 ms, 2% loss | ~1 (player state 30 Hz: pos, yaw, pitch, flags, seq; snapshots 20 Hz) | 0 | Replication error max 0.015 m; 0 false corrections |
 | 2026-11-11 | 1 | 2 (loopback) | 100 ms ±20 ms, 2% loss | < 1 (capsule state 30 Hz + snapshots 20 Hz, float32 positions) | 0 | Replication error max 0.016 m; quantization deferred to Step 5 |
@@ -256,6 +264,8 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | I-006 | S4 | 4 | Camera snow also falls inside interiors in the look-dev scene (per-zone `CameraSnow.intensity` is not driven yet) | Step 8/13 zone volumes set the intensity (0 indoors, light under skylights) |
 | I-007 | S3 | 4 | Zombie v1 model is built from rigidly skinned primitive segments (reads as "puffy" at the torso; joints crease) — fine for Step 5 AI work, below the final art bar | Step 5B / 13: sculpted or CC0 replacement through the same BoneMap/HitboxProfile (drop-in, ART_PIPELINE §5) |
 | I-005 | S3 | 3 | Frag grenades are simulated on every peer; a client's cosmetic copy can rest in a slightly different spot than the host's authoritative one (the explosion is shown at the host's position) | Acceptable for co-op; revisit with Step 9 projectiles |
+| I-008 | S4 | 5 | Crowds produce a few stuck / far re-queues per minute (3–10 per 32-zombie run, 43 in the 10-min soak), mostly zombies boxed in by others at a window queue or in the 1.2 m corridor, and F3 spawns > 60 m from an F1 target. They respawn near the players (no lost zombies) | Watch on Vesper Peak (Step 8); tune STUCK_WINDOW / separation, or add a "push through" when blocked only by other zombies |
+| I-009 | S4 | 5 | Ragdolls / death animation / corpses decide locally per peer, so a corpse can lie in a slightly different pose on each peer | Cosmetic; corpses aren't targets |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
 Severity: **S1** crash / data loss / progress-blocking · **S2** major feature broken · **S3** minor feature issue / visual bug · **S4** polish.
@@ -267,13 +277,16 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | ~~Owner-movement validation~~ | — | Done in Step 2 (D-016) |
 | Settings UI for sensitivity / ADS multiplier / FOV / bob / shake / hold-toggle | Step 15 (15A menus) | Settings exist in `Config` and are live-editable with the `setting` console command; the menu screens are Step 15 work |
 | Downed state (last stand) | Step 6 | Step 2 provides the hook: at 0 HP the host restores the player after 3 s (placeholder) |
-| `NetId` entity registry + reliable spawn/despawn | Step 5 | First needed for zombies; player avatars are keyed by peer id |
-| Snapshot quantization | Step 5 | Bandwidth is negligible with ≤ 4 capsules |
+| ~~`NetId` entity registry + reliable spawn/despawn~~ | — | Done in Step 5 for zombies (D-036); player avatars stay keyed by peer id |
+| ~~Snapshot quantization~~ | — | Done in Step 5 for zombies (`ZombieSnapshot`, 15 B / zombie); player snapshots stay float32 (≤ 4 entries) |
+| Foot-placement IK on near zombies (Step 5 scope 5) | Step 13 | Zombies are navmesh-snapped and the test/greybox floors are flat or ramp-like; IK matters once art stairs/rubble exist. `TwoBoneIK3D` is available in 4.7 and slots in as another SkeletonModifier3D on near zombies |
+| `NavigationAgent3D` RVO avoidance (Step 5 scope 4) | Step 16 (if needed) | Replaced by custom separation + surround slots (D-034), which met the surround and budget criteria |
+| Zombies swiping through a partly broken window (GAME_DESIGN §12) and player plank rebuild | Step 6 | Barricade state, events and the tear flow exist; interaction (rebuild, points) is Step 6 scope |
 | Full `ProjectileBehavior` (launchers, crossbow, Ray Pistol) | Step 9 | Plan scope: stub interface now (`core/weapons/behaviors/projectile_behavior.gd`) |
 | Authored viewmodel/arms models and animation clips | Step 9 | Step 4 delivered the M1911 hero model (viewmodel + world); the other weapons stay greybox; clips are still code-built from the definition timings (`ViewmodelAnimations`) |
 | Hand-authored textures (256 px/m trims) | Step 13 | Step 4 kit/props use world-space triplanar detail noise + vertex-colour grime (no UVs); unique hero textures come with the art pass |
 | Explicit LOD meshes / HLOD | Step 13 | Importer auto-LOD on every mesh now (`meshes/generate_lods`); HLOD/visibility ranges for the full map in 13D |
-| Zombie animation set beyond 12 clips (3 walks, 2 jogs, lunge, rise, vent drop, electrocuted …, ARCHITECTURE §11.3) | Step 5B | The pipeline + 12-clip library exist; Step 5B extends `build_zombie.py` (or imports CC0/Mixamo clips through the BoneMap) |
+| Zombie animation set beyond 12 clips (3 walks, 2 jogs, lunge, rise, vent drop, electrocuted …, ARCHITECTURE §11.3) | Step 12 / 13 | Step 5 drives all 12 clips through the AnimationTree; rise = model rising from below the floor, vent = crawl clip, drop = falling pose, stagger = stomach react. More clips extend `build_zombie.py` or import CC0/Mixamo through the BoneMap |
 | Recorded weapon audio | Step 9 / 15 | Synthesized per-weapon placeholders (`WeaponAudio`), distinct per weapon |
 | Tactical / placeable slots, Pack Mule third slot | Steps 9–10 | `WeaponInventory.slot_count` is config-driven; lethal (frag) implemented |
 
@@ -305,6 +318,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Step 1 | Quick desktop check: `godot --path game`, Solo, press `~` (console: try `help`, `net_status`, Tab completion, Up/Down history), F3 overlay; then `tools/run_coop_local.sh 2 --windowed` and walk both capsules | Open |
 | Step 1 | Confirm the first GitHub Actions run of `.github/workflows/ci.yml` is green (Actions tab) | Open |
 | Step 3 | AC-3.7 gunplay feel review + M0 LAN check (steps in `docs/sessions/2026-11-11_step-3.md`); log `wtune` changes in the GAME_DESIGN tuning log | Open |
+| Step 5 | AC-5.5 desktop AI timing and AC-5.8 "threatening, readable zombies" review (steps in `docs/sessions/2026-11-11_step-5.md`) | Open |
 | Step 2 | AC-2.7 movement feel review on the movement course (steps in `docs/sessions/2026-11-11_step-2.md`); record any `tune` changes in the GAME_DESIGN tuning log | Open |
 
 ---
@@ -320,3 +334,4 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 | 2026-11-11 | 2 | PlayerCharacter (motor, camera rig, health + damage HUD, footsteps), PlayerTuning, movement course, host movement validation, health replication, bot/random drivers, integration + net + visual tests | [2026-11-11_step-2.md](sessions/2026-11-11_step-2.md) |
 | 2026-11-11 | 3 | Weapon framework: WeaponDefinition/Runtime, hitscan/pellet/melee behaviors (+ projectile stub), inventory + frags, viewmodel (own camera/layer, procedural layers, clips), pooled FX, weapon HUD, Hurtbox/HitTarget/TargetRegistry, HitValidator + WeaponSync networking, 4 weapons + knife + frag, gun range, unit/integration/net/visual tests | [2026-11-11_step-3.md](sessions/2026-11-11_step-3.md) |
 | 2026-11-11 | 4 | Art direction & pipeline: STYLE_GUIDE + ART_PIPELINE, Blender generators (16-piece kit, 7 props, zombie + 12-clip retargeted library, M1911 hero model), post-import material remap, 4 shaders + 31 materials, 4 environment presets, Graphics autoload + 4 quality presets, camera snow, ambience, look-dev scene + 5 reference shots, Forward+ screenshots via lavapipe | [2026-11-11_step-4.md](sessions/2026-11-11_step-4.md) |
+| 2026-11-11 | 5 | Zombies: ZombieArchetype, ZombieActor (sim + visual), ZombieSim brain (rise / window tear + climb / drop / vent / pursue / surround / attack / stagger / crawler / stuck + far re-queue), CrowdDirector (path budget, LOD think, separation, slots, timing), ZombieSync replication (NetIds, quantized 20 Hz snapshots, late join), WorldSync (barricades, nav doors), AnimationTree visuals with head look, gibs, ragdoll pool, placeholder audio with voice priority, nav torture map, console commands, unit/integration/net/sim/visual tests | [2026-11-11_step-5.md](sessions/2026-11-11_step-5.md) |
