@@ -20,6 +20,12 @@ func test_targets_nearer_player_by_path_not_straight_line() -> void:
 	var door: NavDoor = rig.marker("D1_Door") as NavDoor
 	b.global_position = Vector3(-1.2, 0, 2.0)  # B farther away now (14 m)
 	door.host_set_open(true)
+	# The re-bake is threaded: under --fixed-fps it can outlast a fixed frame window, so wait for it.
+	var region: NavigationRegion3D = door.get_parent() as NavigationRegion3D
+	for i: int in 900:
+		await ZH.step(self, 1)
+		if region == null or not region.is_baking():
+			break
 	for i: int in 180:
 		await ZH.step(self, 1)
 		if z.sim.target == a:

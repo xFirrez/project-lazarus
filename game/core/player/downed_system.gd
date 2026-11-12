@@ -344,6 +344,11 @@ func _process(_delta: float) -> void:
 func _present_downed(peer_id: int, left: float) -> void:
 	states[peer_id] = State.DOWNED
 	bleed_left[peer_id] = left
+	# `_downed` is sent from inside the host's damage call, before the `_player_health` event.
+	var p: PlayerCharacter = players.avatars.get(peer_id, null)
+	if p != null and not is_authority():
+		p.health.health = 0.0
+		p.health.is_downed = true
 	_play(peer_id, &"player_downed")
 
 

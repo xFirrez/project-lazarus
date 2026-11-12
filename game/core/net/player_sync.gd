@@ -86,9 +86,10 @@ func local_avatar() -> PlayerCharacter:
 func spawn_point_for(peer_id: int) -> Vector3:
 	if spawn_points.is_empty():
 		return Vector3(0, 1, 0)
-	var idx: int = player_ids().find(peer_id)
+	# Session peers in id order (identical on every peer), host bots after them.
+	var idx: int = Net.peer_ids().find(peer_id)
 	if idx < 0:
-		idx = avatars.size()
+		idx = Net.peer_ids().size() + maxi(peer_id - BOT_ID_BASE, 0)
 	return spawn_points[idx % spawn_points.size()]
 
 
@@ -148,11 +149,6 @@ func _physics_process(delta: float) -> void:
 			if me.global_position.y < PlayerCharacter.KILL_Y:
 				me.motor.teleport(spawn_point_for(me.peer_id))
 			_latest[me.peer_id] = [Net.host_time(), me.global_position, me.get_yaw(), me.get_pitch(), me.state_flags()]
-	if Net.is_host():
-		for id: int in avatars:
-			var b: PlayerCharacter = avatars[id]
-			if b.is_bot and b.global_position.y < PlayerCharacter.KILL_Y:
-				b.motor.teleport(spawn_point_for(id))
 		_state_timer -= delta
 		if _state_timer <= 0.0:
 			_state_timer += 1.0 / STATE_RATE
@@ -166,6 +162,10 @@ func _physics_process(delta: float) -> void:
 				buf.put_u16(_correction_seq)
 				Net.send_unreliable(1, STREAM_PLAYER_STATE, buf.data_array)
 	if Net.is_host():
+		for id: int in avatars:
+			var b: PlayerCharacter = avatars[id]
+			if b.is_bot and b.global_position.y < PlayerCharacter.KILL_Y:
+				b.motor.teleport(spawn_point_for(id))
 		_snapshot_timer -= delta
 		if _snapshot_timer <= 0.0:
 			_snapshot_timer += 1.0 / SNAPSHOT_RATE

@@ -496,3 +496,8 @@ Video presets (Low/Medium/High/Ultra + individual: resolution scale/FSR, shadows
 | 2026-11-11 | 3 | Frag damage model | "250 + splash 1200 at centre" → linear splash 1200 (centre) to 250 (5 m edge); thrower takes up to 60 | See PROGRESS *Proposed design changes* |
 | 2026-11-11 | 3 | Thin-prop penetration | — → −25% damage per wood / sheet-metal prop, max 2 props | §4.2 had no number |
 | 2026-11-11 | 3 | Reload / fire rules | — → sprinting doesn't cancel a reload; a semi-auto click up to 0.1 s early is buffered | Feel decisions (Step 3 report) |
+| 2026-11-12 | 6 | §5.2 worked example "solo r15: 75" | 75 → 90 (formula unchanged) | The stated formula gives 24 × 3 × 1.25 = 90; data follows the formula (`test_round_curve.gd`) |
+| 2026-11-12 | 6 | Tier mix per round (new, `content/rounds/default_round_curve.tres`) | — → keyframes r1 100 % shamble; r2 80/20 shamble/walk; r4 35/40/25 (jog); r7 0/30/50/20 (run); r8 jog 55 %; r12 run 60 %; r13 sprint 10 %; r20 sprint 50 %; r30 sprint 75 %; linear between | §5.1 table gives only anchors |
+| 2026-11-12 | 6 | Interaction holds (new) | — → doors / wall-buys 0.35 s hold; barricade rebuild 0.5 s per plank continuous; revive radius 2.0 m; window swipe range 1.6 m with the 0.45 s wind-up | §12 / §3.3 give no hold for purchases |
+| 2026-11-12 | 6 | Bleedout timer while being revived | — → paused while a teammate holds revive | Classic behaviour; §3.3 silent |
+| 2026-11-12 | 6 | Coachgun / M14 values not in §4.3 | — → Coachgun rpm 300 (two quick shots), reload 3.2 s, falloff 5/15 m; M14 falloff 25/60 m 70 %, penetration 2, reload 2.4/2.9 s | Wall-buys added in Step 6 |

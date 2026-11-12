@@ -226,6 +226,8 @@ func _send_now(item: Dictionary) -> void:
 	if multiplayer.multiplayer_peer == null or state == State.IDLE:
 		return
 	var target: int = int(item["target"])
+	if target > 0 and target != local_id() and not multiplayer.get_peers().has(target):
+		return  # the peer left while this (NetSim-delayed) packet was queued
 	if bool(item["reliable"]):
 		var type: StringName = item["type"]
 		var payload: Array = item["payload"]

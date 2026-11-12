@@ -208,9 +208,12 @@ func _draw_teammate_markers(me: PlayerCharacter) -> void:
 			continue
 		var o: PlayerCharacter = match_node.players.avatars[id]
 		var wp: Vector3 = o.global_position + Vector3.UP * 0.6
-		var sp: Vector2 = cam.unproject_position(wp)
-		if cam.is_position_behind(wp):
-			sp = size - sp
+		var sp: Vector2 = Vector2(size.x * 0.5, size.y - 40.0)
+		var local_z: float = (cam.global_transform.affine_inverse() * wp).z
+		if local_z < -0.05:
+			sp = cam.unproject_position(wp)
+		elif local_z > 0.05:
+			sp = size - cam.unproject_position(wp)  # behind: mirror, pinned to the bottom edge
 			sp.y = size.y - 40.0
 		sp = sp.clamp(Vector2(30, 30), size - Vector2(30, 30))
 		var left: float = float(ds.bleed_left.get(id, 0.0)) / maxf(o.tuning.bleedout_time, 1.0)
