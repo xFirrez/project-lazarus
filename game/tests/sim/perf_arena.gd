@@ -1,5 +1,7 @@
 # perf_arena (AC-5.5, ARCHITECTURE §12): solo session on the nav torture map with 4 bot players
 # (the local avatar circling the atrium + 3 bots looping routes on F1 / F2 / F3) and 32 zombies
+# (`--map=vesper_peak`: every door open, bots looping the Courtyard fountain, the Lobby and the
+# Reactor Lower Ring, the avatar circling the Arrival Station — the Step 8 full-map baseline)
 # (mixed tiers) kept alive and pursuing. Records host AI + navigation time per physics frame
 # (CrowdDirector accounting), path queries and frame time to a CSV; passes if the AI average is
 # <= 1.5 ms and p99 <= 3 ms. Players are invulnerable so the pursuit never ends.
@@ -15,7 +17,14 @@ const LOOPS: Array = [
 	[Vector3(-13, 8, -14), Vector3(-3, 8, -14), Vector3(-3, 8, -6), Vector3(-13, 8, -6)],
 ]
 
+const VESPER_LOOPS: Array = [
+	[Vector3(18, -8, -40), Vector3(38, -8, -40), Vector3(38, -8, -58), Vector3(18, -8, -58)],
+	[Vector3(44, -8, -10), Vector3(60, -8, -10), Vector3(60, -8, -2), Vector3(44, -8, -2)],
+	[Vector3(6, -48, -50), Vector3(28, -48, -72), Vector3(50, -48, -50), Vector3(28, -48, -28)],
+]
+
 var duration: float = 60.0
+var _loops: Array = LOOPS
 var _bots: Array[Node3D] = []
 var _u: Array[float] = [0.0, 0.0, 0.0]
 var _started: float = -1.0
@@ -79,18 +88,25 @@ func _setup(s: PlayerSync, zs: ZombieSync) -> void:
 	var me: PlayerCharacter = s.local_avatar()
 	me.bot_driver = circle_driver(0.0, false)
 	me.health.invulnerable = true
-	for i: int in LOOPS.size():
+	if Match.current.definition.id == &"vesper_peak":
+		_loops = VESPER_LOOPS
+		SurvivalCommands._cmd_open_all([])
+		for n: Node in Match.current.map_root.find_children("*", "NavDoor", true, false):
+			(n as NavDoor).host_set_open(true)
+		if Match.current.rounds != null:
+			Match.current.rounds.enabled = false
+	for i: int in _loops.size():
 		var b: Node3D = Node3D.new()
 		b.name = "Bot%d" % (i + 1)
 		Match.current.map_root.add_child(b)
-		b.global_position = LOOPS[i][0]
+		b.global_position = _loops[i][0]
 		zs.crowd.extra_targets.append(b)
 		_bots.append(b)
 
 
 func _move_bots(delta: float) -> void:
 	for i: int in _bots.size():
-		var loop: Array = LOOPS[i]
+		var loop: Array = _loops[i]
 		var seg: int = int(_u[i]) % loop.size()
 		var a: Vector3 = loop[seg]
 		var b: Vector3 = loop[(seg + 1) % loop.size()]

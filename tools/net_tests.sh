@@ -18,7 +18,9 @@
 #   coop4        host + 3 clients at 150 ms / 30 ms / 3 %: 32-zombie bandwidth phase, then 10 bot rounds
 #                with state-hash convergence at every round end (AC-7.1, AC-7.4)
 # Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies|survival|lobby|
-#        late_join|reconnect|coop4]... (default: all)
+#        late_join|reconnect|coop4|traversal]... (default: all)
+#   traversal    vesper_peak at --netsim: power on before join (late join), gondola + lift (with a
+#                zombie) riders without corrections, chute grate + slide (AC-8.4, AC-8.5)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
@@ -139,6 +141,21 @@ test_survival() {
   report survival_host "$OUT/survival_host.json" "$OUT/survival_host.log"
 }
 
+test_traversal() {
+  # The client joins after the host turned the power on (late-join power state, AC-8.5).
+  local port; port="$(free_port)"
+  rm -f "$OUT"/traversal_*.json
+  launch host "$OUT/traversal_host.log" -- --host="$port" --map=vesper_peak --netsim="$NETSIM" \
+    --autotest=res://tests/net/host_traversal.gd --autotest-out="$OUT/traversal_host.json" --profile=nethost
+  wait_for_log "$OUT/traversal_host.log" "AUTOTEST READY host" 30
+  launch client "$OUT/traversal_client.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_traversal.gd --autotest-out="$OUT/traversal_client.json" --profile=netclient1
+  wait "$PID_client" || true
+  wait "$PID_host" || true
+  report traversal_client "$OUT/traversal_client.json" "$OUT/traversal_client.log"
+  report traversal_host "$OUT/traversal_host.json" "$OUT/traversal_host.log"
+}
+
 test_lobby() {
   local port; port="$(free_port)"
   rm -f "$OUT"/lobby_*.json
@@ -221,7 +238,7 @@ test_coop4() {
 }
 
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4 traversal)
 fail=0
 for t in "${TESTS[@]}"; do
   "test_$t" || fail=1

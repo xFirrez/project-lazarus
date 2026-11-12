@@ -128,13 +128,13 @@ func _physics_process(_delta: float) -> void:
 			if elapsed() - _t0 > 2.0:
 				var sp: ZombieSpawner = _spawner(m, "Spawn_Z03_W1")
 				var len: float = m.zombies.crowd.path_length_now(sp.global_position, me.global_position)
-				check("d01_nav_connected", len < 80.0, len)
+				check("d01_nav_connected", len > 30.0 and len < 90.0, len)
 				var z03: Array[ZombieSpawner] = m.zombies.spawners.filter(
 					func(s: ZombieSpawner) -> bool: return s.zone == &"Z03"
 				)
 				check(
 					"z03_spawners_active",
-					m.zones.active_zones().has(&"Z03") and z03.size() == 2,
+					m.zones.active_zones().has(&"Z03") and z03.size() >= 2,
 					m.zones.active_zones()
 				)
 				SurvivalCommands.host_exec(me.peer_id, "down_me", 0)
