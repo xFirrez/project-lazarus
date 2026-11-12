@@ -433,3 +433,33 @@ Optional. Playable solo and with 2–4 players (some steps scale requirements by
 - Map rules script: `maps/vesper_peak/scripts/vesper_peak_rules.gd` (extends `MapRules`): power sequence, relays, bridge, gondola/lift/chute, conduit build, special round enemy = Galvanic, quest graph registration.
 - Each zone is its own scene (`zones/Z03_sanatorium_lobby.tscn`, etc.) with: geometry, `NavigationRegion3D`, zone `Area3D` volume(s), spawners, interactables, lights, audio emitters, reverb area, occluders. Doors live on zone boundaries in the *lower-numbered* zone's scene.
 - Greybox first (Step 8) using kit pieces with gameplay-accurate dimensions; final art (Step 13) replaces meshes without moving gameplay markers (markers are separate nodes under `Gameplay/` in each zone scene).
+
+### 9.1 Step 8 greybox — layout as built (and changes from §2–5)
+
+Datum: **y 0 = the Arrival Station floor (+28 m real)**; +X east, +Z north. All zone scenes are in `game/maps/vesper_peak/zones/`; the full id list is `markers_manifest.json` (checked by `tests/integration/test_vesper_markers.gd`). Validation: `tools/run_sim.sh nav_validate` (AC-8.2) and `tools/run_sim.sh flow` (AC-8.3).
+
+| Zone | Footprint (x, z) | Floor y (real) | Notes |
+|---|---|---|---|
+| Z01 | −13..13, −8..8 + dock −7..−2, −13..−8 | 0 (+28) | Unchanged Step 6 ticket hall; W_G2 moved to x −10 for the dock |
+| Z03 | walkway 13..38 (ramp 0 → −8); lobby 38..68, −14..8 | −8 (+20); mezz −4; landing −2 | Grand staircase → landing → D03 east |
+| Z04 | 70..82, −62..−8 | −2 (+26) | Runs north–south along the Courtyard's east side |
+| Z05 | 64..84, −98..−78 (+ scrub 84..90) | +4 (+32); gallery +7 | Stairwell from D05 |
+| Z06 | −10..66, −78..−20 | −8 (+20) | Fountain loop centre (28, −49) |
+| Z07 | −20..20, −138..−100; road x −30..−26 | +17 (+45) | Road from D06: south, west, 50 m ramp |
+| Z08 | −46..−22, −28..−10 | −13 (+15) | |
+| Z09 | −34..−6, −64..−41 | −18 (+10) | Booth +3 m with the power switch |
+| Z10 | morgue 4..22, −22..−10; tunnels W/S/E | −16 (+12) | East tunnel = Steam Purge section |
+| Z11 | 56..92, −72..−48 | −28 (0) | Gantry x 50..56 at −28 |
+| Z12 | 63..91, −46..−29 | −28 (0) | Lift shaft in the NW corner |
+| Z13 | cavern centre (28, −50), wall r 25.4 | ring −48 (−20) | Shaft x −6..0 from D14 (3 flights) |
+
+**Layout changes (Step 8, with reasons):**
+1. **Gondola dock on Z01's south-west side** (doc: north). The cable runs straight south over the Courtyard to the Comms Array station — matching §8.2 ("gondola cable stretched across the courtyard sky") with Z07 placed on the south ridge where the Sky Bridge from Z05 can reach it.
+2. **Z04 runs along the Courtyard's east side** so the sunroom balcony drop lands in the Courtyard (snowbank, 4.6 m); Z05 sits at its south end; the Sky Bridge (≈ 49 m, 11°) spans the ravine south of the Courtyard to Z07.
+3. **Z07 is reached from D06 by a mountain road** (25 m climb: 6 m + 22 m flat + 50 m ramp at 26.6°).
+4. **Forge platform at −34 (real −6)** instead of −10: keeps the Reactor Bridge from the Z11 gantry at 26.6°. The **west observation balcony (−38)** opens off the D14 shaft's middle landing; the second "observation platform" is the Z12 observation glass (art Step 13).
+5. **Z12's reactor-view gallery** is a marker (`EE_ObservationGlass`) — the D11 ramp runs between Z12 and the cavern; Step 13 frames the view.
+6. **Z04 ceiling vents** are high-wall ducts into the sealed west strip (navmesh needs 1.8 m headroom on spawner ledges); the Z05 skylight drops and Z08 coal chute are real drops.
+7. **Climb points** (Courtyard wall, Comms cliff, Generator Hall floor grates, Morgue grate, reactor pit rifts) use the new `ZombieSpawner.Kind.CLIMB` + JUMP links; door bursts are player-clipped closets.
+8. Secret rooms S1 / S2 exist as entrance + content markers only (rooms are Step 13/14).
+9. Travel times (flow sim, sprint along the navmesh): Z01 → Z13 Lower Ring **35.7 s** (target ≤ 75 s); worst perk-to-nearest-perk **25.6 s** (Marathon Malt; target ≤ 35 s); worst zone-to-perk **15.6 s** (Z13).

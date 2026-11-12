@@ -11,11 +11,11 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | **M2 Play with friends** (automated criteria; Step 7: lobby, late join, reconnect, 4 survivors, pings; AC-7.6 internet session = human check) |
-| Next step to start | **Step 8 — Vesper Peak full greybox → M3** (8A first) |
+| Current milestone | **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
+| Next step to start | **Step 9 — Arsenal, wall-buys & Relic Box** (9A first) |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-12 (Step 7 session) |
-| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (Arrival Station slice): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, M14/Coachgun wall-buys, barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-12 (Step 8 session) |
+| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, M14/Coachgun wall-buys, barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -31,7 +31,7 @@
 | 5 | Zombie AI, animation & networked enemies | **Complete (with deferrals)** (AC-5.5 desktop + AC-5.8 awaiting human) | 5A + 5B | 2026-11-11 |
 | 6 | Core survival loop (→ M1 First Playable) | **Complete** (AC-6.8 awaiting human) | 6A + 6B | 2026-11-12 |
 | 7 | Online co-op, lobby & player characters (→ M2) | **Complete** (AC-7.6 awaiting human) | 7A + 7B | 2026-11-12 |
-| 8 | Vesper Peak full greybox (→ M3) | Not started | 8A / 8B | — |
+| 8 | Vesper Peak full greybox (→ M3) | **Complete** (AC-8.7 / AC-8.8 awaiting human) | 8A + 8B | 2026-11-12 |
 | 9 | Arsenal, wall-buys & Relic Box | Not started | 9A / 9B | — |
 | 10 | Vigor Tonics & power-ups | Not started | — | — |
 | 11 | Relays, Lazarus Forge, traps & hazards | Not started | 11A / 11B | — |
@@ -117,15 +117,15 @@
 - [x] **M2 reached** (automated criteria; AC-7.6 confirms over the internet)
 
 ### Step 8 — Vesper Peak greybox
-- [ ] AC-8.1 All zones/doors with canonical ids, costs, unlocks
-- [ ] AC-8.2 nav_validate passes
-- [ ] AC-8.3 Travel-time targets met
-- [ ] AC-8.4 Gondola / lift / chute in solo + co-op
-- [ ] AC-8.5 Power-on sequence + replication
-- [ ] AC-8.6 Marker manifest complete
-- [ ] AC-8.7 [HUMAN] Full-map greybox perf baseline
-- [ ] AC-8.8 [HUMAN] Flow playtest
-- [ ] **M3 reached**
+- [x] AC-8.1 All zones/doors with canonical ids, costs, unlocks (`test_vesper_markers`: 12 zone volumes + MapDefinition zones with symmetric adjacency, 14 doors with §2.2 costs = 17,000, each unlocking its zones; `flow` sim buys all 14 in order → all 12 zones unlocked; `nav_validate`: every spawner of every zone paths to its activation zones once open)
+- [x] AC-8.2 nav_validate passes (`tools/run_sim.sh nav_validate`: 28 tiles disjoint, 2,261 polygons; 51,707 player-reachable standable cells, **0 uncovered**, 1/64 subsample all path to the spawn; 70 spawners reach own + adjacent zones; 66 unreachable decor islands (prop tops), **0 player-reachable**; definitions D-055)
+- [x] AC-8.3 Travel-time targets met (`tools/run_sim.sh flow`: Z01 → Z13 Lower Ring **35.7 s** sprint (≤ 75); worst perk → nearest perk **25.6 s** (≤ 35); worst zone → perk 15.6 s; sprinting nav bot completes the 14-leg loop through every zone in 157 s, 0 stuck legs)
+- [x] AC-8.4 Gondola / lift / chute in solo + co-op (`net_tests.sh traversal` at 100 ms ±20, 2 %: client rides the gondola Z01 → Z07 and the lift Z06 → Z12 with **0 movement corrections**, arrives at the stations; a zombie boards the lift, rides down and walks off toward the host; grate shot → chute slide lands in Z12. Solo: `flow` / `nav_validate` + debug `machine`)
+- [x] AC-8.5 Power-on sequence + replication (`PWR_MainSwitch` → `power.main` flag; PoweredLights cascade by zone (0.7 s per step from Z09), klaxon + sting; `traversal` client joins after power-on: flag + 38 lights powered; machines refuse without power)
+- [x] AC-8.6 Marker manifest complete (`maps/vesper_peak/markers_manifest.json`, 108 typed markers + live nodes; `test_vesper_markers`: all present with kind + zone, 7 perks, 7 box locations, 14 lore, 8 reels, 3 relays, 5 ravens)
+- [H] AC-8.7 [HUMAN] Full-map greybox perf baseline — automated part met: `run_sim.sh perf_arena --map=vesper_peak` (32 zombies, 4 bots, all doors open) host AI **1.33 ms avg / 2.89 ms p99** (≤ 1.5 / 3.0; tile-local snap + path time cap, D-056); GPU FPS on Medium = human
+- [H] AC-8.8 [HUMAN] Flow playtest (solo + co-op), steps in `docs/sessions/2026-11-12_step-8.md`
+- [x] **M3 reached** (automated criteria; AC-8.7 / AC-8.8 confirm on hardware)
 
 ### Step 9 — Arsenal & Relic Box
 - [ ] AC-9.1 All weapon stats match spec table
@@ -237,6 +237,13 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | 2026-11-11 | 3 | `tools/run_sim.sh smoke` (sandbox, gun_range), `tools/screenshot.sh gun_range` | Pass | `docs/screenshots/gun_range_shot_*.png` |
 | 2026-11-11 | 2 | `tools/check.sh` | Pass | 13 scripts / 64 tests / 1395 asserts |
 | 2026-11-11 | 2 | `tools/run_tests.sh integration` (`--fixed-fps 60`) | Pass | 3 scripts / 16 tests. Walk 4.60, sprint 6.60, crouch 2.40 m/s (±3%); sprint 4.0 s, recharge 3.8 s (0.8 + 3.0, ±0.1); apex 1.0 m; slide 0.7 s + 1.0 s cooldown; bot course from all 4 spawns in 28.0 s (2 mantles, 1 slide, elevator, 5 m drops, no damage); 1.5 m ledge not mantleable; 1.5 m ceiling keeps crouch; slide ends crouched in the 1.3 m tunnel; shuttle carries the player; 10,000 random frames: 0 static overlaps, 0 fall-through (also checked with 7 other seeds) |
+| 2026-11-12 | 8 | `tools/check.sh` (lint, format, boundary, unit) | Pass | 25 scripts / 137 tests |
+| 2026-11-12 | 8 | `tools/run_tests.sh integration` | Pass | 14 scripts / 64 tests (new `test_vesper_markers`) |
+| 2026-11-12 | 8 | `tools/run_sim.sh nav_validate` | Pass | 28 tiles, 2,261 polys, 51,707 reachable cells, 0 uncovered, 70 spawners OK, 0 harmful islands; ~5 s validation (1.09 M rays). Passed 3/3 consecutive runs |
+| 2026-11-12 | 8 | `tools/run_sim.sh flow` | Pass | Z01→Z13 35.7 s; perk spacing ≤ 25.6 s; 14-leg bot loop 0 stuck |
+| 2026-11-12 | 8 | `tools/run_sim.sh smoke`, `round_flow`, `survival --rounds=3 --god=1` | Pass | full map; navmesh 28 tiles bake ≈ 0.2–0.35 s at load |
+| 2026-11-12 | 8 | `tools/run_sim.sh perf_arena` (`--map=vesper_peak` / nav_torture) | Pass | 1.33 / 2.89 ms and 0.74 / 1.27 ms (avg / p99 AI) |
+| 2026-11-12 | 8 | `tools/net_tests.sh traversal late_join reconnect survival zombies lobby coop4` | see session report | traversal: 0 corrections on both rides |
 | 2026-11-11 | 2 | `tools/net_tests.sh` (solo, replication, host_loss, speedhack, course) | Pass | NetSim 100 ms ±20 ms, 2% loss. Replication: remote sprint-circle max error 0.007–0.015 m, max per-frame step 0.15–0.17 m (no snapping), 0 corrections for a legit client; host damage 40 from the client's left → client HP 60, indicator at ~105°, regen to 100. Speed hack ×3: 4 corrections in 3 s, validated speed 8.6–9.1 m/s (limit 10.5) while the client tried ~14 m/s. Client course run: completed in 27.9 s, RTT ~210 ms, 0 corrections |
 | 2026-11-11 | 2 | `tools/visual_tests.sh` | Pass | Indicator redness left/right 0.64/0.00 (hit from left), 0.00/0.71 (from right); corner vignette −0.15 → +0.05 and stronger at 70% missing. Frames: `docs/screenshots/damage_hud_*.png` |
 | 2026-11-11 | 2 | `tools/run_sim.sh smoke`, `tools/screenshot.sh movement_course` | Pass | `docs/screenshots/movement_course_shot_*.png` |
@@ -251,6 +258,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Scene | Preset | Hardware | Avg FPS | p99 frame ms | AI ms | Notes |
 |---|---|---|---|---|---|---|---|---|
+| 2026-11-12 | 8 | perf_arena (**vesper_peak** full greybox, all doors open, 32 zombies, 4 bots) | headless | container CPU | — | — | 1.33 avg / 2.89 p99 | 28 nav tiles / 2.26 k polys; tile-local snap (was 2.7 / 5.2 with map-wide snap) |
 | 2026-11-11 | 5 | perf_arena (nav_torture, 32 zombies, 4 bots) | headless | container CPU (4 vCPU) | — | — | 0.89 avg / 1.57 p99 | Host AI + navigation only (CrowdDirector accounting); visuals/animation not included. Desktop = [HUMAN] AC-5.5 (`ai_stats`, F3 overlay AI line) |
 | 2026-11-11 | 4 | lookdev (5 shots) | High / Medium | container (lavapipe, CPU) | ~7–8 (CPU rasterizer, not meaningful) | — | — | Render-cost proxies: ≤ 780 draw calls, ≤ 320k primitives, 5 shadow lights. GPU FPS = [HUMAN] AC-4.3 |
 
@@ -271,7 +279,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | ID | Severity (S1–S4) | Step found | Description | Owner/plan |
 |---|---|---|---|---|
 | I-002 | S4 | 2 | Headless `--fixed-fps` integration runs sometimes log "Jolt Physics job system exceeded the maximum number of jobs … Waiting for jobs" (engine warning; physics continues). Not seen in real-time runs | Marked benign in `tests/integration/player_test_helper.gd`; re-check after engine upgrades |
-| I-003 | S3 | 2 | Test-map moving platforms (course elevator/shuttle) are simulated locally per peer, so a remote player riding one is seen on the host's copy of the platform only approximately | Step 8 makes traversal machines host-driven (D-020) |
+| ~~I-003~~ | S3 | 2 | **Fixed for map machines in Step 8** (D-052: host-driven deterministic gondola / lift). Test-map moving platforms (course elevator/shuttle) are simulated locally per peer, so a remote player riding one is seen on the host's copy of the platform only approximately | Step 8 makes traversal machines host-driven (D-020) |
 | ~~I-004~~ | S4 | 3 | ~~Viewmodel/particles verified only with the Compatibility renderer~~ — **Fixed in Step 4:** container renders Forward+ via lavapipe (D-030); metallic viewmodels were black in Forward+ and now reflect a neutral sky (D-031). A GPU look check stays part of AC-3.7 | Closed |
 | I-006 | S4 | 4 | Camera snow also falls inside interiors in the look-dev scene (per-zone `CameraSnow.intensity` is not driven yet) | Step 8/13 zone volumes set the intensity (0 indoors, light under skylights) |
 | I-007 | S3 | 4 | Zombie v1 model is built from rigidly skinned primitive segments (reads as "puffy" at the torso; joints crease) — fine for Step 5 AI work, below the final art bar | Step 5B / 13: sculpted or CC0 replacement through the same BoneMap/HitboxProfile (drop-in, ART_PIPELINE §5) |
@@ -284,6 +292,9 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | I-013 | S4 | 7 | Under opengl3 + xvfb, quitting after a menu screen was shown prints "Texture with GL ID … leaked" (default-font glyph atlases); `godot_log_has_errors` ignores that exit message | Re-check with Step 15's final theme/fonts |
 | I-014 | S4 | 3 | `net_tests.sh weapons` "client_saw_host_fire_burst" is intermittent (the host's single relayed fire burst is one unreliable packet at 2 % loss / single-frame trigger); also fails on the Step 6 commit | Make the test fire a short burst (Step 9 weapons work) |
 | I-015 | S4 | 7 | Placeholder first-person arms (greybox guns) sit mostly below the screen edge at the current hip framing; the M1911's authored arms are tinted instead | Step 9/15 authored arms per weapon |
+| I-016 | S3 | 8 | Full-map AI p99 (2.89 ms) sits close to the 3 ms budget in the container; long-path queries across 28 tiles are the cost | Step 16: hierarchical zone routing / path caching; re-measure on desktop (AC-8.7) |
+| I-017 | S4 | 8 | The 32 / 28 decor nav islands on prop tops (desks, fountain tiers, bay roofs) are harmless but `snap()` could in theory place a zombie on one when squeezed next to it | Watch in playtests; cap islands by raising region_min_size or non-walkable prop tops in Step 13 |
+| I-018 | S4 | 8 | Greybox bullets pass through gondola cabin / lift platform (they sit on the player-clip layer so navigation ignores them) | Step 13: add a bullet-only collision layer for machine bodies |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
 Severity: **S1** crash / data loss / progress-blocking · **S2** major feature broken · **S3** minor feature issue / visual bug · **S4** polish.
@@ -301,7 +312,10 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | `NavigationAgent3D` RVO avoidance (Step 5 scope 4) | Step 16 (if needed) | Replaced by custom separation + surround slots (D-034), which met the surround and budget criteria |
 | ~~Window swipe + plank rebuild~~ | — | Done in Step 6 (`BarricadeRepair`, `ZombieSim` window swipe 1.6 m) |
 | ~~Late-join policy and reconnect (GAME_DESIGN §13)~~ | — | Done in Step 7 (`MatchSession`, D-047) |
-| Kit-based greybox, real zone elevations, gondola dock, Second Wind machine, door-burst spawners in Z01/Z03 | Step 8 (perks: 10) | Step 6 slice is box greybox with flattened elevations; Z01 + stubs of Z03 / Z06 only |
+| ~~Kit-based greybox, real zone elevations, gondola dock, door bursts~~ | — | Done in Step 8 (box greybox with kit materials, D-053); Second Wind machine = marker until Step 10 |
+| Kit *meshes* on the greybox, per-zone camera-snow intensity (I-006), occluders beyond floor/roof slabs, reverb areas | Step 13 | Step 8 uses box geometry with the kit materials (dimensions off the 2 m grid); one OccluderInstance3D per zone floor/roof + visibility ranges on small props; ambience markers only |
+| S1 Director's Office / S2 Ice Grotto rooms | Step 13 / 14 | Entrances + content markers (L13, L14, crate, MB4) are placed; rooms come with the secrets |
+| Reactor Bridge extension on relays; Z12 reactor-view gallery framing | Step 11 / 13 | Bridge is an inverted NavDoor toggled by `bridge`; the view is an art task (VESPER_PEAK §9.1) |
 | Bots replicated to clients | Not planned | Host bots are soak-test tooling (D-041) |
 | ~~Remote-player downed / spectate animation~~ | — | Done in Step 7 (`SurvivorModel` downed_crawl / revive) |
 | Steam live test (lobby, overlay invites, P2P) | Human (AC-7.6) / Step 16 | GodotSteam GDExtension is not vendored and no Steam client exists in the container; `SteamTransport` is implemented against GodotSteam's API and unit-tested for its pure parts (D-045). Direct IP + UPnP + VPN is the always-available path |
@@ -341,6 +355,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Step 7 | **AC-7.6**: internet co-op session, 10+ rounds, host + ≥ 1 friend (steps in `docs/sessions/2026-11-12_step-7.md`, guide `docs/NETWORKING.md`); record the path used, join time, ping, issues | Open |
 | Step 7 | Optional Steam: install GodotSteam GDExtension for Godot 4.7 into `game/addons/godotsteam/` (docs/NETWORKING.md §3) and test lobby + overlay invite with a friend (App ID 480) | Open |
 | Step 7 | AC-7.5 visual review: survivors' third-person poses per weapon class (`docs/screenshots/step7/`, or watch a friend in co-op) and first-person sleeves | Open |
+| Step 8 | **AC-8.7** GPU FPS on Medium on the minimum spec with 32 zombies + 4 bots on the full greybox, and **AC-8.8** greybox flow playtest solo + co-op (steps in `docs/sessions/2026-11-12_step-8.md`) | Open |
 | Step 13 | Optional: LightmapGI bakes on a desktop GPU | Open |
 | Step 15 | Provide or approve music (jingles, EE song), VO approach (recorded vs. TTS), and fonts | Open |
 | Any | Monitor Git LFS storage/bandwidth quota | Recurring |
@@ -367,3 +382,4 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 | 2026-11-11 | 5 | Zombies: ZombieArchetype, ZombieActor (sim + visual), ZombieSim brain (rise / window tear + climb / drop / vent / pursue / surround / attack / stagger / crawler / stuck + far re-queue), CrowdDirector (path budget, LOD think, separation, slots, timing), ZombieSync replication (NetIds, quantized 20 Hz snapshots, late join), WorldSync (barricades, nav doors), AnimationTree visuals with head look, gibs, ragdoll pool, placeholder audio with voice priority, nav torture map, console commands, unit/integration/net/sim/visual tests | [2026-11-11_step-5.md](sessions/2026-11-11_step-5.md) |
 | 2026-11-12 | 6 | Survival loop → M1: RoundCurve, RoundDirector, SpawnDirector (zones, fairness), ZoneManager, PointsLedger, Interactable framework (doors, wall-buys, barricade rebuild), DownedSystem (last stand, revive, bleedout, spectate, respawn, game over), HUD v1, game-over screen, round stings, M14 + Coachgun, Vesper Peak Arrival Station slice, SurvivalBots, unit/sim/net tests | [2026-11-12_step-6.md](sessions/2026-11-12_step-6.md) |
 | 2026-11-12 | 7 | Online co-op → M2: Session autoload + LobbyState (unique characters, ready, chat, host settings, countdown), main menu v1 / map select / settings, scene-ready gate, MatchSession (late join WAITING + points, reconnect by uid incl. stale-connection replacement, match flags, state-hash convergence, bandwidth), UPnP + SteamTransport (GodotSteam, dynamic) + NETWORKING.md, CharacterDefinition ×4, survivor models + 18-clip survivor animation library (bpy), SurvivorModel AnimationTree, tinted first-person arms, name tags, pings, lobby / late_join / reconnect / coop4 net tests (D-045…D-050) | [2026-11-12_step-7.md](sessions/2026-11-12_step-7.md) |
+| 2026-11-12 | 8 | Vesper Peak full greybox → M3: 12 zone scenes (VesperZone builders, kit materials), 14 doors (17,000), 70 spawners (windows, risers, vents, drops, climbs, bursts, pit rifts), NavTiles (28 tiles), power switch + PoweredLight cascade, gondola / freight lift (zombies ride) / laundry chute / Reactor Bridge, 108 typed markers + manifest, nav_validate + flow sims, traversal net test, minimap + map console, tile-local zombie snap (D-051…D-056) | [2026-11-12_step-8.md](sessions/2026-11-12_step-8.md) |
