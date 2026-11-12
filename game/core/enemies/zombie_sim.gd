@@ -83,6 +83,8 @@ var separation: Vector3 = Vector3.ZERO
 var traversals: Dictionary = {}  # TraversalLink.Action -> count (statistics / tests)
 var speed_scale: float = 1.0  # StatusEffects: slows (Glacier Breaker)
 var frozen: bool = false  # StatusEffects: Coolant Purge freeze (no movement, no attacks)
+var behavior: ZombieBehavior = null  # archetype special brain (Galvanic / Warden), hooks below
+var electrocuted_left: float = 0.0  # Lazarus Conduit stun: ELECTROCUTED flag while > 0
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
@@ -100,6 +102,11 @@ func _init(p_actor: ZombieActor, p_director: CrowdDirector, seed_value: int) -> 
 	repath_interval = _rng.randf_range(0.5, 1.0)
 	think_timer = _rng.randf_range(0.0, 0.1)
 	stuck_ref = pos
+	if archetype.behavior_script != null:
+		behavior = archetype.behavior_script.new() as ZombieBehavior
+		behavior.sim = self
+		p_actor.behavior = behavior
+		behavior.setup()
 	if p_actor.spawn_kind == ZombieSpawner.Kind.RISER:
 		_enter(State.SPAWNING)
 		actor.start_action(ZombieActor.Action.RISE)
@@ -120,6 +127,8 @@ func current_speed_cap() -> float:
 
 func think(dt: float) -> void:
 	if state == State.DEAD or frozen:
+		return
+	if behavior != null and behavior.think(dt):
 		return
 	target_eval_timer -= dt
 	if target_eval_timer <= 0.0 and state in [State.PURSUE, State.IDLE, State.WAIT, State.SPAWNING]:
@@ -250,6 +259,13 @@ func move(dt: float) -> void:
 		return
 	state_time += dt
 	attack_cooldown -= dt
+	if electrocuted_left > 0.0:
+		electrocuted_left -= dt
+		if electrocuted_left <= 0.0:
+			actor.set_flag(ZombieActor.Flag.ELECTROCUTED, false)
+	if behavior != null and behavior.move(dt):
+		_write_actor()
+		return
 	match state:
 		State.SPAWNING:
 			if state_time >= RISE_TIME:
@@ -593,6 +609,10 @@ func _move_attack(dt: float) -> void:
 
 
 func on_damaged(info: DamageInfo, survives: bool) -> void:
+	if behavior != null:
+		behavior.on_damaged(info, survives)
+		if survives and not behavior.can_stagger():
+			return
 	if not survives:
 		_enter(State.DEAD)
 		_release_barricade()
@@ -616,11 +636,29 @@ func on_damaged(info: DamageInfo, survives: bool) -> void:
 func host_stun(seconds: float) -> void:
 	if state in [State.TRAVERSE, State.SPAWNING, State.DEAD] or frozen:
 		return
+	if behavior != null:
+		seconds = behavior.stun_time(seconds)
+		if seconds <= 0.0:
+			return
+		behavior.on_stunned()
 	stagger_time = maxf(seconds, stagger_time if state == State.STAGGER else 0.0)
 	actor.set_flag(ZombieActor.Flag.STUNNED, true)
 	_release_barricade()
 	_enter(State.STAGGER)
 	actor.start_action(ZombieActor.Action.STAGGER)
+
+
+# Lazarus Conduit electrocution (GAME_DESIGN §7.2): a stun of `seconds` with the ELECTROCUTED flag
+# (spasm + sparks on every peer). Returns whether the zombie was stunned.
+func host_electrocute(seconds: float) -> bool:
+	if state in [State.DEAD] or frozen:
+		return false
+	host_stun(seconds)
+	if state != State.STAGGER:
+		return false
+	electrocuted_left = maxf(electrocuted_left, stagger_time)
+	actor.set_flag(ZombieActor.Flag.ELECTROCUTED, true)
+	return true
 
 
 func _release_barricade() -> void:

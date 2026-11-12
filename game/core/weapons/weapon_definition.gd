@@ -99,6 +99,9 @@ enum Hitzone { HEAD, NECK, TORSO, LIMB }
 @export var projectile_bounce: float = 0.45  # restitution for &"grenade"
 @export var projectile_radius: float = 0.06
 @export var projectile_arm_distance: float = 0.0  # rockets fly this far before exploding on contact
+# &"plasma" (Ray Pistol, Step 12): explodes on a zombie; bounces off walls this many times first.
+@export var projectile_bounces: int = 0
+@export var projectile_color: Color = Color(1.0, 0.55, 0.2)  # glow of plasma bolts
 
 @export_group("Equipment (Step 9)")
 @export var attract_radius: float = 0.0  # Drummer Decoy: path distance zombies are pulled from
@@ -148,6 +151,27 @@ enum Hitzone { HEAD, NECK, TORSO, LIMB }
 @export var thermal_scope: bool = false  # ADS highlights zombies (Dread Novice)
 @export var tracer_color: Color = Color(0, 0, 0, 0)  # alpha 0 = the default tracer
 
+@export_group("Wonder weapons (Step 12, GAME_DESIGN §7)")
+# Kill presentation: &"disintegrate" (Ray Pistol green ash) | &"char" (Conduit) | &"" (gibs).
+@export var death_fx: StringName = &""
+@export var fx_variant: int = 0  # WonderFx.Variant of arcs / bursts (green, nova, electric, requiem)
+# Chain lightning (behavior &"chain"): first zombie within `max_range` inside `chain_cone_deg` of the
+# aim, then up to `chain_jumps` more, each within `chain_jump_range` of the previous one; jump j
+# deals damage x chain_falloff^max(0, j - chain_full_jumps). Every zombie struck is stunned.
+@export var chain_cone_deg: float = 4.0
+@export var chain_jumps: int = 0
+@export var chain_jump_range: float = 6.0
+@export var chain_falloff: float = 0.75
+@export var chain_full_jumps: int = 0  # Lazarus Requiem: no falloff for the first 4 jumps
+@export var chain_kill_arcs: int = 0  # a killed zombie arcs to this many more (Requiem)
+@export var chain_kill_arc_factor: float = 0.5  # ... at this share of the killing jump's damage
+@export var stun_time: float = 0.0  # electrocution stun (chain) / pulse stun
+# Pulse alt behavior: holding fire `pulse_hold_time` releases weapon `pulse_id` (behavior &"pulse",
+# `splash_radius` = stun radius, no damage) for `pulse_ammo` rounds of this weapon's magazine.
+@export var pulse_id: StringName = &""
+@export var pulse_hold_time: float = 1.0
+@export var pulse_ammo: int = 3
+
 @export_group("Audio (placeholder synthesis)")
 @export var sound_body_hz: float = 160.0  # body layer pitch: lower = heavier
 @export var sound_mech_hz: float = 2400.0
@@ -165,6 +189,10 @@ func is_melee() -> bool:
 
 
 # Not a primary-slot weapon (knife / Ice Axe, frags, decoys, tripmines).
+func is_wonder() -> bool:
+	return weapon_class == WeaponClass.WONDER
+
+
 func is_equipment() -> bool:
 	return weapon_class in [WeaponClass.MELEE, WeaponClass.LETHAL, WeaponClass.TACTICAL, WeaponClass.PLACEABLE]
 

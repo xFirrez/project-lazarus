@@ -11,6 +11,7 @@ signal shattered(actor: ZombieActor, source_peer: int)
 
 const BURN_TICK: float = 0.5
 const SHATTER_TOUCH: float = 1.0  # a player this close to a frozen zombie shatters it
+const BOSS_FREEZE_MAX: float = 3.0  # bosses (the Warden) thaw after at most this, never shatter
 
 var targets: TargetRegistry = null
 var players: PlayerSync = null
@@ -72,6 +73,10 @@ func host_freeze(a: ZombieActor, seconds: float, peer_id: int) -> void:
 	if not _ok(a):
 		return
 	var e: Effect = _of(a)
+	if _boss(a):
+		seconds = minf(seconds, BOSS_FREEZE_MAX)  # Warden: coolant chills the armor (brittle)
+		if a.behavior != null:
+			a.behavior.on_frozen(seconds)
 	if e.freeze_left <= 0.0:
 		e.freeze_left = seconds
 		e.freeze_peer = peer_id
@@ -93,8 +98,12 @@ func is_burning(a: ZombieActor) -> bool:
 
 # HOST: any damage to a frozen zombie shatters it (kills it, credited to whoever froze it).
 func host_on_damaged(a: ZombieActor, kind: int) -> void:
-	if a.alive and kind != DamageInfo.Kind.TRAP and is_frozen(a):
+	if a.alive and kind != DamageInfo.Kind.TRAP and is_frozen(a) and not _boss(a):
 		_shatter(a)
+
+
+static func _boss(a: ZombieActor) -> bool:
+	return a.archetype != null and a.archetype.is_boss
 
 
 func _ok(a: ZombieActor) -> bool:
@@ -123,7 +132,10 @@ func _physics_process(delta: float) -> void:
 			_tick_burn(actor, e, delta)
 		if e.freeze_left > 0.0:
 			e.freeze_left -= delta
-			if e.freeze_left <= 0.0 or _player_touching(actor):
+			if _boss(actor) and e.freeze_left <= 0.0:
+				e.freeze_left = 0.0
+				actor.set_flag(ZombieActor.Flag.FROZEN, false)  # thaws: bosses never shatter
+			elif not _boss(actor) and (e.freeze_left <= 0.0 or _player_touching(actor)):
 				_shatter(actor)
 				continue
 		_apply(actor, e)

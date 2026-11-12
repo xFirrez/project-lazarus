@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="ZombieArchetype" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://core/enemies/zombie_archetype.gd" id="1"]
+[ext_resource type="PackedScene" path="res://content/enemies/zombie/zombie_orderly_frostbitten.tscn" id="2"]
+[ext_resource type="Script" path="res://core/enemies/behaviors/warden_behavior.gd" id="3"]
+[ext_resource type="Script" path="res://core/enemies/behaviors/warden_visual.gd" id="4"]
+[ext_resource type="Resource" path="res://content/enemies/warden/warden_tuning.tres" id="5"]
+
+[resource]
+script = ExtResource("1")
+id = &"warden"
+is_boss = true
+trap_resistant = true
+display_name = "The Warden"
+variants = Array[PackedScene]([ExtResource("2")])
+behavior_script = ExtResource("3")
+boss_tuning = ExtResource("5")
+extra_visual = ExtResource("4")
+model_scale = 1.65
+tier_speeds = PackedFloat32Array(2.2, 2.2, 2.2, 2.2, 2.2)
+speed_jitter = 0.0
+turn_rate = 3.5
+capsule_radius = 0.55
+capsule_height = 3.0
+attack_damage = 60.0
+attack_range = 2.2
+lunge_range = 2.2
+attack_windup = 0.7
+attack_cooldown = 1.6
+stagger_fraction = 10.0
+crawler_explosive_fraction = 100.0
+head_gib_chance = 0.0
+limb_gib_chance = 0.0
+voice_pitch_range = Vector2(0.55, 0.65)
+groan_interval = Vector2(4.0, 8.0)

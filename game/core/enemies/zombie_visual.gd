@@ -12,6 +12,12 @@
 class_name ZombieVisual
 extends Node3D
 
+# Death presentation by killing weapon / archetype (Step 12): Ray Pistol disintegration (green glow,
+# shrinks to ash), Conduit char (blackened + sparks), Galvanic electric burst.
+enum DeathFx { NONE, DISINTEGRATE, CHAR, BURST }
+
+const DEATH_FX_NAMES: Array[StringName] = [&"", &"disintegrate", &"char", &"burst"]
+const DISINTEGRATE_TIME: float = 0.9
 const WALK_NATIVE: float = 1.3  # m/s at playback rate 1
 const RUN_NATIVE: float = 3.8
 const CRAWL_NATIVE: float = 0.8
@@ -73,6 +79,8 @@ var react_count: int = 0
 var last_react: StringName = &""
 var death_style: String = ""  # "ragdoll" | "animation"
 var gib_mask: int = 0
+var death_fx: int = DeathFx.NONE
+var extra: Node3D = null  # archetype extra visual (Warden armor, Galvanic electrodes)
 
 var _bt: AnimationNodeBlendTree = null
 var _gait: float = 0.0
@@ -98,7 +106,14 @@ func _ready() -> void:
 	var scene: PackedScene = arch.variants[clampi(actor.variant, 0, arch.variants.size() - 1)]
 	model = scene.instantiate() as ZombieModel
 	model.autoplay = &""
+	if not is_equal_approx(arch.model_scale, 1.0):
+		model.scale = Vector3.ONE * arch.model_scale
 	add_child(model)
+	if arch.extra_visual != null:
+		extra = arch.extra_visual.new() as Node3D
+		extra.name = "Extra"
+		extra.set_meta(&"visual", self)
+		add_child(extra)
 	_pitch = randf_range(arch.voice_pitch_range.x, arch.voice_pitch_range.y)
 	_voice_timer = randf_range(0.5, arch.groan_interval.y)
 	if model.skeleton == null:
@@ -229,23 +244,64 @@ func _update_status() -> void:
 		st = 1
 	elif actor.flags & ZombieActor.Flag.BURNING != 0:
 		st = 2
+	elif actor.flags & ZombieActor.Flag.ELECTROCUTED != 0:
+		st = 4
 	elif thermal_on:
 		st = 3
+	elif actor.archetype.glow_color.a > 0.0:
+		st = 5
 	if st == _overlay_state:
 		return
 	_overlay_state = st
 	if _geoms.is_empty():
 		for n: Node in model.find_children("*", "GeometryInstance3D", true, false):
 			_geoms.append(n as GeometryInstance3D)
-	var mat: Material = overlay_material(st)
+	var mat: Material = overlay_material(st) if st != 5 else glow_material(actor.archetype)
 	for g: GeometryInstance3D in _geoms:
 		if is_instance_valid(g):
 			g.material_overlay = mat
 
 
+static func death_fx_id(fx_name: StringName) -> int:
+	return maxi(DEATH_FX_NAMES.find(fx_name), 0)
+
+
+# Archetype glow (Galvanic electrodes): emissive additive overlay, shared per archetype.
+static func glow_material(arch: ZombieArchetype) -> Material:
+	var key: String = "glow_%s" % arch.id
+	if not _overlays.has(key):
+		var m: StandardMaterial3D = StandardMaterial3D.new()
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		m.albedo_color = arch.glow_color
+		m.emission_enabled = true
+		m.emission = Color(arch.glow_color.r, arch.glow_color.g, arch.glow_color.b) * 1.2
+		_overlays[key] = m
+	return _overlays[key]
+
+
 static func overlay_material(st: int) -> Material:
 	if st == 0:
 		return null
+	if st == 4:
+		if not _overlays.has(4):
+			var e: StandardMaterial3D = StandardMaterial3D.new()
+			e.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			e.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+			e.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			e.albedo_color = Color(0.55, 0.85, 1.0, 0.7)
+			_overlays[4] = e
+		return _overlays[4]
+	if st == 6 or st == 7:
+		if not _overlays.has(st):
+			var d: StandardMaterial3D = StandardMaterial3D.new()
+			d.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			d.albedo_color = Color(0.35, 1.0, 0.45, 0.8) if st == 6 else Color(0.03, 0.03, 0.03, 0.85)
+			d.emission_enabled = st == 6
+			d.emission = Color(0.35, 1.0, 0.45) * 2.0
+			d.blend_mode = BaseMaterial3D.BLEND_MODE_ADD if st == 6 else BaseMaterial3D.BLEND_MODE_MIX
+			_overlays[st] = d
+		return _overlays[st]
 	if not _overlays.has(st):
 		var m: StandardMaterial3D = StandardMaterial3D.new()
 		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -428,14 +484,56 @@ func die(p_gib_mask: int, dir: Vector3, _zone: int, _kind: int) -> void:
 	model.position.y = 0.0
 	_apply_gibs(p_gib_mask, dir)
 	_voice(&"zombie_death", 1.1, true)
+	_present_death_fx()
 	var fx: ZombieFx = _fx()
-	if fx != null and fx.acquire_ragdoll(self):
+	if fx != null and death_fx != DeathFx.DISINTEGRATE and fx.acquire_ragdoll(self):
 		_start_ragdoll(dir)
 	else:
 		death_style = "animation"
 		tree.set(&"parameters/action/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_ABORT)
 		tree.set(&"parameters/mode/transition_request", "dead")
 	_corpse_timer = CORPSE_TIME
+
+
+func _present_death_fx() -> void:
+	if death_fx == DeathFx.NONE:
+		return
+	var at: PackedVector3Array = PackedVector3Array([actor.global_position + Vector3.UP * 1.0])
+	var wfx: WonderFx = WonderFx.of(self)
+	match death_fx:
+		DeathFx.DISINTEGRATE:
+			_set_overlay(overlay_material(6))
+			var tw: Tween = create_tween()
+			tw.tween_property(model, ^"scale", model.scale * Vector3(0.05, 0.02, 0.05), DISINTEGRATE_TIME)
+			if wfx != null:
+				wfx.present(WonderFx.Kind.BURST, at, 1.2, WonderFx.Variant.GREEN)
+			Audio.play_event_3d(&"ray_disintegrate", actor.global_position)
+		DeathFx.CHAR:
+			_set_overlay(overlay_material(7))
+			if wfx != null:
+				wfx.present(WonderFx.Kind.SPARKS, at, 1.0, WonderFx.Variant.ELECTRIC)
+		DeathFx.BURST:
+			if wfx != null:
+				wfx.present(WonderFx.Kind.BURST, at, 3.0, WonderFx.Variant.ELECTRIC)
+			Audio.play_event_3d(&"galvanic_burst", actor.global_position)
+
+
+# Overlays on imported GLB meshes must be cleared before the meshes are freed (headless shutdown
+# errors otherwise; same rule as WeaponCamo).
+func _exit_tree() -> void:
+	for g: GeometryInstance3D in _geoms:
+		if is_instance_valid(g):
+			g.material_overlay = null
+
+
+func _set_overlay(mat: Material) -> void:
+	_overlay_state = 99  # keep the death overlay (status updates stop with death)
+	if _geoms.is_empty():
+		for n: Node in model.find_children("*", "GeometryInstance3D", true, false):
+			_geoms.append(n as GeometryInstance3D)
+	for g: GeometryInstance3D in _geoms:
+		if is_instance_valid(g):
+			g.material_overlay = mat
 
 
 func _apply_gibs(mask: int, dir: Vector3) -> void:

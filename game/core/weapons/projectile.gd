@@ -7,6 +7,8 @@
 #             (direct `damage`) or when `fuse_time` runs out.
 #   bolt    — sticks to the first zombie (direct `damage` at impact, follows the hurtbox) or wall,
 #             explodes `fuse_time` later.
+#   plasma  — Ray Pistol bolt (Step 12): glowing, no gravity; explodes on a zombie, bounces off the
+#             world `projectile_bounces` times (Nova Mk.II: once) and explodes at the next contact.
 # Only the HOST's copy is authoritative: it emits `struck` (direct hit) and `detonated` (splash) and
 # WeaponSync applies the damage and broadcasts `_wpexplode`. Cosmetic copies stop at their own
 # detonation point and wait (COSMETIC_GRACE) for the host's explosion message.
@@ -21,6 +23,9 @@ signal stuck_to(projectile: Projectile)  # a bolt stuck (Lure of the Lantern att
 const LIFETIME: float = 8.0
 const COSMETIC_GRACE: float = 1.5
 const REST_SPEED: float = 1.2
+const PLASMA_LIGHT_CAP: int = 6  # plasma bolts with their own light at once (AC-12.6 light cap)
+
+static var plasma_lights: int = 0
 
 var key: String = ""
 var peer_id: int = 0
@@ -39,6 +44,7 @@ var _done: bool = false
 var _resting: bool = false
 var _stuck_node: Node3D = null
 var _stuck_local: Transform3D = Transform3D.IDENTITY
+var _light: OmniLight3D = null
 
 
 static func create(p_def: WeaponDefinition, p_key: String, p_peer: int, vel: Vector3, auth: bool) -> Projectile:
@@ -64,6 +70,8 @@ func _ready() -> void:
 			mat.albedo_color = Color(0.75, 0.2, 0.12)
 			mat.emission_enabled = true
 			mat.emission = Color(0.9, 0.25, 0.1)
+		&"plasma":
+			_build_plasma(mi, mat)
 		&"grenade":
 			var sm: SphereMesh = SphereMesh.new()
 			sm.radius = def.projectile_radius
@@ -83,6 +91,41 @@ func _ready() -> void:
 	mi.material_override = mat
 	add_child(mi)
 	_face_velocity()
+
+
+func _build_plasma(mi: MeshInstance3D, mat: StandardMaterial3D) -> void:
+	var sm: SphereMesh = SphereMesh.new()
+	sm.radius = maxf(def.projectile_radius, 0.06)
+	sm.height = sm.radius * 2.0
+	mi.mesh = sm
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = def.projectile_color
+	mat.emission_enabled = true
+	mat.emission = def.projectile_color
+	var trail: MeshInstance3D = MeshInstance3D.new()
+	var cm: CylinderMesh = CylinderMesh.new()
+	cm.top_radius = sm.radius * 0.7
+	cm.bottom_radius = 0.0
+	cm.height = 0.7
+	trail.mesh = cm
+	trail.rotation.x = -PI * 0.5
+	trail.position = Vector3(0, 0, 0.38)  # behind: the node looks along -Z
+	var tm: StandardMaterial3D = WeaponFx._unshaded(Color(def.projectile_color, 0.45), true)
+	trail.material_override = tm
+	add_child(trail)
+	if plasma_lights < PLASMA_LIGHT_CAP:
+		plasma_lights += 1
+		_light = OmniLight3D.new()
+		_light.light_color = def.projectile_color
+		_light.light_energy = 2.5
+		_light.omni_range = 4.0
+		add_child(_light)
+
+
+func _exit_tree() -> void:
+	if _light != null:
+		plasma_lights = maxi(plasma_lights - 1, 0)
+		_light = null
 
 
 func is_done() -> bool:
@@ -165,6 +208,15 @@ func _on_world_hit(collider: Node3D, pos: Vector3, normal: Vector3) -> void:
 		&"bolt":
 			global_position = pos - velocity.normalized() * 0.15
 			_stick(collider, null)
+		&"plasma":
+			if bounces < def.projectile_bounces:
+				bounces += 1
+				velocity = velocity.bounce(normal)
+				global_position = pos + normal * (def.projectile_radius + 0.02)
+				Audio.play_event_3d(&"ray_bounce", pos)
+				return
+			global_position = pos + normal * 0.05
+			_detonate()
 		_:
 			global_position = pos + normal * 0.05
 			_detonate()

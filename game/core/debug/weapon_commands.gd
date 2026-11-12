@@ -6,6 +6,14 @@
 class_name WeaponCommands
 extends RefCounted
 
+# Short names for the debug console (DEVELOPMENT_PLAN Step 12 scope 6: `give raygun`, `give conduit`).
+const ALIASES: Dictionary = {
+	"raygun": "ray_pistol",
+	"nova": "ray_pistol_up",
+	"conduit": "lazarus_conduit",
+	"requiem": "lazarus_conduit_up",
+}
+
 
 static func register(reg: CommandRegistry) -> void:
 	reg.register("give", _cmd_give, [["weapon", TYPE_STRING]], "Give the local player a weapon (host decides)")
@@ -40,7 +48,7 @@ static func _cmd_give(args: Array) -> String:
 	var ws: WeaponSync = _sync()
 	if ws == null:
 		return "No match"
-	var id: StringName = StringName(args[0])
+	var id: StringName = StringName(ALIASES.get(String(args[0]), args[0]))
 	var def: WeaponDefinition = WeaponCatalog.get_def(id)
 	if def == null:
 		return "Unknown weapon '%s' (see `weapons`)" % id

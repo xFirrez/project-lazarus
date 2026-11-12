@@ -6,6 +6,8 @@
 #   alignment screenshot test can find it).
 # Styles: pistol | smg | shotgun | rifle | lmg | launcher | crossbow | rifle_scoped. Step 9 adds
 # rifle / lmg / launcher / crossbow (the "greybox+" fallback of DEVELOPMENT_PLAN Step 9 risks).
+# Step 12 adds the original wonder-weapon designs: ray_pistol (retro finned emitter with a glowing
+# cell) and conduit (crank-capacitor rifle with three glass vesperite coils).
 # The weapon's local -Z is forward; Sight sits at (0, def.sight_height, z_front).
 # Authority: local presentation.
 class_name GreyboxGun
@@ -110,6 +112,39 @@ static func build(def: WeaponDefinition, layer: int = VIEWMODEL_LAYER) -> Node3D
 			var bolt: Node3D = _node(root, "Action", Vector3(0.035, 0.02, 0.06))
 			_box(bolt, "BoltHandle", Vector3(0.05, 0.012, 0.012), Vector3(0.02, 0, 0), dark)
 			_scope(root, h, dark, sight_mat)
+		&"ray_pistol":
+			front = -0.2
+			var glow: StandardMaterial3D = _glow(def.projectile_color)
+			_box(root, "Frame", Vector3(0.04, 0.045, 0.16), Vector3(0, 0, -0.04), body)
+			_box(root, "Grip", Vector3(0.034, 0.11, 0.05), Vector3(0, -0.07, 0.02), dark, deg_to_rad(14))
+			_cyl(root, "Emitter", 0.026, 0.14, Vector3(0, 0.005, -0.19), dark)
+			for i: int in 3:  # cooling fins along the emitter
+				_cyl(root, "Fin%d" % i, 0.045, 0.012, Vector3(0, 0.005, -0.15 - 0.04 * i), body)
+			var cell: Node3D = _node(root, "Mag", Vector3(0, 0.045, 0.02))
+			_cyl(cell, "Cell", 0.018, 0.08, Vector3.ZERO, glow)
+			var act: Node3D = _node(root, "Action", Vector3(0, 0.03, 0.05))
+			_box(act, "Hammer", Vector3(0.012, 0.03, 0.02), Vector3.ZERO, dark)
+			_post(root, "FrontPost", Vector2(0.004, 0.004), 0.05, h - 0.002, front, dark)
+		&"conduit":
+			front = -0.5
+			var coil_mat: StandardMaterial3D = _glow(
+				def.tracer_color if def.tracer_color.a > 0.0 else Color(0.55, 0.85, 1.0)
+			)
+			coil_mat.albedo_color.a = 0.55
+			coil_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			_box(root, "Receiver", Vector3(0.06, 0.07, 0.3), Vector3(0, 0, -0.06), body)
+			_box(root, "Stock", Vector3(0.045, 0.08, 0.26), Vector3(0, -0.03, 0.2), wood)
+			_box(root, "Grip", Vector3(0.035, 0.1, 0.045), Vector3(0, -0.08, 0.04), dark, deg_to_rad(15))
+			_cyl(root, "Barrel", 0.014, 0.36, Vector3(0, 0.01, -0.36), dark)
+			for i: int in 3:  # glass coils around the barrel
+				_cyl(root, "Coil%d" % i, 0.034, 0.07, Vector3(0, 0.01, -0.26 - 0.09 * i), coil_mat)
+			var cap: Node3D = _node(root, "Mag", Vector3(0, -0.05, -0.08))
+			_cyl(cap, "Capacitor", 0.028, 0.12, Vector3(0, -0.03, 0), coil_mat)
+			var crank: Node3D = _node(root, "Action", Vector3(0.05, 0.0, 0.0))
+			_box(crank, "Crank", Vector3(0.012, 0.07, 0.012), Vector3(0, -0.03, 0), dark)
+			_box(crank, "Knob", Vector3(0.03, 0.015, 0.015), Vector3(0.015, -0.065, 0), wood)
+			_post(root, "RearSight", Vector2(0.03, 0.01), 0.036, h - 0.006, 0.04, dark)
+			_post(root, "FrontPost", Vector2(0.004, 0.004), 0.03, h - 0.002, front, dark)
 		_:  # pistol
 			front = -0.14
 			_box(root, "Frame", Vector3(0.035, 0.035, 0.18), Vector3(0, 0, -0.06), body)
@@ -153,6 +188,10 @@ static func _muzzle_z(def: WeaponDefinition) -> float:
 			return -0.55
 		&"crossbow":
 			return -0.42
+		&"ray_pistol":
+			return -0.27
+		&"conduit":
+			return -0.55
 	return -0.16
 
 
@@ -236,6 +275,14 @@ static func _cyl(parent: Node3D, n: String, radius: float, length: float, pos: V
 	mi.position = pos
 	mi.rotation.x = PI * 0.5
 	parent.add_child(mi)
+
+
+static func _glow(c: Color) -> StandardMaterial3D:
+	var m: StandardMaterial3D = _mat(c)
+	m.emission_enabled = true
+	m.emission = Color(c.r, c.g, c.b)
+	m.emission_energy_multiplier = 2.0
+	return m
 
 
 static func _mat(c: Color) -> StandardMaterial3D:

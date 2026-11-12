@@ -25,6 +25,25 @@ extends Resource
 @export var intro_delay: float = 5.0  # intro sting before round 1 (GAME_DESIGN §2)
 @export var intermission: float = 10.0
 @export var last_zombies_promoted: int = 2  # the last N zombies are promoted to Run if slower
+@export_group("Special rounds (GAME_DESIGN §5.3)")
+@export var special_first_min: int = 5  # first special round: random in [min, max]
+@export var special_first_max: int = 7
+@export var special_gap_min: int = 4  # then every gap_min..gap_max rounds
+@export var special_gap_max: int = 6
+@export var special_count_first: int = 6  # x players on the first special round
+@export var special_count_step: int = 2  # + step x players each later special round
+@export var special_count_cap: int = 24  # x players
+@export var special_alive_cap: int = 12
+@export var special_health_first: float = 400.0
+@export var special_health_growth: float = 1.35  # per special round
+@export var special_health_cap_fraction: float = 0.6  # soft cap: base zombie hp(r) x this (>= first)
+@export var special_intermission: float = 12.0  # the intermission before a special round
+@export var special_warning: float = 8.0  # build-up (storm, green lights, pulse, music) before it
+@export var special_spawn_interval: float = 1.2
+@export var rift_telegraph: float = 1.5  # an energy rift crackles this long before the Galvanic arrives
+@export var mixed_from_round: int = 20  # 1-2 Galvanics mixed into normal rounds from here
+@export var mixed_min: int = 1
+@export var mixed_max: int = 2
 @export_group("Tier mix")
 # Keyframes: `tier_mix_rounds[i]` -> 5 weights (Shamble, Walk, Jog, Run, Sprint) at
 # tier_mix[5i .. 5i+4]; linear between keyframes, clamped outside (GAME_DESIGN §5.1 table).
@@ -147,3 +166,31 @@ func pick_tier(r: int, roll: float) -> int:
 		if roll < acc:
 			return k
 	return 4
+
+
+# --- special rounds ---------------------------------------------------------------------------
+
+
+# Special rounds up to `last_round` (first 5-7, then every 4-6; seeded so a match is reproducible).
+func special_schedule(seed_value: int, last_round: int = 200) -> PackedInt32Array:
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var out: PackedInt32Array = PackedInt32Array()
+	var r: int = rng.randi_range(special_first_min, special_first_max)
+	while r <= last_round:
+		out.append(r)
+		r += rng.randi_range(special_gap_min, special_gap_max)
+	return out
+
+
+# Galvanics on the k-th special round (k = 0 first), p players.
+func special_count(k: int, players: int) -> int:
+	var p: int = clampi(players, 1, 4)
+	return mini((special_count_first + special_count_step * maxi(k, 0)) * p, special_count_cap * p)
+
+
+# Galvanic health on the k-th special round at round r (base_hp = the base zombie's hp(r)).
+func special_health(k: int, base_hp: float) -> float:
+	var hp: float = special_health_first * pow(special_health_growth, maxi(k, 0))
+	var cap: float = maxf(special_health_first, base_hp * special_health_cap_fraction)
+	return roundf(minf(hp, cap))

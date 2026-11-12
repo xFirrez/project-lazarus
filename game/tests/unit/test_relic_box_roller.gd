@@ -27,7 +27,8 @@ func test_weights_over_100k_rolls() -> void:
 	var ids: Array[StringName] = elig[0]
 	var w: PackedFloat32Array = elig[1]
 	assert_false(ids.has(&"m14"), "owned weapons are ineligible")
-	assert_false(ids.has(&"ray_pistol"), "undefined wonder weapons are ineligible")
+	assert_true(ids.has(&"ray_pistol"), "the Ray Pistol is in the pool (Step 12)")
+	assert_eq(w[ids.find(&"ray_pistol")], 1.5, "Ray Pistol box weight: rare (GAME_DESIGN §10.3)")
 	assert_false(ids.has(&"lazarus_conduit"), "the Conduit needs its first build")
 	var total: float = 0.0
 	for x: float in w:
@@ -53,8 +54,8 @@ func test_weights_over_100k_rolls() -> void:
 
 func test_condition_unlocks_conduit_entry() -> void:
 	var elig: Array = _elig([], {"conduit_built": true})
-	# The Conduit definition arrives in Step 12; until then it stays ineligible even with its flag.
-	assert_eq((elig[0] as Array).has(&"lazarus_conduit"), WeaponCatalog.get_def(&"lazarus_conduit") != null)
+	assert_true((elig[0] as Array).has(&"lazarus_conduit"), "the Conduit joins after its first build")
+	assert_false(_elig([&"ray_pistol"])[0].has(&"ray_pistol"), "one Ray Pistol per player")
 
 
 func test_doll_chance_ramp() -> void:

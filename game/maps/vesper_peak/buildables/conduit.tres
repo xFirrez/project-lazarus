@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="BuildableDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/world/buildables/buildable_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"conduit"
+display_name = "Lazarus Conduit"
+parts = Array[StringName]([&"coil", &"lens", &"stock"])
+part_names = {
+&"coil": "Coil",
+&"lens": "Lens",
+&"stock": "Stock"
+}
+part_markers = {
+&"coil": [&"Part_Coil_A", &"Part_Coil_B"],
+&"lens": [&"Part_Lens_A", &"Part_Lens_B"],
+&"stock": [&"Part_Stock_A", &"Part_Stock_B"]
+}
+workbench_marker = &"WB_LabWorkbench"
+requires_power = true
+build_time = 3.0
+reward_weapon = &"lazarus_conduit"
+unlock_flag = "conduit_built"

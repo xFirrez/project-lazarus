@@ -2,8 +2,9 @@
 # MatchSession (late join / reconnect / scene-ready gate / state hash), PlayerSync, TargetRegistry,
 # WeaponSync, WeaponFx, WorldSync, ZombieSync + CrowdDirector, ZoneManager, PointsLedger,
 # InteractionSystem, RelicBoxSystem, PerkSystem, DownedSystem, RoundDirector, SpawnDirector,
-# PowerUpSystem, StatusEffects, RelaySystem, ForgeSystem, TrapSystem, HazardSystem (Step 11), the
-# map's MapRules, PingSystem and the match HUD. Reachable via Match.current.
+# PowerUpSystem, StatusEffects, RelaySystem, ForgeSystem, TrapSystem, HazardSystem (Step 11),
+# WonderFx, BuildableSystem and SpecialRoundDirector (Step 12), the map's MapRules, PingSystem and
+# the match HUD. Reachable via Match.current.
 # Authority: exists on every peer; host-only systems check Net.is_host().
 class_name Match
 extends Node
@@ -36,6 +37,9 @@ var relays: RelaySystem = null
 var forge: ForgeSystem = null
 var traps: TrapSystem = null
 var hazards: HazardSystem = null
+var wonder_fx: WonderFx = null
+var buildables: BuildableSystem = null
+var specials: SpecialRoundDirector = null
 var session_joined_at: float = -1.0  # client: Net.now() at the session welcome (join timing)
 
 
@@ -63,6 +67,8 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	rules.match_node = self
 	fx = WeaponFx.new()
 	add_child(fx)
+	wonder_fx = WonderFx.new()
+	add_child(wonder_fx)
 	# Hazard drums / icicles are HitTargets (tree-order ids): build them before the target scan.
 	hazards = HazardSystem.new()
 	hazards.match_node = self
@@ -126,6 +132,10 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	traps = TrapSystem.new()
 	traps.match_node = self
 	traps.setup(map_root)
+	# Step 12: buildable parts and the workbench are interactables too.
+	buildables = BuildableSystem.new()
+	buildables.match_node = self
+	buildables.setup(def.buildables, map_root)
 	interaction = InteractionSystem.new()
 	interaction.players = players
 	interaction.ledger = points
@@ -150,6 +160,7 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	add_child(forge)
 	add_child(traps)
 	add_child(hazards)
+	add_child(buildables)
 	if def.survival:
 		spawns = SpawnDirector.new()
 		spawns.rounds = rounds
@@ -161,6 +172,9 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	powerups = PowerUpSystem.new()
 	powerups.match_node = self
 	add_child(powerups)
+	specials = SpecialRoundDirector.new()
+	specials.match_node = self
+	add_child(specials)
 	pings = PingSystem.new()
 	pings.match_node = self
 	add_child(pings)

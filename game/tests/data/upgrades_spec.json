@@ -1,39 +1,354 @@
 {
- "doc": "GAME_DESIGN.md §9.3 Forge upgrade table as data (Step 11, AC-11.2 / AC-11.3). Every upgraded weapon = base with damage x2 (splash x2), the mag / reserve below, a unique name, the vesperite camo and the listed behavior change. 'set' = fields copied verbatim onto the upgraded definition; 'checks' = the behavior checklist test_forge_upgrades.gd asserts per weapon. tools/gen_upgrades.py generates content/weapons/<base>/<base>_up.tres from this table.",
+ "doc": "GAME_DESIGN.md \u00a79.3 Forge upgrade table as data (Step 11, AC-11.2 / AC-11.3). Every upgraded weapon = base with damage x2 (splash x2), the mag / reserve below, a unique name, the vesperite camo and the listed behavior change. 'set' = fields copied verbatim onto the upgraded definition; 'checks' = the behavior checklist test_forge_upgrades.gd asserts per weapon. tools/gen_upgrades.py generates content/weapons/<base>/<base>_up.tres from this table.",
  "upgrades": {
-  "m1911":      {"name": "\"Gemini\" Twin Grenadiers", "mag": 12, "reserve": 72, "checks": ["dual_wield", "explosive_rounds"],
-                 "set": {"dual_wield": true, "behavior": "&projectile", "projectile_kind": "&rocket", "projectile_speed": 55.0, "projectile_gravity": 3.0, "projectile_radius": 0.04, "projectile_arm_distance": 1.0, "splash_radius": 2.0, "splash_damage_centre": 300.0, "splash_damage_edge": 60.0, "self_damage_max": 30.0}},
-  "revolver":   {"name": "\"Black Widow\"", "mag": 12, "reserve": 96, "checks": ["penetration>=4", "headshot_kill_burst"],
-                 "set": {"penetration": 4, "impact_splash": "&headshot_kill", "impact_splash_radius": 2.5, "impact_splash_damage": 600.0}},
-  "mauser":     {"name": "\"Kaiser's Fury\"", "mag": 30, "reserve": 160, "checks": ["full_auto"], "set": {"fire_mode": 1}},
-  "mp40":       {"name": "\"The Afterburner\"", "mag": 64, "reserve": 384, "checks": ["tracer_color"], "set": {"tracer_every": 1, "tracer_color": "Color(1, 0.45, 0.1, 1)"}},
-  "grease_gun": {"name": "\"Grease Fire\"", "mag": 60, "reserve": 360, "checks": ["burn"], "set": {"burn_dps": 45.0, "burn_time": 3.0, "tracer_color": "Color(1, 0.55, 0.15, 1)"}},
-  "skorpion":   {"name": "\"Black Scorpions\"", "mag": 40, "reserve": 400, "checks": ["dual_wield"], "set": {"dual_wield": true}},
-  "ppsh":       {"name": "\"Reaper's Choir\"", "mag": 115, "reserve": 568, "checks": ["rpm_x1.15"], "set": {"rpm": 1092.5}},
-  "m14":        {"name": "\"Mnemonic\"", "mag": 20, "reserve": 184, "checks": ["burst3"], "set": {"fire_mode": 2, "burst_count": 3, "rpm": 600.0}},
-  "m16":        {"name": "\"Skullcrusher\"", "mag": 45, "reserve": 240, "checks": ["alt_fire"], "set": {"alt_fire_id": "&m16_up_gl"}},
-  "ak47":       {"name": "\"Iron Curtain\"", "mag": 60, "reserve": 480, "checks": ["penetration+2"], "set": {"penetration": 4}},
-  "fal":        {"name": "\"Willful Destroyer\"", "mag": 40, "reserve": 320, "checks": ["full_auto"], "set": {"fire_mode": 1}},
-  "g3":         {"name": "\"Glacier Breaker\"", "mag": 40, "reserve": 360, "checks": ["slow"], "set": {"slow_factor": 0.2, "slow_time": 1.0}},
-  "coachgun":   {"name": "\"Two Graves\"", "mag": 2, "reserve": 120, "checks": ["explosive_rounds"],
-                 "set": {"impact_splash": "&hit", "impact_splash_radius": 1.8, "impact_splash_damage": 400.0}},
-  "model37":    {"name": "\"Pump Action Requiem\"", "mag": 10, "reserve": 108, "checks": ["pellets_x1.5", "faster_pump"], "set": {"pellets": 12, "rpm": 105.0}},
-  "auto12":     {"name": "\"Storm of Thunder\"", "mag": 16, "reserve": 128, "checks": ["tracer_color"], "set": {"tracer_every": 1, "tracer_color": "Color(1, 0.4, 0.05, 1)", "muzzle_flash_scale": 2.4}},
-  "rpd":        {"name": "\"Red Purge Doctrine\"", "mag": 150, "reserve": 800, "checks": [], "set": {}},
-  "m60":        {"name": "\"Sixty Sins\"", "mag": 200, "reserve": 600, "checks": ["penetration+2"], "set": {"penetration": 6}},
-  "mg42":       {"name": "\"Banshee\"", "mag": 200, "reserve": 750, "checks": ["reduced_recoil"], "set": {"recoil_scale": 0.5}},
-  "kar98k":     {"name": "\"Avalanche\"", "mag": 8, "reserve": 100, "checks": ["explosive_headshots"],
-                 "set": {"impact_splash": "&headshot", "impact_splash_radius": 3.0, "impact_splash_damage": 1200.0}},
-  "dragunov":   {"name": "\"Dread Novice\"", "mag": 20, "reserve": 120, "checks": ["thermal_scope"], "set": {"thermal_scope": true}},
-  "law":        {"name": "\"L.A.W. of Averages\"", "mag": 3, "reserve": 40, "checks": ["cluster"], "set": {"cluster_count": 4, "cluster_radius": 2.0}},
-  "china_lake": {"name": "\"China Doll\"", "mag": 6, "reserve": 40, "checks": ["impact_detonation"], "set": {"projectile_kind": "&rocket", "projectile_arm_distance": 1.0}},
-  "crossbow":   {"name": "\"Lure of the Lantern\"", "mag": 2, "reserve": 30, "checks": ["attracts"], "set": {"attract_radius": 18.0, "attract_time": 4.0, "fuse_time": 4.0}}
+  "m1911": {
+   "name": "\"Gemini\" Twin Grenadiers",
+   "mag": 12,
+   "reserve": 72,
+   "checks": [
+    "dual_wield",
+    "explosive_rounds"
+   ],
+   "set": {
+    "dual_wield": true,
+    "behavior": "&projectile",
+    "projectile_kind": "&rocket",
+    "projectile_speed": 55.0,
+    "projectile_gravity": 3.0,
+    "projectile_radius": 0.04,
+    "projectile_arm_distance": 1.0,
+    "splash_radius": 2.0,
+    "splash_damage_centre": 300.0,
+    "splash_damage_edge": 60.0,
+    "self_damage_max": 30.0
+   }
+  },
+  "revolver": {
+   "name": "\"Black Widow\"",
+   "mag": 12,
+   "reserve": 96,
+   "checks": [
+    "penetration>=4",
+    "headshot_kill_burst"
+   ],
+   "set": {
+    "penetration": 4,
+    "impact_splash": "&headshot_kill",
+    "impact_splash_radius": 2.5,
+    "impact_splash_damage": 600.0
+   }
+  },
+  "mauser": {
+   "name": "\"Kaiser's Fury\"",
+   "mag": 30,
+   "reserve": 160,
+   "checks": [
+    "full_auto"
+   ],
+   "set": {
+    "fire_mode": 1
+   }
+  },
+  "mp40": {
+   "name": "\"The Afterburner\"",
+   "mag": 64,
+   "reserve": 384,
+   "checks": [
+    "tracer_color"
+   ],
+   "set": {
+    "tracer_every": 1,
+    "tracer_color": "Color(1, 0.45, 0.1, 1)"
+   }
+  },
+  "grease_gun": {
+   "name": "\"Grease Fire\"",
+   "mag": 60,
+   "reserve": 360,
+   "checks": [
+    "burn"
+   ],
+   "set": {
+    "burn_dps": 45.0,
+    "burn_time": 3.0,
+    "tracer_color": "Color(1, 0.55, 0.15, 1)"
+   }
+  },
+  "skorpion": {
+   "name": "\"Black Scorpions\"",
+   "mag": 40,
+   "reserve": 400,
+   "checks": [
+    "dual_wield"
+   ],
+   "set": {
+    "dual_wield": true
+   }
+  },
+  "ppsh": {
+   "name": "\"Reaper's Choir\"",
+   "mag": 115,
+   "reserve": 568,
+   "checks": [
+    "rpm_x1.15"
+   ],
+   "set": {
+    "rpm": 1092.5
+   }
+  },
+  "m14": {
+   "name": "\"Mnemonic\"",
+   "mag": 20,
+   "reserve": 184,
+   "checks": [
+    "burst3"
+   ],
+   "set": {
+    "fire_mode": 2,
+    "burst_count": 3,
+    "rpm": 600.0
+   }
+  },
+  "m16": {
+   "name": "\"Skullcrusher\"",
+   "mag": 45,
+   "reserve": 240,
+   "checks": [
+    "alt_fire"
+   ],
+   "set": {
+    "alt_fire_id": "&m16_up_gl"
+   }
+  },
+  "ak47": {
+   "name": "\"Iron Curtain\"",
+   "mag": 60,
+   "reserve": 480,
+   "checks": [
+    "penetration+2"
+   ],
+   "set": {
+    "penetration": 4
+   }
+  },
+  "fal": {
+   "name": "\"Willful Destroyer\"",
+   "mag": 40,
+   "reserve": 320,
+   "checks": [
+    "full_auto"
+   ],
+   "set": {
+    "fire_mode": 1
+   }
+  },
+  "g3": {
+   "name": "\"Glacier Breaker\"",
+   "mag": 40,
+   "reserve": 360,
+   "checks": [
+    "slow"
+   ],
+   "set": {
+    "slow_factor": 0.2,
+    "slow_time": 1.0
+   }
+  },
+  "coachgun": {
+   "name": "\"Two Graves\"",
+   "mag": 2,
+   "reserve": 120,
+   "checks": [
+    "explosive_rounds"
+   ],
+   "set": {
+    "impact_splash": "&hit",
+    "impact_splash_radius": 1.8,
+    "impact_splash_damage": 400.0
+   }
+  },
+  "model37": {
+   "name": "\"Pump Action Requiem\"",
+   "mag": 10,
+   "reserve": 108,
+   "checks": [
+    "pellets_x1.5",
+    "faster_pump"
+   ],
+   "set": {
+    "pellets": 12,
+    "rpm": 105.0
+   }
+  },
+  "auto12": {
+   "name": "\"Storm of Thunder\"",
+   "mag": 16,
+   "reserve": 128,
+   "checks": [
+    "tracer_color"
+   ],
+   "set": {
+    "tracer_every": 1,
+    "tracer_color": "Color(1, 0.4, 0.05, 1)",
+    "muzzle_flash_scale": 2.4
+   }
+  },
+  "rpd": {
+   "name": "\"Red Purge Doctrine\"",
+   "mag": 150,
+   "reserve": 800,
+   "checks": [],
+   "set": {}
+  },
+  "m60": {
+   "name": "\"Sixty Sins\"",
+   "mag": 200,
+   "reserve": 600,
+   "checks": [
+    "penetration+2"
+   ],
+   "set": {
+    "penetration": 6
+   }
+  },
+  "mg42": {
+   "name": "\"Banshee\"",
+   "mag": 200,
+   "reserve": 750,
+   "checks": [
+    "reduced_recoil"
+   ],
+   "set": {
+    "recoil_scale": 0.5
+   }
+  },
+  "kar98k": {
+   "name": "\"Avalanche\"",
+   "mag": 8,
+   "reserve": 100,
+   "checks": [
+    "explosive_headshots"
+   ],
+   "set": {
+    "impact_splash": "&headshot",
+    "impact_splash_radius": 3.0,
+    "impact_splash_damage": 1200.0
+   }
+  },
+  "dragunov": {
+   "name": "\"Dread Novice\"",
+   "mag": 20,
+   "reserve": 120,
+   "checks": [
+    "thermal_scope"
+   ],
+   "set": {
+    "thermal_scope": true
+   }
+  },
+  "law": {
+   "name": "\"L.A.W. of Averages\"",
+   "mag": 3,
+   "reserve": 40,
+   "checks": [
+    "cluster"
+   ],
+   "set": {
+    "cluster_count": 4,
+    "cluster_radius": 2.0
+   }
+  },
+  "china_lake": {
+   "name": "\"China Doll\"",
+   "mag": 6,
+   "reserve": 40,
+   "checks": [
+    "impact_detonation"
+   ],
+   "set": {
+    "projectile_kind": "&rocket",
+    "projectile_arm_distance": 1.0
+   }
+  },
+  "crossbow": {
+   "name": "\"Lure of the Lantern\"",
+   "mag": 2,
+   "reserve": 30,
+   "checks": [
+    "attracts"
+   ],
+   "set": {
+    "attract_radius": 18.0,
+    "attract_time": 4.0,
+    "fuse_time": 4.0
+   }
+  }
  },
  "attachments": {
-  "m16_up_gl": {"from": "china_lake", "of": "m16_up", "name": "Skullcrusher Launcher", "mag": 1, "reserve": 8,
-                "set": {"weapon_class": 6, "damage": 450.0, "projectile_kind": "&rocket", "projectile_speed": 32.0, "projectile_gravity": 9.8, "projectile_arm_distance": 1.0, "splash_radius": 3.0, "splash_damage_centre": 600.0, "splash_damage_edge": 120.0, "rpm": 60.0, "reload_per_shell": false, "reload_partial_time": 2.2, "reload_empty_time": 2.2, "ammo_in_partial": 1.5, "ammo_in_empty": 1.5}}
+  "m16_up_gl": {
+   "from": "china_lake",
+   "of": "m16_up",
+   "name": "Skullcrusher Launcher",
+   "mag": 1,
+   "reserve": 8,
+   "set": {
+    "weapon_class": 6,
+    "damage": 450.0,
+    "projectile_kind": "&rocket",
+    "projectile_speed": 32.0,
+    "projectile_gravity": 9.8,
+    "projectile_arm_distance": 1.0,
+    "splash_radius": 3.0,
+    "splash_damage_centre": 600.0,
+    "splash_damage_edge": 120.0,
+    "rpm": 60.0,
+    "reload_per_shell": false,
+    "reload_partial_time": 2.2,
+    "reload_empty_time": 2.2,
+    "ammo_in_partial": 1.5,
+    "ammo_in_empty": 1.5
+   }
+  }
  },
- "not_upgradable": ["knife", "ice_axe", "frag", "decoy", "tripmines"],
+ "not_upgradable": [
+  "knife",
+  "ice_axe",
+  "frag",
+  "decoy",
+  "tripmines"
+ ],
  "cost": 5000,
- "upgraded_wall_ammo": 4500
+ "upgraded_wall_ammo": 4500,
+ "wonder_upgrades": {
+  "doc": "Wonder weapon Forge upgrades (GAME_DESIGN \u00a77): explicit values, not the x2 rule; tools/gen_upgrades.py writes <id>_up.tres",
+  "ray_pistol": {
+   "name": "Nova Mk.II",
+   "mag": 40,
+   "reserve": 200,
+   "set": {
+    "damage": 1500.0,
+    "splash_damage_centre": 1800.0,
+    "splash_damage_edge": 450.0,
+    "splash_radius": 3.5,
+    "projectile_bounces": 1,
+    "projectile_color": "Color(1, 0.42, 0.15, 1)",
+    "fx_variant": 1
+   }
+  },
+  "lazarus_conduit": {
+   "name": "Lazarus Requiem",
+   "mag": 36,
+   "reserve": 180,
+   "set": {
+    "damage": 2400.0,
+    "chain_jumps": 10,
+    "chain_jump_range": 8.0,
+    "chain_full_jumps": 4,
+    "stun_time": 2.5,
+    "chain_kill_arcs": 2,
+    "fx_variant": 3,
+    "tracer_color": "Color(0.85, 0.6, 1, 1)"
+   }
+  }
+ }
 }

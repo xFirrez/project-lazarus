@@ -28,6 +28,8 @@ static func for_definition(def: WeaponDefinition) -> WeaponBehavior:
 			return MeleeBehavior.new()
 		&"projectile":
 			return ProjectileBehavior.new()
+		&"chain", &"pulse":
+			return ChainBehavior.new()
 	return HitscanBehavior.new()
 
 

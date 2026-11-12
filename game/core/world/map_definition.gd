@@ -21,6 +21,8 @@ extends Resource
 # Relic Box (Step 9): the MapMarker (kind &"box") id of the start location; "" = first by id.
 @export var box_start: StringName = &""
 @export var box_pool: RelicBoxPool = null  # null -> res://content/box/relic_box_pool.tres
+# Buildables (Step 12): parts + workbench (Vesper Peak: the Lazarus Conduit).
+@export var buildables: Array[BuildableDef] = []
 
 
 func zone_def(zone_id: StringName) -> ZoneDef:

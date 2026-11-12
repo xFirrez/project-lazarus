@@ -16,6 +16,9 @@
 #   owner -> host : `_wmine`   [seq, x, y, z, yaw] ; host -> all: `_wmine_r` [peer, seq, x, y, z, yaw]
 #   host  -> joiner: `_wmines_full` [[peer, seq, x, y, z, yaw]...]
 #   host  -> all  : `_wsplash` [x, y, z, radius]  impact splash / cluster blast (Step 11 upgrades)
+# Wonder weapons (Step 12): Ray Pistol bolts are `projectile` (kind plasma); the Lazarus Conduit's
+# chain (behavior `chain`) and pulse (behavior `pulse`) are resolved here on the host from the shot
+# claim (ChainLightning) and presented on every peer through WonderFx (`_wfx`).
 # `_wloadout` also carries equipment: [peer, ids, current, lethal, melee, tactical, tac_n, placeable, place_n].
 #   host  -> owner: `_wcheat`  [infinite_ammo]
 # The host validates every claim with HitValidator, recomputes damage from the definition and
@@ -49,6 +52,10 @@ var explosions: int = 0  # host: explosions applied (tests)
 var status: StatusEffects = null  # host: slow / burn on hit (Forge upgrades)
 var impact_splashes: int = 0  # host: upgraded-weapon impact splashes + cluster blasts (tests)
 var splashes_shown: int = 0  # every peer: splashes presented (net test)
+var last_chain: Array = []  # host: [[zombie, damage, stunned]...] of the latest Conduit arc (tests)
+var last_pulse: Array[ZombieActor] = []  # host: zombies stunned by the latest pulse (tests)
+var chains: int = 0
+var pulses: int = 0
 
 var _outbox: Array = []
 var _standalone_controllers: Array[WeaponController] = []
@@ -67,6 +74,7 @@ static func is_authority() -> bool:
 
 
 func _ready() -> void:
+	WonderAudio.ensure()
 	name = "Weapons"
 	add_to_group(&"weapon_sync")
 	process_physics_priority = 110
@@ -262,6 +270,9 @@ func host_give(peer_id: int, weapon_id: StringName) -> bool:
 	var alt: WeaponDefinition = WeaponCatalog.get_def(def.alt_fire_id)
 	if alt != null:
 		validator.give(peer_id, alt)  # the underbarrel's own magazine (Skullcrusher)
+	var pulse: WeaponDefinition = WeaponCatalog.get_def(def.pulse_id)
+	if pulse != null:
+		validator.give(peer_id, pulse)  # the Conduit's pulse (draws from the Conduit's magazine)
 	lo["current"] = weapon_id
 	_broadcast_loadout(peer_id)
 	return true
@@ -278,6 +289,8 @@ func host_take_weapon(peer_id: int, weapon_id: StringName) -> bool:
 	var def: WeaponDefinition = WeaponCatalog.get_def(weapon_id)
 	if def != null and def.alt_fire_id != &"":
 		validator.take(peer_id, def.alt_fire_id)
+	if def != null and def.pulse_id != &"":
+		validator.take(peer_id, def.pulse_id)
 	if StringName(lo["current"]) == weapon_id:
 		lo["current"] = StringName(ids[0]) if not ids.is_empty() else &""
 	_broadcast_loadout(peer_id)
@@ -641,6 +654,8 @@ func _host_process_shot(peer_id: int, claim: Array) -> void:
 	var now: float = Net.host_time()
 	# The host's own shots are trusted (it is the authority); every client claim is validated.
 	var trusted: bool = not Net.is_active() or peer_id == Net.local_id() or _is_host_bot(peer_id)
+	if def.behavior == &"pulse" and _pulse_parent(peer_id, def) != &"" and not validator.owns(peer_id, def.id):
+		validator.give(peer_id, def)  # restored loadouts (reconnect) carry the Conduit, not its pulse
 	var res: HitValidator.Result = HitValidator.Result.OK
 	if trusted:
 		validator.accepted_shots += 1
@@ -653,13 +668,20 @@ func _host_process_shot(peer_id: int, claim: Array) -> void:
 	shot_accepted.emit(peer_id, def)
 	var origin: Vector3 = Vector3(float(claim[3]), float(claim[4]), float(claim[5]))
 	var forward: Vector3 = Vector3(float(claim[6]), float(claim[7]), float(claim[8]))
-	_relay_fire(peer_id, def, int(claim[10]), origin, forward, float(claim[9]))
+	if def.behavior != &"pulse":  # the pulse ring arrives through WonderFx; keep the held gun's model
+		_relay_fire(peer_id, def, int(claim[10]), origin, forward, float(claim[9]))
 	if def.behavior == &"projectile":
 		var ctx: WeaponBehavior.ShotContext = WeaponBehavior.ShotContext.new()
 		ctx.forward = forward
 		ctx.spread_deg = float(claim[9])
 		ctx.seed = int(claim[10])
 		_host_launch(peer_id, def, int(claim[1]), _shooter_eye(peer_id, origin), projectile_dir(ctx))
+		return
+	if def.behavior == &"chain":
+		host_chain(peer_id, def, _shooter_eye(peer_id, origin), forward)
+		return
+	if def.behavior == &"pulse":
+		host_pulse(peer_id, def, _shooter_eye(peer_id, origin))
 		return
 	var eye: Vector3 = _shooter_eye(peer_id, origin)
 	var space: PhysicsDirectSpaceState3D = get_viewport().get_world_3d().direct_space_state
@@ -788,6 +810,106 @@ func _on_msg_splash(sender: int, p: Array) -> void:
 	_show_splash(Vector3(float(p[0]), float(p[1]), float(p[2])), float(p[3]))
 
 
+# HOST: the Lazarus Conduit's arc (GAME_DESIGN §7.2): the first zombie inside the aim cone, then
+# up to `chain_jumps` more within `chain_jump_range` (line of sight between links), falloff per
+# jump, each survivor electrocuted for `stun_time`; Requiem kills arc to `chain_kill_arcs` more.
+func host_chain(peer_id: int, def: WeaponDefinition, eye: Vector3, forward: Vector3) -> int:
+	chains += 1
+	last_chain = []
+	var zs: Array[ZombieActor] = _live_zombies()
+	var pts: Array[Vector3] = []
+	for z: ZombieActor in zs:
+		pts.append(z.zone_position(WeaponDefinition.Hitzone.TORSO))
+	var space: PhysicsDirectSpaceState3D = get_viewport().get_world_3d().direct_space_state
+	var vis: Callable = func(a: Vector3, b: Vector3) -> bool: return HitValidator.has_line_of_sight(space, a, b)
+	var muzzle: Vector3 = eye + forward.normalized() * 0.6 + Vector3.DOWN * 0.1
+	var first: int = ChainLightning.pick_first(eye, forward, pts, def.max_range, def.chain_cone_deg, vis)
+	if first < 0:
+		var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+			eye, eye + forward.normalized() * def.max_range, Ballistics.WORLD_MASK
+		)
+		var hit: Dictionary = space.intersect_ray(q)
+		var end: Vector3 = hit["position"] if not hit.is_empty() else eye + forward.normalized() * def.max_range
+		WonderFx.play(self, WonderFx.Kind.ARC, PackedVector3Array([muzzle, end]), 0.0, def.fx_variant)
+		return 0
+	var order: PackedInt32Array = ChainLightning.chain(first, pts, def.chain_jumps, def.chain_jump_range, vis)
+	var arc: PackedVector3Array = PackedVector3Array([muzzle])
+	var struck: Array = []
+	for i: int in order:
+		struck.append(i)
+	for j: int in order.size():
+		var z: ZombieActor = zs[order[j]]
+		arc.append(pts[order[j]])
+		var dmg: float = ChainLightning.damage_for(def, j)
+		_chain_hit(peer_id, def, z, dmg, eye)
+		if not z.alive and def.chain_kill_arcs > 0:
+			var extra: PackedInt32Array = ChainLightning.nearest(
+				order[j], pts, def.chain_kill_arcs, def.chain_jump_range, vis, struck
+			)
+			for k: int in extra.size():
+				struck.append(extra[k])
+				_chain_hit(peer_id, def, zs[extra[k]], dmg * def.chain_kill_arc_factor, eye)
+				WonderFx.play(
+					self, WonderFx.Kind.ARC, PackedVector3Array([pts[order[j]], pts[extra[k]]]), 0.0, def.fx_variant
+				)
+	WonderFx.play(self, WonderFx.Kind.ARC, arc, 0.0, def.fx_variant)
+	Audio.play_event_3d(&"conduit_arc", eye)
+	return struck.size()
+
+
+func _chain_hit(peer_id: int, def: WeaponDefinition, z: ZombieActor, dmg: float, eye: Vector3) -> void:
+	if not z.alive:
+		return
+	var info: DamageInfo = DamageInfo.make(dmg, WeaponDefinition.Hitzone.TORSO, DamageInfo.Kind.BULLET, def.id, peer_id)
+	info.position = eye
+	info.distance = eye.distance_to(z.global_position)
+	targets.host_damage(z, info)
+	var stunned: bool = false
+	if z.alive and z.sim != null:
+		stunned = z.sim.host_electrocute(def.stun_time)
+	last_chain.append([z, dmg, stunned])
+
+
+# HOST: the Conduit pulse (hold fire 1 s, 3 rounds): stuns every zombie within `splash_radius` of
+# the shooter for `stun_time`, no damage — the escape tool.
+func host_pulse(peer_id: int, def: WeaponDefinition, eye: Vector3) -> int:
+	pulses += 1
+	last_pulse = []
+	var parent: WeaponDefinition = WeaponCatalog.get_def(_pulse_parent(peer_id, def))
+	if parent != null:
+		var a: Array = validator.ammo(peer_id, parent.id)
+		a[0] = maxi(int(a[0]) - parent.pulse_ammo, 0)
+	var at: Vector3 = eye + Vector3.DOWN * 1.5
+	if players != null and players.avatars.has(peer_id):
+		at = (players.avatars[peer_id] as Node3D).global_position
+	for z: ZombieActor in _live_zombies():
+		if z.global_position.distance_to(at) <= def.splash_radius and z.sim != null:
+			if z.sim.host_electrocute(def.stun_time):
+				last_pulse.append(z)
+	WonderFx.play(self, WonderFx.Kind.RING, PackedVector3Array([at]), def.splash_radius, def.fx_variant)
+	Audio.play_event_3d(&"conduit_pulse", at)
+	return last_pulse.size()
+
+
+# The Conduit (or its Requiem upgrade) a pulse draws from, "" when the peer owns neither.
+func _pulse_parent(peer_id: int, pulse: WeaponDefinition) -> StringName:
+	for wid: StringName in [StringName(String(pulse.attachment_of) + "_up"), pulse.attachment_of]:
+		if validator.owns(peer_id, wid):
+			return wid
+	return &""
+
+
+func _live_zombies() -> Array[ZombieActor]:
+	var out: Array[ZombieActor] = []
+	if targets == null:
+		return out
+	for id: int in targets.targets.keys():
+		var t: HitTarget = targets.get_target(id)
+		if t is ZombieActor and t.alive:
+			out.append(t as ZombieActor)
+	return out
+
+
 # Perk damage (host): Twin-Fire fires every hitscan bullet twice (×2, ammo once; projectile /
 # melee weapons get the fire rate only); Bullseye adds +25 % to headshots (GAME_DESIGN §8).
 func perk_damage_factor(peer_id: int, def: WeaponDefinition, zone: int) -> float:
@@ -795,7 +917,7 @@ func perk_damage_factor(peer_id: int, def: WeaponDefinition, zone: int) -> float
 	if st == null or def.is_melee():
 		return 1.0
 	var f: float = 1.0
-	if def.behavior != &"projectile" and st.flag(PlayerStats.DOUBLE_TAP):
+	if def.behavior in [&"hitscan", &"pellet"] and st.flag(PlayerStats.DOUBLE_TAP):
 		f *= 2.0
 	if zone == WeaponDefinition.Hitzone.HEAD:
 		f *= st.value(PlayerStats.HEADSHOT_BONUS, 1.0)
@@ -903,8 +1025,12 @@ func host_explode(def: WeaponDefinition, peer_id: int, pos: Vector3) -> void:
 		var dmg: float = DamageModel.self_damage(def, pd)
 		if dmg > 0.0:
 			players.damage_player(peer_id, dmg, pos, HealthComponent.DamageType.EXPLOSIVE)
-	WeaponFx.of(self).explosion(pos, def.splash_radius)
-	Audio.play_event_3d(&"frag_explode", pos)
+	if def.projectile_kind == &"plasma":
+		WonderFx.play(self, WonderFx.Kind.BURST, PackedVector3Array([pos]), def.splash_radius, def.fx_variant)
+		Audio.play_event_3d(&"ray_splash", pos)
+	else:
+		WeaponFx.of(self).explosion(pos, def.splash_radius)
+		Audio.play_event_3d(&"frag_explode", pos)
 	if def.cluster_count > 0:
 		_host_cluster(def, peer_id, pos)
 
@@ -1212,6 +1338,9 @@ func _on_msg_pexplode(sender: int, p: Array) -> void:
 	mines.erase(key)
 	var def: WeaponDefinition = WeaponCatalog.get_def(StringName(p[1]))
 	var pos: Vector3 = Vector3(float(p[2]), float(p[3]), float(p[4]))
+	if def != null and def.projectile_kind == &"plasma":
+		Audio.play_event_3d(&"ray_splash", pos)  # the burst itself comes through WonderFx `_wfx`
+		return
 	WeaponFx.of(self).explosion(pos, def.splash_radius if def != null else 4.0)
 	Audio.play_event_3d(&"frag_explode", pos)
 

@@ -65,6 +65,7 @@ func _register_builtin_commands() -> void:
 	BoxCommands.register(commands)
 	PerkCommands.register(commands)
 	ProgressionCommands.register(commands)
+	WonderCommands.register(commands)
 	RenderCommands.register(commands)
 	ZombieCommands.register(commands)
 	SurvivalCommands.register(commands)

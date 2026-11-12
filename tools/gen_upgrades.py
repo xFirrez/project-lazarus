@@ -4,6 +4,8 @@
 # base .tres with damage x2 (splash x2), the table's mag / reserve, the upgraded name, the vesperite
 # camo, `base_id` and the listed behavior-change fields. Attachments (the Skullcrusher's underbarrel
 # launcher) are copies of another weapon with explicit fields and `attachment_of`.
+# Wonder weapons (Step 12, GAME_DESIGN §7) come from the "wonder_upgrades" table with explicit
+# values (Nova Mk.II, Lazarus Requiem): no x2 rule, everything else copied from the base.
 # Always regenerates (the upgraded files are derived data; edit the table or the base weapon).
 # Run from the repo root: python3 tools/gen_upgrades.py
 import json
@@ -79,6 +81,21 @@ def main():
             v = get(props, key)
             if v is not None:
                 put(props, key, repr(float(v) * 2.0))
+        put(props, "mag_size", str(u["mag"]))
+        put(props, "reserve_max", str(u["reserve"]))
+        put(props, "base_id", '&"%s"' % base)
+        put(props, "camo", '&"vesperite"')
+        for k, v in u["set"].items():
+            put(props, k, fmt(v))
+        write(base, up, head, props)
+        n += 1
+    for base, u in SPEC.get("wonder_upgrades", {}).items():
+        if base == "doc":
+            continue
+        head, props = split(load(base))
+        up = base + "_up"
+        put(props, "id", '&"%s"' % up)
+        put(props, "display_name", json.dumps(u["name"]))
         put(props, "mag_size", str(u["mag"]))
         put(props, "reserve_max", str(u["reserve"]))
         put(props, "base_id", '&"%s"' % base)

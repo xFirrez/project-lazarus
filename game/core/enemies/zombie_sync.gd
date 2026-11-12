@@ -1,6 +1,8 @@
 # ZombieSync — the zombie entity registry and replication (ARCHITECTURE §5.2, §7):
 #   host -> all : `_zspawn`   [id, archetype, variant, tier, x, y, z, yaw, max_hp, flags, spawn_kind]
-#   host -> all : `_zdie`     [id, gib_mask, dx, dy, dz, zone, kind]   (after `_target_health`)
+#   host -> all : `_zdie`     [id, gib_mask, dx, dy, dz, zone, kind, death_fx]   (after `_target_health`)
+#                 death_fx: ZombieVisual.DeathFx from the killing weapon (Ray Pistol disintegrate,
+#                 Conduit char) or the archetype (Galvanic electric burst)
 #   host -> all : `_zdespawn` [id]                        re-queue / cleanup (no corpse)
 #   host -> peer: `_zfull`    [[spawn tuple..., health]...] on join (late join)
 #   host -> all : STREAM_ZOMBIES (20 Hz, unreliable) ZombieSnapshot packets
@@ -32,6 +34,7 @@ var archetypes: Array[ZombieArchetype] = []
 var spawners: Array[ZombieSpawner] = []
 var auto_respawn: bool = true
 var fx: ZombieFx = null
+var pending_meta: Dictionary = {}  # host: metadata set on the next spawned actor before its brain (Warden round)
 
 # Statistics.
 var spawned_total: int = 0
@@ -80,6 +83,7 @@ func _ready() -> void:
 	Net.register_stream(STREAM_ZOMBIES, _on_snapshot)
 	Net.peer_joined.connect(_on_peer_joined)
 	ZombieAudio.ensure_events()
+	WonderAudio.ensure()
 
 
 func _exit_tree() -> void:
@@ -124,6 +128,8 @@ func host_spawn(
 	var hp: float = health_value if health_value > 0.0 else arch.health_for_round(1)
 	var p: Vector3 = crowd.snap(pos, pos) if crowd.is_ready() else pos
 	var a: ZombieActor = _create([id, archetypes.find(arch), variant, tier, p.x, p.y, p.z, yaw, hp, 0, kind])
+	for k: Variant in pending_meta:
+		a.set_meta(k, pending_meta[k])
 	var sim: ZombieSim = ZombieSim.new(a, crowd, _rng.randi())
 	a.sim = sim
 	crowd.add(sim)
@@ -271,6 +277,10 @@ func _remove(a: ZombieActor, free_now: bool) -> void:
 	if a.sim != null:
 		crowd.remove(a.sim)
 		a.sim.state = ZombieSim.State.DEAD
+		if a.sim.behavior != null:
+			a.sim.behavior.sim = null  # sim <-> behavior is a RefCounted cycle
+			a.sim.behavior = null
+		a.behavior = null
 	if free_now:
 		a.queue_free()
 
@@ -293,10 +303,22 @@ func _on_actor_died(source_peer: int, a: ZombieActor) -> void:
 			dir = (a.global_position - src)
 			dir.y = 0.0
 			dir = dir.normalized() if dir.length() > 0.01 else dir
-	Net.send_reliable(0, &"_zdie", [a.net_id, gib, dir.x, dir.y, dir.z, zone, kind])
+	var dfx: int = death_fx_of(a, info)
+	Net.send_reliable(0, &"_zdie", [a.net_id, gib, dir.x, dir.y, dir.z, zone, kind, dfx])
 	_remove(a, false)
+	a.visual.death_fx = dfx
 	a.visual.die(gib, dir, zone, kind)
 	zombie_died.emit(a, source_peer)
+
+
+static func death_fx_of(a: ZombieActor, info: DamageInfo) -> int:
+	if info != null and info.weapon_id != &"":
+		var def: WeaponDefinition = WeaponCatalog.get_def(info.weapon_id)
+		if def != null and def.death_fx != &"":
+			return ZombieVisual.death_fx_id(def.death_fx)
+	if a.archetype != null and a.archetype.death_burst_fx:
+		return ZombieVisual.DeathFx.BURST
+	return ZombieVisual.DeathFx.NONE
 
 
 func _roll_gibs(a: ZombieActor, info: DamageInfo) -> int:
@@ -429,6 +451,7 @@ func _on_msg_die(sender: int, p: Array) -> void:
 	if a.alive:
 		a.apply_remote(0.0, 0.0, int(p[5]), int(p[6]), 0, false)
 	_remove(a, false)
+	a.visual.death_fx = int(p[7]) if p.size() > 7 else 0
 	a.visual.die(int(p[1]), Vector3(float(p[2]), float(p[3]), float(p[4])), int(p[5]), int(p[6]))
 
 

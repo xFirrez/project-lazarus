@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="ZombieArchetype" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://core/enemies/zombie_archetype.gd" id="1"]
+[ext_resource type="PackedScene" path="res://content/enemies/zombie/zombie_orderly_pallid.tscn" id="2"]
+[ext_resource type="Script" path="res://core/enemies/behaviors/galvanic_behavior.gd" id="3"]
+[ext_resource type="Script" path="res://core/enemies/behaviors/galvanic_visual.gd" id="4"]
+
+[resource]
+script = ExtResource("1")
+id = &"galvanic"
+trap_resistant = true
+display_name = "Galvanic"
+variants = Array[PackedScene]([ExtResource("2")])
+behavior_script = ExtResource("3")
+extra_visual = ExtResource("4")
+special = true
+glow_color = Color(0.45, 0.85, 1, 0.35)
+death_burst_fx = true
+tier_speeds = PackedFloat32Array(6, 6, 6, 6, 6)
+speed_jitter = 0.05
+turn_rate = 10.0
+attack_damage = 40.0
+crawler_attack_damage = 20.0
+attack_windup = 0.45
+leap_min = 3.0
+leap_max = 6.0
+leap_telegraph = 0.6
+leap_time = 0.45
+leap_damage = 40.0
+leap_cooldown = 3.0
+leap_hit_radius = 1.6
+burst_radius = 3.0
+burst_damage = 30.0
+burst_plank_radius = 4.0
+base_health = 400.0
+health_step = 0.0
+health_growth = 1.0
+health_growth_late = 1.0
+stagger_fraction = 0.6
+crawler_explosive_fraction = 0.5
+tear_time = 0.8
+tear_time_fast = 0.7
+voice_pitch_range = Vector2(1.15, 1.4)
+groan_interval = Vector2(2.0, 4.0)

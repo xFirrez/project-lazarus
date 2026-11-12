@@ -8,7 +8,11 @@ class_name ZombieActor
 extends HitTarget
 
 enum Action { NONE, ATTACK, TEAR, CLIMB, DROP, VENT, STAGGER, RISE, WAIT }
-enum Flag { CRAWLER = 1, BURNING = 2, STUNNED = 4, TRAVERSING = 8, FROZEN = 16, AGGRO = 32 }
+# ELECTROCUTED: Lazarus Conduit stun (spasm + sparks). TELEGRAPH: a special attack is winding up
+# (Galvanic leap crackle, Warden slam / charge / summon) — every peer shows the warning.
+enum Flag {
+	CRAWLER = 1, BURNING = 2, STUNNED = 4, TRAVERSING = 8, FROZEN = 16, AGGRO = 32, ELECTROCUTED = 64, TELEGRAPH = 128
+}
 
 const BODY_LAYER: int = 1 << 3  # 3d_physics/layer_4 "zombie_body"
 
@@ -18,6 +22,7 @@ var variant: int = 0
 var tier: int = ZombieArchetype.Tier.SHAMBLE
 var spawn_kind: int = ZombieSpawner.Kind.RISER
 var sim: ZombieSim = null  # host only
+var behavior: ZombieBehavior = null  # host only: the archetype's special brain (sim.behavior)
 var visual: ZombieVisual = null
 var body: AnimatableBody3D = null
 var buffer: InterpolationBuffer = null  # clients only
@@ -85,6 +90,8 @@ func health_bucket() -> int:
 
 # HOST: remember the DamageInfo so the brain can react (stagger, crawler) after HitTarget applies it.
 func host_apply(info: DamageInfo) -> float:
+	if behavior != null and alive:
+		info.amount = behavior.filter_damage(info)  # Warden armor plates / core
 	last_hit = info
 	var applied: float = super(info)
 	last_hit = null

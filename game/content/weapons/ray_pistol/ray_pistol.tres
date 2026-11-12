@@ -1,0 +1,70 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.05, 1.2, 0, 0, 0, 0, -0.08, 1.2, 0, 0, 0, 0, 0.1, 1.3)
+}
+point_count = 3
+
+[resource]
+script = ExtResource("1")
+id = &"ray_pistol"
+display_name = "Mk.I Ray Pistol"
+weapon_class = 7
+cost = 0
+behavior = &"projectile"
+fire_mode = 0
+rpm = 180.0
+damage = 1000.0
+max_range = 150.0
+range_min = 0.0
+range_max = 1.0
+min_damage_fraction = 1.0
+mag_size = 20
+reserve_max = 160
+reload_partial_time = 2.2
+reload_empty_time = 2.6
+ammo_in_partial = 1.6
+ammo_in_empty = 1.9
+raise_time = 0.4
+lower_time = 0.3
+ads_time = 0.2
+sprint_out_time = 0.15
+ads_fov_multiplier = 0.88
+spread_hip = 1.2
+spread_ads = 0.05
+spread_move = 1.0
+spread_per_shot = 0.2
+spread_max = 2.5
+recoil_random = 0.1
+view_kick = 1.2
+vm_kick_back = 0.05
+vm_kick_rot = 6.0
+splash_radius = 3.0
+splash_damage_centre = 1200.0
+splash_damage_edge = 300.0
+self_damage_max = 25.0
+fuse_time = 3.0
+projectile_kind = &"plasma"
+projectile_speed = 55.0
+projectile_gravity = 0.0
+projectile_bounce = 0.0
+projectile_radius = 0.08
+projectile_bounces = 0
+projectile_color = Color(0.35, 1, 0.45, 1)
+viewmodel_style = &"ray_pistol"
+viewmodel_color = Color(0.55, 0.52, 0.45, 1)
+viewmodel_offset = Vector3(0.16, -0.16, -0.32)
+sight_height = 0.06
+tracer_every = 0
+shell_size = 0.0
+muzzle_flash_scale = 0.8
+death_fx = &"disintegrate"
+fx_variant = 0
+sound_body_hz = 520.0
+sound_mech_hz = 3400.0
+sound_tail_s = 0.6
+sound_volume_db = -3.0
+recoil_pattern = SubResource("recoil")

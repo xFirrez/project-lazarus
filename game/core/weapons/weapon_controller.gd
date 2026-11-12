@@ -47,6 +47,8 @@ var aim_snaps: int = 0  # Bullseye Bitters ADS head snaps (tests)
 # dual-wield weapons alternate the muzzle between the two guns.
 var alt_runtimes: Dictionary = {}  # attachment id -> WeaponRuntime
 var alt_shots: int = 0
+var pulses_fired: int = 0  # Lazarus Conduit pulses released (tests)
+var pulse_hold: float = 0.0  # seconds fire has been held toward a pulse (-1 = fired, release to re-arm)
 var _left_hand: bool = false
 var _equip_seq: int = 0
 var _drink_total: float = 0.0
@@ -251,6 +253,7 @@ func physics_step(f: PlayerInputFrame, dt: float) -> void:
 		var shots: int = h.update(dt, trigger, f.aim, player.motor.sprinting)
 		for i: int in shots:
 			_fire_shot(h)
+		_update_pulse(h, f.fire and not cooking(), dt)
 		var alt: WeaponRuntime = alt_runtime()
 		if alt != null and h.is_ready():
 			var alt_n: int = alt.update(dt, f.alt_fire and not f.fire, false, player.motor.sprinting)
@@ -413,6 +416,36 @@ func _fire_shot(h: WeaponRuntime) -> void:
 	_confirm_hits(def, result)
 	WeaponSync.submit_shot(self, def, _shot_seq, ctx, result)
 	shot_fired.emit(def, result)
+
+
+# Lazarus Conduit pulse (GAME_DESIGN §7.2): holding fire `pulse_hold_time` releases the pulse
+# weapon (`pulse_id`) for `pulse_ammo` rounds of the magazine; releasing the trigger re-arms it.
+func _update_pulse(h: WeaponRuntime, held_fire: bool, dt: float) -> void:
+	if h.def.pulse_id == &"":
+		return
+	if not held_fire:
+		pulse_hold = 0.0
+		return
+	if pulse_hold < 0.0 or h.mag < h.def.pulse_ammo or not h.is_ready():
+		return
+	pulse_hold += dt
+	if pulse_hold < h.def.pulse_hold_time:
+		return
+	pulse_hold = -1.0
+	var pdef: WeaponDefinition = WeaponCatalog.get_def(h.def.pulse_id)
+	if pdef == null:
+		return
+	h.mag -= h.def.pulse_ammo
+	pulses_fired += 1
+	_shot_seq += 1
+	var ctx: WeaponBehavior.ShotContext = WeaponBehavior.ShotContext.new()
+	ctx.space = player.get_world_3d().direct_space_state
+	ctx.def = pdef
+	ctx.origin = eye_position()
+	ctx.forward = aim_forward()
+	ctx.seed = Ballistics.shot_seed(player.peer_id, _shot_seq)
+	WeaponSync.submit_shot(self, pdef, _shot_seq, ctx, Ballistics.ShotResult.new())
+	shot_fired.emit(pdef, Ballistics.ShotResult.new())
 
 
 func _try_melee() -> void:

@@ -6,6 +6,9 @@ class_name MapRules
 extends RefCounted
 
 var match_node: Match = null
+# The rare late-round Warden (GAME_DESIGN §5.4) is implemented in SpecialRoundDirector but gated
+# here: off until the Easter-egg step balances it (debug `warden_late on` flips it on the host).
+var warden_late_rounds: bool = false
 
 
 func on_match_start() -> void:
@@ -33,6 +36,17 @@ func on_relays_complete() -> void:
 	pass
 
 
-# Special-round enemy for round r (Step 12); &"" = a normal round.
+# Special-round enemy for round r (Step 12); &"" = a normal round. Must be deterministic per
+# round within a match (asked at round start and at the intermission before it).
 func get_special_round_enemy(_round: int) -> StringName:
 	return &""
+
+
+# Special enemy mixed (1-2) into normal round r (RoundCurve.mixed_from_round); &"" = none.
+func get_mixed_enemy(_round: int) -> StringName:
+	return &""
+
+
+# The late-round Warden rule is on (SpecialRoundDirector asks at every round start).
+func warden_late_rounds_enabled() -> bool:
+	return warden_late_rounds

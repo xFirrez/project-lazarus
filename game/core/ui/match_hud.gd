@@ -48,7 +48,11 @@ func _on_points_changed(peer_id: int, _total: int, delta: int) -> void:
 
 func _on_round_started(r: int) -> void:
 	round_pulse = 0.0
-	_show_banner("ROUND %d" % r)
+	var rd: RoundDirector = match_node.rounds if match_node != null else null
+	if rd != null and rd.special_id != &"":
+		_show_banner("ROUND %d — GALVANIC SURGE" % r)
+	else:
+		_show_banner("ROUND %d" % r)
 
 
 func _show_banner(text: String) -> void:
@@ -80,6 +84,7 @@ func _draw() -> void:
 		return
 	_draw_perks(me)
 	_draw_powerups()
+	_draw_parts()
 	_draw_prompt(me)
 	_draw_downed(me)
 	_draw_teammate_markers(me)
@@ -265,6 +270,22 @@ func _bar(center: Vector2, frac: float, col: Color) -> void:
 	var r: Rect2 = Rect2(center.x - w * 0.5, center.y, w, 8.0)
 	draw_rect(r, Color(0, 0, 0, 0.6))
 	draw_rect(Rect2(r.position, Vector2(w * frac, 8.0)), col)
+
+
+# Buildable parts collected by the team (shared inventory, Step 12), above the points.
+func _draw_parts() -> void:
+	if match_node.buildables == null:
+		return
+	var y: float = size.y - 190.0
+	for line: String in match_node.buildables.hud_lines():
+		_text(Vector2(size.x - 40, y), line, 16, Color(0.6, 0.9, 1.0), true)
+		y -= 22.0
+	var rd: RoundDirector = match_node.rounds
+	if rd != null and rd.phase == RoundDirector.Phase.INTERMISSION and rd.next_special != &"":
+		if rd.time_left <= rd.curve.special_warning:
+			_text_centered(
+				size.y * 0.22, "THE STORM IS BREAKING", 30, Color(0.5, 1.0, 0.6, 0.6 + 0.4 * sin(round_pulse * 8.0))
+			)
 
 
 func _draw_downed(me: PlayerCharacter) -> void:

@@ -1,9 +1,10 @@
-[gd_resource type="Resource" script_class="MapDefinition" load_steps=17 format=3]
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://core/world/map_definition.gd" id="1"]
 [ext_resource type="Script" path="res://core/world/zone_def.gd" id="2"]
 [ext_resource type="Resource" path="res://content/rounds/default_round_curve.tres" id="3"]
 [ext_resource type="Script" path="res://maps/vesper_peak/scripts/vesper_peak_rules.gd" id="4"]
+[ext_resource type="Resource" path="res://maps/vesper_peak/buildables/conduit.tres" id="5"]
 
 [sub_resource type="Resource" id="z01"]
 script = ExtResource("2")
@@ -93,3 +94,4 @@ round_curve = ExtResource("3")
 zones = Array[ZoneDef]([SubResource("z01"), SubResource("z03"), SubResource("z04"), SubResource("z05"), SubResource("z06"), SubResource("z07"), SubResource("z08"), SubResource("z09"), SubResource("z10"), SubResource("z11"), SubResource("z12"), SubResource("z13")])
 starting_zone = &"Z01"
 rules_script = ExtResource("4")
+buildables = Array[BuildableDef]([ExtResource("5")])

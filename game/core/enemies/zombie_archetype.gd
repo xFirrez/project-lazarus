@@ -1,6 +1,7 @@
 # ZombieArchetype — data for one enemy type (ARCHITECTURE §7.1, GAME_DESIGN §5.1): model
 # variants, locomotion tiers, attack, health curve, hitzone multipliers, reactions and audio.
-# Special enemies (Step 12) add a behavior script; the base zombie needs none.
+# Special enemies (Step 12) add a behavior script (ZombieBehavior: Galvanic leap / burst, Warden
+# plates / attacks / phases); the base zombie needs none.
 # Authority: shared data (the host simulates with it; every peer picks visuals from it).
 class_name ZombieArchetype
 extends Resource
@@ -14,6 +15,15 @@ const TIER_NAMES: PackedStringArray = ["shamble", "walk", "jog", "run", "sprint"
 @export var trap_resistant: bool = false  # traps take 50 % max HP / s instead of killing (Galvanics, GAME_DESIGN §12)
 @export var display_name: String = "Zombie"
 @export var variants: Array[PackedScene] = []  # ZombieModel scenes (material variants)
+# Script extending ZombieBehavior (host brain hooks + damage filter); null = plain zombie.
+@export var behavior_script: Script = null
+@export var boss_tuning: WardenTuning = null  # the Warden's plates / attacks / phases
+@export var extra_visual: Script = null  # Node3D script added under the ZombieVisual (armor, electrodes)
+@export var special: bool = false  # spawned by special rounds / rifts (Galvanics), not by the queue
+@export_group("Presentation")
+@export var model_scale: float = 1.0  # Warden: a 3 m brute from the zombie rig
+@export var glow_color: Color = Color(0, 0, 0, 0)  # alpha > 0: emissive overlay (Galvanic electrodes)
+@export var death_burst_fx: bool = false  # electric death burst (Galvanics) on every peer
 @export_group("Locomotion")
 @export var tier_speeds: PackedFloat32Array = [1.1, 1.7, 3.0, 4.3, 5.4]  # m/s per Tier
 @export var speed_jitter: float = 0.08  # +-fraction per zombie
@@ -30,6 +40,18 @@ const TIER_NAMES: PackedStringArray = ["shamble", "walk", "jog", "run", "sprint"
 @export var attack_windup: float = 0.45
 @export var attack_duration: float = 1.0
 @export var attack_cooldown: float = 1.1
+@export_group("Leap (Galvanics, GAME_DESIGN §5.3)")
+@export var leap_min: float = 0.0  # 0 = never leaps
+@export var leap_max: float = 0.0
+@export var leap_telegraph: float = 0.6  # crackle wind-up before the jump (>= 0.6 s, AC-12.5 rule)
+@export var leap_time: float = 0.45  # airborne
+@export var leap_damage: float = 40.0
+@export var leap_cooldown: float = 3.0
+@export var leap_hit_radius: float = 1.6
+@export_group("Death burst (Galvanics)")
+@export var burst_radius: float = 0.0  # 0 = none
+@export var burst_damage: float = 0.0  # to players
+@export var burst_plank_radius: float = 0.0  # disable one plank of a barricade this close
 @export_group("Health")
 @export var base_health: float = 150.0  # hp(1)
 @export var health_step: float = 100.0  # +per round, rounds 2..9

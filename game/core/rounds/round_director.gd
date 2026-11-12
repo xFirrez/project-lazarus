@@ -3,7 +3,13 @@
 # A round ends only when every zombie of it is dead. Zombies re-queued by the brain (stuck / far)
 # are pushed back into the spawn queue and still count. The last zombies are promoted to Run when
 # slower (unless a crawler is left). GAME_OVER stops everything.
-#   host -> all : `_round` [round, phase, time_left, total]  (on every phase change; join snapshot)
+# Special rounds (Step 12, GAME_DESIGN §5.3): MapRules.get_special_round_enemy(r) names the enemy
+# (Vesper Peak: Galvanics on the seeded schedule); such a round spawns only that archetype
+# (RoundCurve.special_count / special_health), through energy rifts (SpawnDirector), after a longer
+# intermission with the warning build-up (SpecialRoundDirector), and its last kill drops Max Ammo.
+# MapRules.get_mixed_enemy(r) mixes 1-2 of them into normal rounds (from round 20).
+#   host -> all : `_round` [round, phase, time_left, total, special, next_special]
+#                 (on every phase change; join snapshot)
 # Authority: HOST runs the machine; clients mirror round / phase / countdown and play the stings.
 class_name RoundDirector
 extends Node
@@ -12,6 +18,7 @@ signal round_started(round_number: int)
 signal round_ended(round_number: int)
 signal intermission_started(next_round: int, seconds: float)
 signal phase_changed(phase: int)
+signal special_last_killed(actor: ZombieActor)  # host: the last special enemy of a special round died
 
 enum Phase { WAITING, INTRO, ACTIVE, INTERMISSION, GAME_OVER }
 
@@ -36,6 +43,16 @@ var events: Array[String] = []  # host: ordered event log (tests, AC-6.2)
 var hold: bool = false
 var first_round: int = 1  # dev lobby setting "starting round"
 var paused: bool = false  # host debug (`round_pause`): intro / intermission timers stop
+# Special enemies (replicated through `_round`): this round's / the next round's enemy id.
+var special_id: StringName = &""
+var next_special: StringName = &""
+var special_archetype: ZombieArchetype = null  # host
+var special_left: int = 0  # host: special enemies still to spawn this round
+var special_ids: Dictionary = {}  # host: alive special enemies of this round
+var special_health_value: float = 400.0  # host
+var special_rounds_played: int = 0  # host: k for the special count / health growth
+var forced_special: StringName = &""  # host debug `special_round`: the next round is special
+var special_log: Array[int] = []  # host: rounds that were special (tests, AC-12.4)
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
@@ -100,12 +117,82 @@ func host_start_round(r: int) -> void:
 	requeued = 0
 	promoted = false
 	queue.clear()
-	for i: int in total:
-		queue.append(curve.pick_tier(current_round, _rng.randf()))
-	_log("round_start %d total %d" % [current_round, total])
+	special_ids.clear()
+	special_left = 0
+	special_id = _special_for(current_round)
+	forced_special = &""
+	special_archetype = zombies.archetype(special_id) if special_id != &"" and zombies != null else null
+	if special_archetype != null and special_archetype.id != special_id:
+		special_archetype = null
+	if special_archetype != null:
+		total = curve.special_count(special_rounds_played, player_count())
+		special_left = total
+		special_health_value = curve.special_health(special_rounds_played, zombie_health())
+		special_rounds_played += 1
+		special_log.append(current_round)
+	else:
+		special_id = &""
+		for i: int in total:
+			queue.append(curve.pick_tier(current_round, _rng.randf()))
+		_add_mixed()
+	next_special = &""
+	_log("round_start %d total %d%s" % [current_round, total, " special %s" % special_id if special_id != &"" else ""])
 	_set_phase(Phase.ACTIVE, 0.0)
 	round_started.emit(current_round)
 	_on_round_started_host()
+
+
+func _special_for(r: int) -> StringName:
+	if forced_special != &"":
+		return forced_special
+	var m: Match = Match.current
+	return m.rules.get_special_round_enemy(r) if m != null and m.rules != null else &""
+
+
+# Normal rounds from RoundCurve.mixed_from_round: 1-2 special enemies join the queue (MapRules).
+func _add_mixed() -> void:
+	var m: Match = Match.current
+	if m == null or m.rules == null or zombies == null:
+		return
+	var mid: StringName = m.rules.get_mixed_enemy(current_round)
+	var arch: ZombieArchetype = zombies.archetype(mid) if mid != &"" else null
+	if arch == null or arch.id != mid or current_round < curve.mixed_from_round:
+		return
+	special_archetype = arch
+	special_left = _rng.randi_range(curve.mixed_min, curve.mixed_max)
+	special_health_value = curve.special_health(maxi(special_rounds_played - 1, 0), zombie_health())
+	total += special_left
+	_log("mixed %s x%d" % [mid, special_left])
+
+
+func is_special_round() -> bool:
+	return special_id != &""
+
+
+# HOST: the next special enemy to spawn (SpawnDirector), or null.
+func host_take_special() -> ZombieArchetype:
+	if special_left <= 0 or special_archetype == null:
+		return null
+	special_left -= 1
+	return special_archetype
+
+
+func host_register_special(a: ZombieActor) -> void:
+	round_ids[a.net_id] = true
+	special_ids[a.net_id] = true
+
+
+# Debug `special_round [enemy]`: the next round is a special round (starts it now when active).
+func host_force_special(enemy: StringName = &"galvanic") -> void:
+	if not is_authority():
+		return
+	forced_special = enemy
+	next_special = enemy
+	if phase == Phase.ACTIVE:
+		host_skip_round()
+	elif phase == Phase.INTERMISSION:
+		time_left = minf(time_left, curve.special_warning + 0.5)
+		Net.send_reliable(0, &"_round", _payload())
 
 
 # Debug `skip_round`: kills this round's zombies and ends it.
@@ -116,6 +203,7 @@ func host_skip_round() -> void:
 		host_start_round(current_round + 1)
 		return
 	queue.clear()
+	special_left = 0
 	for id: int in round_ids.keys():
 		var a: ZombieActor = zombies.actors.get(id, null)
 		if a != null:
@@ -173,6 +261,8 @@ func _on_zombie_died(a: ZombieActor, _source: int) -> void:
 		return
 	round_ids.erase(a.net_id)
 	killed += 1
+	if special_ids.erase(a.net_id) and is_special_round() and special_left == 0 and special_ids.is_empty():
+		special_last_killed.emit(a)
 	_check_end()
 
 
@@ -181,21 +271,29 @@ func _on_zombie_requeued(_arch: ZombieArchetype, tier: int, reason: String, net_
 		return
 	round_ids.erase(net_id)
 	requeued += 1
-	queue.push_front(tier)
+	if special_ids.erase(net_id):
+		special_left += 1  # comes back through a rift
+	else:
+		queue.push_front(tier)
 	_log("requeue %s" % reason)
 
 
 func _check_end() -> void:
 	if phase != Phase.ACTIVE or killed < total or not queue.is_empty() or not round_ids.is_empty():
 		return
+	if special_left > 0:
+		return
 	_log("round_end %d" % current_round)
 	round_ended.emit(current_round)
 	var m: Match = Match.current
 	if m != null and m.rules != null:
 		m.rules.on_round_end(current_round)
-	_set_phase(Phase.INTERMISSION, curve.intermission)
-	_log("intermission %d" % (current_round + 1))
-	intermission_started.emit(current_round + 1, curve.intermission)
+	next_special = _special_for(current_round + 1)
+	var pause: float = curve.special_intermission if next_special != &"" else curve.intermission
+	special_id = &""
+	_set_phase(Phase.INTERMISSION, pause)
+	_log("intermission %d%s" % [current_round + 1, " special warning" if next_special != &"" else ""])
+	intermission_started.emit(current_round + 1, pause)
 
 
 func _promote_last() -> void:
@@ -235,13 +333,19 @@ func _physics_process(delta: float) -> void:
 func _set_phase(p: Phase, seconds: float) -> void:
 	phase = p
 	time_left = seconds
-	Net.send_reliable(0, &"_round", [current_round, int(phase), time_left, total])
+	Net.send_reliable(0, &"_round", _payload())
 	phase_changed.emit(int(phase))
 	_play_sting(p)
 
 
+func _payload() -> Array:
+	return [current_round, int(phase), time_left, total, String(special_id), String(next_special)]
+
+
 func _play_sting(p: Phase) -> void:
-	if p == Phase.ACTIVE:
+	if p == Phase.ACTIVE and special_id != &"":
+		Audio.play_event(&"special_round_start")
+	elif p == Phase.ACTIVE:
 		Audio.play_event(&"round_start")
 	elif p == Phase.INTERMISSION:
 		Audio.play_event(&"round_end")
@@ -266,6 +370,8 @@ func _on_msg_round(sender: int, p: Array) -> void:
 	phase = int(p[1]) as Phase
 	time_left = float(p[2])
 	total = int(p[3])
+	special_id = StringName(p[4]) if p.size() > 4 else &""
+	next_special = StringName(p[5]) if p.size() > 5 else &""
 	if phase != prev_phase:
 		phase_changed.emit(int(phase))
 		_play_sting(phase)
@@ -279,4 +385,4 @@ func _on_msg_round(sender: int, p: Array) -> void:
 func _on_peer_joined(peer_id: int, _info: Dictionary) -> void:
 	if not Net.is_host() or peer_id == Net.local_id():
 		return
-	Net.send_reliable(peer_id, &"_round", [current_round, int(phase), time_left, total])
+	Net.send_reliable(peer_id, &"_round", _payload())
