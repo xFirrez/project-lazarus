@@ -77,3 +77,81 @@ func build() -> void:
 		lamp(p, Color(0.85, 1.0, 1.0), 1.2, 12.0, true, 0.1)
 	lamp(Vector3(74, Y + 1.5, -60), Color(0.4, 1.0, 0.5), 1.0, 6.0, false)  # vesperite leak
 	ambience(Vector3(74, Y + 2, -60), &"lab_hum")
+
+
+# --- Step 13 art pass (13C): white-tile labs, containment chambers, observation room, gantry -----
+
+
+func dress() -> void:
+	trim = "lab"
+	var clinical: Color = Color(0.85, 1.0, 1.0)
+	for c: Vector3 in [Vector3(64, Y, -54), Vector3(84, Y, -54), Vector3(64, Y, -66), Vector3(84, Y, -66)]:
+		var tank: MeshInstance3D = skin("ChamberGlass_%d_%d" % [int(c.x), int(absf(c.z))], &"containment_tank")
+		if tank != null:
+			tank.scale = Vector3(1.75, 1.0, 1.75)
+		decal(&"handprints", c + Vector3(0, 1.4, 1.62), Vector2(1.2, 1.2), Vector3.BACK)
+	# Vignette 9: containment chamber 6 — claw marks on the OUTSIDE.
+	var v: Node3D = vignette(
+		"V09_Chamber6", Vector3(84, Y, -64), "containment chamber 6 with claw marks on the outside"
+	)
+	for k: int in 3:
+		var a: float = -0.5 + k * 0.5
+		decal(
+			&"claws",
+			Vector3(84, Y + 1.3 + k * 0.3, -66) + Vector3(sin(a), 0, cos(a)) * 1.85,
+			Vector2(0.9, 1.2),
+			Vector3(sin(a), 0, cos(a))
+		)
+	signage("KAMMER 6", Vector3(84, Y + 3.0, -64.2), 0.0, 30, Color(0.85, 0.15, 0.1))
+	decal(&"blood", Vector3(84.6, Y + 0.05, -63.6), Vector2(1.6, 1.6), Vector3.UP, 0.4)
+	prop(&"chair", Vector3(1.0, 0, 0.8), 2.4, v, Vector3(PI / 2.0, 0, 0))
+	# The two shattered chambers (door-burst closets): broken glass on the floor.
+	for x: float in [64.0, 84.0]:
+		decal(&"frost", Vector3(x, Y + 0.05, -71.0), Vector2(2.4, 2.4), Vector3.UP, x, Color(0.9, 1.0, 1.0, 0.8))
+		signage(
+			"KAMMER %d — BRUCH" % (1 if x < 70 else 5), Vector3(x, Y + 2.9, -71.75), 0.0, 22, Color(0.85, 0.15, 0.1)
+		)
+	# Central chamber: the vesperite leak bleeding from the cracks (Relay #3 inside).
+	for i: int in 5:
+		var a2: float = TAU * i / 5.0
+		deco(
+			"VesperiteShard_%d" % i,
+			Vector3(74 + cos(a2) * 2.2, Y + 0.3, -60 + sin(a2) * 2.2),
+			Vector3(0.25, 0.6 + (i % 2) * 0.4, 0.25),
+			&"vesperite",
+			Vector3(0.3, a2, 0.2)
+		)
+	fx(AtmosFx.Kind.ENERGY, Vector3(74, Y + 0.8, -60), Vector3(2.0, 0.4, 2.0))
+	decal(&"scorch", Vector3(74, Y + 0.05, -60), Vector2(4, 4))
+	# Observation control room: the tape machine looping a countdown.
+	skin("ObservationDesk", &"console", Vector3.ZERO, PI)
+	prop(&"lab_bench", Vector3(90.6, Y, -66.0), -PI / 2.0)
+	prop(&"lab_bench", Vector3(57.4, Y, -56.0), PI / 2.0)
+	prop(&"lab_bench", Vector3(57.4, Y, -64.5), PI / 2.0)
+	prop(&"gurney", Vector3(68.5, Y, -49.5), 0.0)
+	prop(&"gas_tank", Vector3(91.4, Y, -49.0), 0.0)
+	prop(&"gas_tank", Vector3(91.0, Y, -49.4), 0.0)
+	prop(&"cabinet", Vector3(91.5, Y, -70.0), -PI / 2.0)
+	signage("BEOBACHTUNG · OBSERVATION", Vector3(88, Y + 3.2, -71.75), 0.0, 24, Color(0.85, 0.9, 0.9))
+	signage("LABOR LAZARUS — ZUTRITT NUR MIT GENEHMIGUNG", Vector3(74, Y + 4.2, -48.25), PI, 26, Color(0.85, 0.9, 0.9))
+	signage("ENTGIFTUNG · DECONTAMINATION", Vector3(80, Y + 3.3, -48.3), PI, 20, Color(0.95, 0.8, 0.2))
+	signage("REAKTORBRÜCKE", Vector3(56.25, Y + 3.4, -60), PI / 2.0, 26, Color(0.95, 0.8, 0.2))
+	decal(&"hazard_stripes", Vector3(55.6, Y + 0.05, -60), Vector2(0.6, 3.6))
+	# Lights: clinical fluorescents (flicker), red alarm strobes, the green leak.
+	for p: Vector3 in [
+		Vector3(64, Y + 4.8, -60), Vector3(84, Y + 4.8, -60), Vector3(74, Y + 4.8, -52), Vector3(74, Y + 4.8, -68)
+	]:
+		fixture_light(
+			&"fluoro", p, clinical, 0.5, 8.0, PoweredLight.Pattern.FLICKER, true, 20 if p.x == 74 and p.z == -52 else 0
+		)
+	for p: Vector3 in [Vector3(56.4, Y + 4.2, -50), Vector3(91.6, Y + 4.2, -70)]:
+		prop(&"beacon", p, 0.0, null, Vector3(0, 0, PI / 2.0 if p.x < 60 else -PI / 2.0))
+		fixture_light(&"", p, Color(1.0, 0.08, 0.05), 1.2, 10.0, PoweredLight.Pattern.STROBE, false)
+	for p: Vector3 in [
+		Vector3(70, Y + 0.05, -52), Vector3(80, Y + 0.05, -60), Vector3(62, Y + 0.05, -70), Vector3(88, Y + 0.05, -56)
+	]:
+		decal(&"grime", p, Vector2(4, 4), Vector3.UP, p.x)
+	decal(&"blood", Vector3(60, Y + 0.05, -60), Vector2(2, 2), Vector3.UP, 2.0)
+	fx(AtmosFx.Kind.DUST, Vector3(74, Y + 2.5, -60), Vector3(16, 2.0, 10))
+	reverb(&"Reverb_Tile", Vector3(56, -29, -72), Vector3(92, -22, -48))
+	reverb(&"Reverb_Tunnel", Vector3(57, -29, -48), Vector3(60, -13, -21.2))

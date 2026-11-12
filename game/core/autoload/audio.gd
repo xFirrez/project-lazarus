@@ -9,6 +9,17 @@ const PLAYER_POOL_3D: int = 24
 const MUFFLED_BUSES: PackedStringArray = ["SFX", "Weapons", "Zombies"]
 const MUFFLE_OPEN_HZ: float = 20000.0
 const MUFFLE_CLOSED_HZ: float = 900.0
+const AUDIO_ZONE_LAYER: int = 1 << 9  # physics layer 10 "audio_zone" (ReverbZone areas)
+# Reverb presets for ReverbZone areas: name -> [room size, damping, wet, pre-delay ms, spread].
+const REVERBS: Dictionary = {
+	&"Reverb_Room": [0.35, 0.6, 0.18, 15.0, 0.6],
+	&"Reverb_Hall": [0.7, 0.45, 0.28, 35.0, 0.9],
+	&"Reverb_Tunnel": [0.6, 0.25, 0.32, 25.0, 0.4],
+	&"Reverb_Industrial": [0.65, 0.35, 0.3, 30.0, 0.8],
+	&"Reverb_Tile": [0.5, 0.15, 0.3, 12.0, 0.7],
+	&"Reverb_Cavern": [0.95, 0.3, 0.42, 60.0, 1.0],
+	&"Reverb_Exterior": [0.25, 0.8, 0.06, 5.0, 1.0],
+}
 
 var muffle_amount: float = 0.0
 
@@ -33,6 +44,7 @@ func _ready() -> void:
 		var p3: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 		p3.unit_size = 6.0
 		p3.max_distance = 45.0
+		p3.area_mask = 1 | AUDIO_ZONE_LAYER
 		add_child(p3)
 		_players_3d.append(p3)
 	_setup_muffle()
@@ -54,6 +66,28 @@ func ensure_buses() -> void:
 			var idx: int = AudioServer.bus_count - 1
 			AudioServer.set_bus_name(idx, bus_name)
 			AudioServer.set_bus_send(idx, &"Master")
+
+
+# Creates (once) a reverb send bus for ReverbZone areas; returns its name ("" if unknown preset).
+func ensure_reverb_bus(preset: StringName) -> StringName:
+	if not REVERBS.has(preset):
+		return &""
+	if AudioServer.get_bus_index(preset) != -1:
+		return preset
+	AudioServer.add_bus()
+	var idx: int = AudioServer.bus_count - 1
+	AudioServer.set_bus_name(idx, preset)
+	AudioServer.set_bus_send(idx, &"Master")
+	var r: Array = REVERBS[preset]
+	var fx: AudioEffectReverb = AudioEffectReverb.new()
+	fx.room_size = float(r[0])
+	fx.damping = float(r[1])
+	fx.wet = float(r[2])
+	fx.dry = 0.0
+	fx.predelay_msec = float(r[3])
+	fx.spread = float(r[4])
+	AudioServer.add_bus_effect(idx, fx)
+	return preset
 
 
 func bus_names() -> PackedStringArray:

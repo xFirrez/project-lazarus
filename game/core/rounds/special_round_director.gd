@@ -37,6 +37,7 @@ var last_warden_round: int = -100
 var _lights: Array = []  # [Light3D, base colour, base energy]
 var _env: Environment = null
 var _env_base: Array = []  # [fog density, fog colour]
+var _lights_idle: bool = false
 var _t: float = 0.0
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
@@ -76,7 +77,7 @@ func _collect_presentation() -> void:
 			_env_base = [_env.fog_density, _env.fog_light_color]
 			break
 	for n: Node in root.find_children("*", "Light3D", true, false):
-		if n is DirectionalLight3D or _lights.size() >= MAX_FLICKER_LIGHTS:
+		if n is DirectionalLight3D or n.is_in_group(&"light_animated") or _lights.size() >= MAX_FLICKER_LIGHTS:
 			continue
 		var l: Light3D = n as Light3D
 		_lights.append([l, l.light_color, l.light_energy])
@@ -118,8 +119,17 @@ func _start_warning(enemy: StringName) -> void:
 
 func _apply_atmosphere(u: float) -> void:
 	if _env != null and not _env_base.is_empty():
-		_env.fog_density = lerpf(float(_env_base[0]), float(_env_base[0]) * FOG_DENSITY_SCALE, u)
-		_env.fog_light_color = (_env_base[1] as Color).lerp(STORM_COLOR, u * 0.6)
+		if _env.has_meta(&"atmosphere_presenter"):
+			# A per-zone atmosphere presenter owns the fog: it folds the storm in from this meta.
+			_env.set_meta(&"storm_u", u)
+		else:
+			_env.fog_density = lerpf(float(_env_base[0]), float(_env_base[0]) * FOG_DENSITY_SCALE, u)
+			_env.fog_light_color = (_env_base[1] as Color).lerp(STORM_COLOR, u * 0.6)
+	# Lights are only touched while the atmosphere is (or was just) up, so they stay free for
+	# other presenters the rest of the time.
+	if u <= 0.0 and _lights_idle:
+		return
+	_lights_idle = u <= 0.0
 	for e: Array in _lights:
 		var l: Light3D = e[0] as Light3D
 		if not is_instance_valid(l):

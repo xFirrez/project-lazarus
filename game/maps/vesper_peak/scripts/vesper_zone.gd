@@ -4,48 +4,23 @@
 # `Audio/`, and reports its navigation tile boxes (`nav_areas`) to the map root, which bakes one
 # tile per area (NavTiles). Coordinates are map-global; datum y 0 = the Arrival Station floor
 # (+28 m real elevation). Axes: +X east, +Z north.
-# Subclasses override `build()`.
+# Subclasses override `build()` (greybox + gameplay, Step 8) and `dress()` (Step 13 art pass:
+# everything under `Art/` — props, fixtures, decals, signage, FX, reverb zones and vignettes —
+# is visual only and never moves or adds gameplay nodes; D-076). `trim` picks the automatic
+# architectural trim pass run over the zone's wall boxes after dressing.
 # Authority: static map data; doors / barricades / machines replicate through core systems.
 class_name VesperZone
-extends Node3D
+extends VesperZoneArt
 
 const WALL_T: float = 0.4
 const SLAB_T: float = 0.5
-const CASCADE_STEP: float = 0.7  # power-on cascade delay per zone step (s)
-const STYLES: Dictionary = {
-	&"concrete": ["res://content/materials/stone_grey.tres", &"concrete"],
-	&"marble": ["res://content/materials/marble_floor.tres", &"tile"],
-	&"tile": ["res://content/materials/marble_floor_wet.tres", &"tile"],
-	&"wood": ["res://content/materials/wood_dark.tres", &"wood"],
-	&"metal": ["res://content/materials/metal_dark.tres", &"metal"],
-	&"olive": ["res://content/materials/metal_olive.tres", &"metal"],
-	&"snow": ["res://content/materials/cobble_snow.tres", &"snow"],
-	&"cobble": ["res://content/materials/cobble_icy.tres", &"gravel"],
-	&"plaster": ["res://content/materials/plaster_rose.tres", &"concrete"],
-	&"facade": ["res://content/materials/stone_facade.tres", &"concrete"],
-	&"stone": ["res://content/materials/stone_grey.tres", &"concrete"],
-	&"ice": ["res://content/materials/ice.tres", &"tile"],
-	&"brass": ["res://content/materials/brass.tres", &"metal"],
-	&"vesperite": ["res://content/materials/vesperite.tres", &"tile"],
-	&"sandbag": ["res://content/materials/sandbag.tres", &"gravel"],
-}
 
-static var _mats: Dictionary = {}
-
-@export var zone_id: StringName = &""
-@export var display_name: String = ""
-@export var cascade: int = 0  # power-on order (lights wake after cascade × CASCADE_STEP s)
-
-var geometry: Node3D = null
-var gameplay: Node3D = null
-var lighting: Node3D = null
-var audio: Node3D = null
 var nav_areas: Array[AABB] = []
 var occluders: int = 0
 
 
 func _ready() -> void:
-	for n: String in ["Geometry", "Gameplay", "Lighting", "Audio"]:
+	for n: String in ["Geometry", "Gameplay", "Lighting", "Audio", "Art"]:
 		var c: Node3D = Node3D.new()
 		c.name = n
 		add_child(c)
@@ -53,10 +28,20 @@ func _ready() -> void:
 	gameplay = $Gameplay
 	lighting = $Lighting
 	audio = $Audio
+	art = $Art
 	build()
+	dress()
+	if trim != "":
+		_auto_trim()
+	batch_static()
+	set_process(not _spinners.is_empty())
 
 
 func build() -> void:
+	pass
+
+
+func dress() -> void:
 	pass
 
 
@@ -112,12 +97,6 @@ func clip(node_name: String, center: Vector3, size: Vector3, yaw: float = 0.0) -
 	b.add_child(cs)
 	gameplay.add_child(b)
 	return b
-
-
-static func _basis_along(dir: Vector3) -> Basis:
-	# Local -Z points along `dir` (pitched), local Y is the slope normal.
-	var up: Vector3 = Vector3.UP if absf(dir.normalized().y) < 0.99 else Vector3.FORWARD
-	return Basis.looking_at(dir.normalized(), up)
 
 
 # Sloped (or flat) floor whose TOP surface runs from `a` to `b` (centre line).
@@ -223,7 +202,11 @@ func _wall(prefix: String, along_z: bool, fixed: float, dims: Vector4, openings:
 		if float(o[2]) > 0.0:
 			_wall_box("%s_%d" % [prefix, n], along_z, fixed, lo, hi, y0, y0 + float(o[2]), style)
 			n += 1
-		_wall_box("%s_%d" % [prefix, n], along_z, fixed, lo, hi, y0 + float(o[3]), y0 + h, style)
+		var lintel: StaticBody3D = _wall_box(
+			"%s_%d" % [prefix, n], along_z, fixed, lo, hi, y0 + float(o[3]), y0 + h, style
+		)
+		if lintel != null:
+			lintel.set_meta(&"wall_part", &"lintel")
 		n += 1
 		cursor = maxf(cursor, hi)
 	if cursor < a1:
@@ -232,13 +215,13 @@ func _wall(prefix: String, along_z: bool, fixed: float, dims: Vector4, openings:
 
 func _wall_box(
 	node_name: String, along_z: bool, fixed: float, a0: float, a1: float, y0: float, y1: float, style: StringName
-) -> void:
+) -> StaticBody3D:
 	if a1 - a0 < 0.01 or y1 - y0 < 0.01:
-		return
+		return null
 	var mid: float = (a0 + a1) * 0.5
 	var c: Vector3 = Vector3(fixed, (y0 + y1) * 0.5, mid) if along_z else Vector3(mid, (y0 + y1) * 0.5, fixed)
 	var s: Vector3 = Vector3(WALL_T, y1 - y0, a1 - a0) if along_z else Vector3(a1 - a0, y1 - y0, WALL_T)
-	box(node_name, c, s, style)
+	return box(node_name, c, s, style)
 
 
 # A rectangular room from lo (x0, floor y, z0) to hi (x1, floor y + wall height, z1). `open`
@@ -276,18 +259,6 @@ func room(
 				wall_x("%s_E" % prefix, hi.x, lo.z, hi.z, y, h, ops, ws)
 			"W":
 				wall_x("%s_W" % prefix, lo.x, lo.z, hi.z, y, h, ops, ws)
-
-
-func _mat(style: StringName) -> Material:
-	if not _mats.has(style):
-		var st: Array = STYLES.get(style, STYLES[&"concrete"])
-		var m: Material = load(st[0]) as Material
-		if m == null:
-			var sm: StandardMaterial3D = StandardMaterial3D.new()
-			sm.albedo_color = Color(0.5, 0.5, 0.5)
-			m = sm
-		_mats[style] = m
-	return _mats[style]
 
 
 # --- gameplay -----------------------------------------------------------------------------------
@@ -540,14 +511,6 @@ func lamp(
 	pl.position = pos
 	lighting.add_child(pl)
 	return o
-
-
-func ambience(pos: Vector3, preset: StringName) -> void:
-	var m: Marker3D = Marker3D.new()
-	m.name = "Ambience_%s_%d" % [preset, audio.get_child_count()]
-	m.position = pos
-	m.set_meta(&"ambience", preset)
-	audio.add_child(m)
 
 
 # Occluder box (put it inside solid mass: floor slabs, thick rock) for occlusion culling.

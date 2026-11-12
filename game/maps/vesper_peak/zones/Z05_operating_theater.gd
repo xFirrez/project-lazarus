@@ -90,3 +90,122 @@ func build() -> void:
 	lamp(Vector3(87, Y + 2.6, -81), Color(0.8, 0.95, 1.0), 0.8, 6.0)
 	ambience(Vector3(74, Y + 3, -88), &"interior_wind")
 	occluder("Occ_Floor", Vector3(74, Y - 1.5, -88), Vector3(20, 2, 20))
+
+
+# --- Step 13 art pass (13B): the amphitheater, the glass dome, the apparatus, the scrub room -----
+
+
+func dress() -> void:
+	trim = "lab"
+	# The glass dome (the roof slab stays as invisible collision: glass). Snow falls through one
+	# broken pane in a single column; moonlight shafts down onto the apparatus.
+	hide_greybox("Theater_Roof")
+	var roof: Node = geometry.get_node_or_null("Theater_Roof")
+	if roof != null:
+		roof.set_meta(&"glass", true)
+	_dome(Vector3(74, Y + 10.0, -88), 11.0)
+	skin("Lamp", &"surgical_lamp", Vector3(0, 0.6, 0))
+	var lamp_s: SpotLight3D = spot_light(
+		Vector3(74, Y + 8.2, -88), Vector3(74, Y, -88), Color(0.92, 0.97, 1.0), 4.0, 14.0, 38.0, true
+	)
+	lamp_s.shadow_enabled = true
+	lamp_s.add_to_group(&"shadow_light")
+	lamp_s.set_meta(&"shadow_priority", 70)
+	spot_light(Vector3(68, Y + 16.0, -83), Vector3(73, Y, -87), Color(0.6, 0.7, 1.0), 1.4, 24.0, 12.0)
+	fx(AtmosFx.Kind.SNOW_DRIFT, Vector3(70, Y + 9.5, -84), Vector3(0.5, 0.2, 0.5), Vector3.DOWN)
+	decal(&"frost", Vector3(70, Y + 0.05, -84), Vector2(2.5, 2.5))
+	# The electroconvulsive apparatus: vesperite cells, cables, green arcs (Relay #2 sits on it).
+	for i: int in 4:
+		var a: float = TAU * i / 4.0 + PI / 4.0
+		var p: Vector3 = Vector3(74, Y, -88) + Vector3(cos(a), 0, sin(a)) * 2.2
+		prop(&"gas_tank", p, a)
+		deco("Cell_%d" % i, p + Vector3(0, 1.6, 0), Vector3(0.25, 0.4, 0.25), &"vesperite")
+		fx(AtmosFx.Kind.ENERGY, p + Vector3(0, 1.7, 0), Vector3(0.2, 0.2, 0.2))
+	fixture_light(&"", Vector3(74, Y + 2.2, -88), Color(0.4, 1.0, 0.55), 0.9, 6.0, PoweredLight.Pattern.BUZZ, false)
+	decal(&"scorch", Vector3(74, Y + 0.05, -88), Vector2(5, 5))
+	decal(&"blood", Vector3(72.0, Y + 0.05, -86.2), Vector2(1.5, 1.5), Vector3.UP, 0.8)
+	# Tiered seating on the gallery ring, facing the table.
+	for x: float in [69.0, 74.0, 79.0]:
+		prop(&"bench", Vector3(x, GAL, -79.4), PI)
+		prop(&"bench", Vector3(x, GAL, -96.6), 0.0)
+	for z: float in [-85.0, -91.0]:
+		prop(&"bench", Vector3(65.4, GAL, z), PI / 2.0)
+		prop(&"bench", Vector3(82.6, GAL, z), -PI / 2.0)
+	# Vignette 4: Varga's seat — a notebook and fogged glasses.
+	var v: Node3D = vignette(
+		"V04_VargaSeat", Vector3(65.5, GAL, -96.5), "Varga's gallery seat: a notebook and fogged glasses"
+	)
+	prop(&"chair", Vector3(0, 0, 0), PI / 4.0, v)
+	prop(&"notebook", Vector3(0.0, 0.48, 0.05), 0.3, v)
+	prop(&"glasses", Vector3(0.12, 0.49, -0.12), 1.0, v)
+	decal(&"frost", Vector3(65.5, GAL + 0.6, -96.5), Vector2(0.6, 0.6), Vector3.UP, 0.0, Color(1, 1, 1, 0.7))
+	# Scrub room: cabinets, gurney, linen; the laundry chute grate.
+	prop(&"cabinet", Vector3(89.6, Y, -79.6), -PI / 2.0)
+	prop(&"gurney", Vector3(86.5, Y, -83.2), PI / 2.0)
+	deco("ScrubSink", Vector3(84.6, Y + 0.85, -79.2), Vector3(1.2, 0.2, 0.5), &"enamel")
+	signage("BLANCHISSERIE · WÄSCHE", Vector3(89.75, Y + 2.3, -81), -PI / 2.0, 22, Color(0.9, 0.9, 0.85))
+	fixture_light(
+		&"fluoro", Vector3(87, Y + 3.0, -81), Color(0.82, 0.95, 1.0), 0.5, 6.0, PoweredLight.Pattern.FLICKER, true
+	)
+	for p: Vector3 in [Vector3(64.25, GAL + 2.2, -84), Vector3(83.75, GAL + 2.2, -92)]:
+		fixture_light(
+			&"sconce",
+			p,
+			Color(0.9, 0.95, 1.0),
+			0.5,
+			6.0,
+			PoweredLight.Pattern.NONE,
+			true,
+			0,
+			PI / 2.0 if p.x < 70 else -PI / 2.0
+		)
+	signage("AMPHITHÉÂTRE · OPERATIONSSAAL", Vector3(75, Y + 3.0, -78.25), PI, 26, Color(0.85, 0.85, 0.8))
+	reverb(&"Reverb_Tile", Vector3(64, 3.5, -98), Vector3(84, 14.0, -78))
+	reverb(&"Reverb_Room", Vector3(84, 3.5, -84), Vector3(90, 8.0, -78), 0.5)
+	ambience(Vector3(74, Y + 2, -88), &"lab_hum", 4.0)
+
+
+func _dome(c: Vector3, r: float) -> void:
+	var b: MeshBatch = MeshBatch.new()
+	var glass: Material = VesperProps.m(&"glass_clear")
+	var iron: Material = VesperProps.m(&"metal")
+	var sm: SphereMesh = SphereMesh.new()
+	sm.radius = r
+	sm.height = r
+	sm.is_hemisphere = true
+	sm.radial_segments = 24
+	sm.rings = 6
+	var dome: MeshInstance3D = MeshInstance3D.new()
+	dome.name = "GlassDome"
+	dome.mesh = sm
+	dome.material_override = glass
+	dome.position = c
+	dome.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	art.add_child(dome)
+	for i: int in 12:
+		var a: float = TAU * i / 12.0
+		for k: int in 6:
+			var t0: float = PI / 2.0 * float(k) / 6.0
+			var t1: float = PI / 2.0 * float(k + 1) / 6.0
+			var p0: Vector3 = c + Vector3(cos(a) * cos(t0), sin(t0), sin(a) * cos(t0)) * r
+			var p1: Vector3 = c + Vector3(cos(a) * cos(t1), sin(t1), sin(a) * cos(t1)) * r
+			var mid: Vector3 = (p0 + p1) * 0.5
+			var bs: Basis = _basis_along(p1 - p0)
+			b.add(MeshBatch.Shape.BOX, Vector3(0.12, 0.12, p0.distance_to(p1) + 0.05), Transform3D(bs, mid), iron)
+	for k: int in [1, 3]:
+		var t: float = PI / 2.0 * float(k) / 6.0
+		for i: int in 24:
+			var a0: float = TAU * i / 24.0
+			var a1: float = TAU * (i + 1) / 24.0
+			var p0: Vector3 = c + Vector3(cos(a0) * cos(t), sin(t), sin(a0) * cos(t)) * r
+			var p1: Vector3 = c + Vector3(cos(a1) * cos(t), sin(t), sin(a1) * cos(t)) * r
+			b.add(
+				MeshBatch.Shape.BOX,
+				Vector3(0.1, 0.1, p0.distance_to(p1) + 0.04),
+				Transform3D(_basis_along(p1 - p0), (p0 + p1) * 0.5),
+				iron
+			)
+	for side: Vector3 in [Vector3(1, 0, 0), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(0, 0, -1)]:
+		var sz: Vector3 = Vector3(0.6, 0.5, 2 * r) if absf(side.x) > 0.5 else Vector3(2 * r, 0.5, 0.6)
+		b.box(sz, c + side * (r - 0.3) + Vector3(0, 0.1, 0), VesperProps.m(&"stone"))
+	art.add_child(b.instance("DomeRibs", 160.0))

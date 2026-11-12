@@ -204,3 +204,188 @@ func _road() -> void:
 		var cl: StaticBody3D = clip("RampClip%d" % int(side), Vector3.ZERO, Vector3(0.3, 3.0, a2.distance_to(b2)))
 		cl.transform = Transform3D(bs, mid + bs.y * 2.0)
 	box_mm("CheckpointHut", Vector3(-3.6, -8.0, -81.8), Vector3(-1.0, -5.2, -78.4), &"olive")
+
+
+# --- Step 13 art pass (13A): the ridge plaza, the radar tower, the radio building, gondola station
+
+
+func dress() -> void:
+	trim = "military"
+	_tower_art()
+	# Antenna masts with guy wires.
+	for m: Vector3 in [Vector3(-2, Y, -110), Vector3(14, Y, -132)]:
+		var b: MeshBatch = MeshBatch.new()
+		b.cyl(0.12, 14.0, m + Vector3(0, 7.0, 0), VesperProps.m(&"metal"))
+		b.box(Vector3(2.4, 0.08, 0.08), m + Vector3(0, 13.0, 0), VesperProps.m(&"metal"))
+		for k: int in 3:
+			var a: float = TAU * k / 3.0 + 0.4
+			var top: Vector3 = m + Vector3(0, 12.0, 0)
+			var foot: Vector3 = m + Vector3(cos(a) * 5.0, 0.05, sin(a) * 5.0)
+			b.add(
+				MeshBatch.Shape.BOX,
+				Vector3(0.025, 0.025, top.distance_to(foot)),
+				Transform3D(_basis_along(top - foot), (top + foot) * 0.5),
+				VesperProps.m(&"black")
+			)
+		art.add_child(b.instance("AntennaMast", 140.0))
+		prop(&"beacon", m + Vector3(0, 14.0, 0))
+		fixture_light(&"", m + Vector3(0, 14.2, 0), Color(1.0, 0.1, 0.05), 1.0, 6.0, PoweredLight.Pattern.BLINK, false)
+	# Searchlight mounts (the lights themselves are map-level, VesperArt).
+	for x: float in [-16.0, 12.0]:
+		deco("SearchlightMount", Vector3(x, Y + 2.7, -101), Vector3(0.5, 5.4, 0.5), &"olive")
+		deco("SearchlightDeck", Vector3(x, Y + 5.3, -101), Vector3(1.6, 0.15, 1.6), &"metal")
+	# Radio room: consoles, the frozen operator (vignette 6), lockers.
+	skin("RadioDesk", &"radio_console", Vector3(0, 0, 0), PI / 2.0)
+	prop(&"radio_console", Vector3(18.8, Y, -106.5), -PI / 2.0)
+	prop(&"filing_cabinet", Vector3(19.4, Y, -109.2), -PI / 2.0)
+	var v: Node3D = vignette(
+		"V06_FrozenOperator",
+		Vector3(12.5, Y, -102),
+		"a radio operator still seated, frozen solid, headphones on",
+		PI * 0.85
+	)
+	prop(&"frozen_operator", Vector3.ZERO, 0.0, v)
+	deco("OperatorDesk", Vector3(12.5, Y + 0.78, -101.0), Vector3(1.6, 0.06, 0.7), &"wood")
+	var set_top: MeshInstance3D = prop(&"radio_console", Vector3(12.5, Y + 0.8, -100.6), PI, v)
+	set_top.scale = Vector3(0.45, 0.45, 0.45)
+	decal(&"frost", Vector3(12.5, Y + 0.05, -102), Vector2(2.4, 2.4))
+	skin("DeckLockers", &"cabinet", Vector3(-0.4, 0, 0), PI)
+	prop(&"cabinet", Vector3(19.2, Y + 4.5, -102), PI)
+	fixture_light(
+		&"caged_bulb",
+		Vector3(14, Y + 3.8, -105),
+		Color(1.0, 0.78, 0.5),
+		0.8,
+		7.0,
+		PoweredLight.Pattern.FLICKER,
+		true,
+		25
+	)
+	signage("FUNKSTATION · RADIO ROOM", Vector3(14, Y + 2.9, -110.25), PI, 24, Color(0.92, 0.9, 0.82))
+	signage("GROUP VESPER — KOMMANDOSTATION VESPERHÖHE", Vector3(0, Y + 3.6, -99.75), PI, 34, Color(0.92, 0.9, 0.82))
+	# The climbing club plaque (Ice Axe wall-buy).
+	deco("ClubPlaque", Vector3(-19.75, Y + 2.6, -118), Vector3(0.06, 0.8, 1.6), &"wood")
+	signage("ALPENVEREIN VESPERHÖHE · 1911", Vector3(-19.7, Y + 2.9, -118), PI / 2.0, 20, Color(0.95, 0.85, 0.55))
+	# Gondola upper station.
+	signage("GONDEL > BERGSTATION", Vector3(-4.5, Y + 3.5, -99.8), PI, 22, Color(0.92, 0.9, 0.82))
+	fixture_light(
+		&"caged_bulb", Vector3(-4.5, Y + 3.9, -97.5), Color(1.0, 0.78, 0.5), 0.6, 6.0, PoweredLight.Pattern.SWING, true
+	)
+	# Generator shed.
+	signage("AGGREGAT · GENERATOR", Vector3(-14, Y + 3.0, -137.75), 0.0, 22, Color(0.95, 0.8, 0.2))
+	decal(&"hazard_stripes", Vector3(-14, Y + 0.05, -137.0), Vector2(2.4, 0.6))
+	prop(&"drum_rack", Vector3(-17.5, Y, -136.5), 0.0)
+	prop(&"crate_stack", Vector3(16.5, Y, -135.5), 0.3)
+	_sky_bridge()
+	# Sky Bridge: swinging caged bulbs.
+	for t: float in [0.2, 0.5, 0.8]:
+		var p: Vector3 = Vector3(64.0, 7.0, -88.0).lerp(Vector3(20.0, Y, -112.0), t)
+		fixture_light(
+			&"caged_bulb", p + Vector3(0, 3.0, 0), Color(1.0, 0.75, 0.45), 0.6, 7.0, PoweredLight.Pattern.SWING, true
+		)
+	# Storm FX, frost, acoustics.
+	fx(AtmosFx.Kind.SNOW_DRIFT, Vector3(0, Y + 1.2, -119), Vector3(19, 0.8, 18), Vector3(1, 0, 0.2))
+	fx(AtmosFx.Kind.HAZE, Vector3(0, Y + 2.0, -119), Vector3(18, 1.2, 18))
+	for p: Vector3 in [Vector3(-12, Y + 0.05, -108), Vector3(6, Y + 0.05, -128), Vector3(-6, Y + 0.05, -118)]:
+		decal(&"frost", p, Vector2(4, 4), Vector3.UP, p.x)
+	decal(&"blood", Vector3(2, Y + 0.05, -114), Vector2(1.6, 1.6), Vector3.UP, 0.3)
+	reverb(&"Reverb_Exterior", Vector3(-20, 16.5, -138), Vector3(20, 32.0, -100))
+	reverb(&"Reverb_Room", Vector3(8, 16.5, -110), Vector3(20, 21.0, -100), 0.6)
+	ambience(Vector3(12, Y + 1.5, -104), &"radio_static")
+
+
+# The 35 m lattice radar tower (the map's landmark): cross-braced legs, a rotating dish and blinking
+# red aircraft lights at the top (VESPER_PEAK §3 Z07 / §8.2).
+func _tower_art() -> void:
+	var b: MeshBatch = MeshBatch.new()
+	var steel: Material = VesperProps.m(&"metal")
+	var legs: Array[Vector3] = [
+		Vector3(-16, 0, -130), Vector3(-8, 0, -130), Vector3(-8, 0, -122), Vector3(-16, 0, -122)
+	]
+	for f: int in 4:
+		var a: Vector3 = legs[f]
+		var c: Vector3 = legs[(f + 1) % 4]
+		var y0: float = Y + 1.0
+		while y0 < Y + 33.0:
+			var y1: float = y0 + 4.0
+			for pair: Array in [
+				[a + Vector3(0, y0, 0), c + Vector3(0, y1, 0)], [c + Vector3(0, y0, 0), a + Vector3(0, y1, 0)]
+			]:
+				var p0: Vector3 = pair[0]
+				var p1: Vector3 = pair[1]
+				b.add(
+					MeshBatch.Shape.BOX,
+					Vector3(0.12, 0.12, p0.distance_to(p1)),
+					Transform3D(_basis_along(p1 - p0), (p0 + p1) * 0.5),
+					steel
+				)
+			b.box(Vector3(absf(c.x - a.x) + 0.2, 0.15, absf(c.z - a.z) + 0.2), (a + c) * 0.5 + Vector3(0, y1, 0), steel)
+			y0 = y1
+	art.add_child(b.instance("TowerLattice", 400.0))
+	hide_greybox("Dish")
+	var dish_pivot: Node3D = Node3D.new()
+	dish_pivot.name = "RadarDish"
+	dish_pivot.position = Vector3(-12, Y + 35.6, -126)
+	art.add_child(dish_pivot)
+	var d: MeshBatch = MeshBatch.new()
+	d.cyl(0.4, 1.2, Vector3(0, 0.6, 0), steel)
+	d.box(Vector3(7.0, 2.6, 0.25), Vector3(0, 2.0, 0.4), steel, Vector3(-0.25, 0, 0))
+	for i: int in 6:
+		d.box(Vector3(0.1, 2.6, 0.6), Vector3(-3.0 + i * 1.2, 2.0, 0.6), steel, Vector3(-0.25, 0, 0))
+	d.box(Vector3(0.15, 0.15, 1.6), Vector3(0, 2.0, 1.4), steel)
+	var dmi: MeshInstance3D = d.instance("Dish", 400.0)
+	dish_pivot.add_child(dmi)
+	spin(dish_pivot, Vector3.UP, 0.6)
+	for l: Vector3 in legs:
+		var top: Vector3 = l + Vector3(0, Y + 35.1, 0)
+		prop(&"beacon", top)
+		fixture_light(
+			&"", top + Vector3(0, 0.3, 0), Color(1.0, 0.08, 0.04), 1.5, 10.0, PoweredLight.Pattern.BLINK, false
+		)
+
+
+# The Sky Bridge reads as an open iron footbridge: the greybox walls / roof stay as invisible
+# collision (marked `glass` for sightline checks) and the art adds deck planks, posts and rails.
+func _sky_bridge() -> void:
+	var a: Vector3 = Vector3(64.0, 7.0, -88.0)
+	var e: Vector3 = Vector3(20.0, Y, -112.0)
+	for n: String in ["SkyBridge_WallL", "SkyBridge_WallR", "SkyBridge_Roof"]:
+		hide_greybox(n)
+		var body: Node = geometry.get_node_or_null(n)
+		if body != null:
+			body.set_meta(&"glass", true)
+	var bs: Basis = _basis_along(e - a)
+	var b: MeshBatch = MeshBatch.new()
+	var iron: Material = VesperProps.m(&"metal")
+	var n_posts: int = 16
+	for i: int in n_posts + 1:
+		var p: Vector3 = a.lerp(e, float(i) / n_posts)
+		for side: float in [-1.0, 1.0]:
+			b.add(
+				MeshBatch.Shape.BOX,
+				Vector3(0.1, 1.2, 0.1),
+				Transform3D(Basis.IDENTITY, p + bs.x * side * 1.65 + Vector3(0, 0.6, 0)),
+				iron
+			)
+	for side: float in [-1.0, 1.0]:
+		for h: float in [1.15, 0.6]:
+			var p0: Vector3 = a + bs.x * side * 1.65 + Vector3(0, h, 0)
+			var p1: Vector3 = e + bs.x * side * 1.65 + Vector3(0, h, 0)
+			b.add(MeshBatch.Shape.BOX, Vector3(0.06, 0.06, p0.distance_to(p1)), Transform3D(bs, (p0 + p1) * 0.5), iron)
+	# Lattice trusses under the deck.
+	for i: int in n_posts:
+		var p2: Vector3 = a.lerp(e, (float(i) + 0.5) / n_posts)
+		b.add(MeshBatch.Shape.BOX, Vector3(3.4, 0.12, 0.12), Transform3D(bs, p2 + Vector3(0, -0.9, 0)), iron)
+		b.add(
+			MeshBatch.Shape.BOX,
+			Vector3(0.12, 1.6, 0.12),
+			Transform3D(bs * Basis(Vector3.RIGHT, 0.7), p2 + bs.x * 1.6 + Vector3(0, -0.6, 0)),
+			iron
+		)
+		b.add(
+			MeshBatch.Shape.BOX,
+			Vector3(0.12, 1.6, 0.12),
+			Transform3D(bs * Basis(Vector3.RIGHT, 0.7), p2 - bs.x * 1.6 + Vector3(0, -0.6, 0)),
+			iron
+		)
+	art.add_child(b.instance("SkyBridgeRails", 160.0))

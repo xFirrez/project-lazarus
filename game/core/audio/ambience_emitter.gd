@@ -9,19 +9,26 @@ extends Node3D
 @export var volume_db: float = -8.0
 @export var spatial: bool = false
 @export var unit_size: float = 6.0
+@export var max_distance: float = 0.0  # 0 = unlimited (Godot default)
 
 var player: Node = null
 
 
 func _ready() -> void:
-	AmbienceLibrary.ensure_registered()
-	var stream: AudioStream = AmbienceLibrary.stream(event)
+	add_to_group(&"ambience_emitter")
+	# Headless runs (tests, sims, dedicated tools) skip the synthesis: nobody can hear it.
+	var silent: bool = DisplayServer.get_name() == "headless"
+	if not silent:
+		AmbienceLibrary.ensure_registered()
+	var stream: AudioStream = null if silent else AmbienceLibrary.stream(event)
 	if spatial:
 		var p3: AudioStreamPlayer3D = AudioStreamPlayer3D.new()
 		p3.stream = stream
 		p3.bus = &"Ambience"
 		p3.volume_db = volume_db
 		p3.unit_size = unit_size
+		p3.max_distance = max_distance
+		p3.area_mask = 1 | Audio.AUDIO_ZONE_LAYER
 		p3.autoplay = true
 		player = p3
 	else:

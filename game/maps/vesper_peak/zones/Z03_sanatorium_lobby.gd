@@ -73,3 +73,120 @@ func build() -> void:
 	lamp(Vector3(25, 2.0, -3), Color(0.9, 0.85, 0.7), 0.8, 9.0)
 	ambience(Vector3(53, -5, -3), &"interior_wind")
 	occluder("Occ_Floor", Vector3(53, Y - 1.5, -3), Vector3(30, 2, 22))
+
+
+# --- Step 13 art pass (13B): Belle Époque lobby, mezzanine, S1 office shell ----------------------
+
+
+func dress() -> void:
+	trim = "sanatorium"
+	var warm: Color = Color(1.0, 0.72, 0.42)
+	skin("ReceptionDesk", &"desk", Vector3(-1.2, 0, 0), PI)
+	prop(&"desk", Vector3(54.2, Y, -6), PI)
+	prop(&"reception_switchboard", Vector3(56.5, Y, -7.6), 0.0)
+	fx(AtmosFx.Kind.SPARKS, Vector3(56.5, Y + 1.7, -7.3), Vector3(0.3, 0.1, 0.1), Vector3.FORWARD).set_meta(
+		&"note", "switchboard"
+	)
+	fixture_light(
+		&"", Vector3(56.5, Y + 1.8, -7.0), Color(1.0, 0.8, 0.5), 0.5, 4.0, PoweredLight.Pattern.FLICKER, false
+	)
+	skin("Clock", &"clock", Vector3.ZERO, PI)
+	skin("Chandelier", &"chandelier_fallen", Vector3(0, 0, 0), 0.4)
+	# Chequered floor accents + frost cracks; rugs.
+	for i: int in 6:
+		decal(
+			&"frost",
+			Vector3(40.0 + i * 5.0, Y + 0.05, 7.0 - (i % 2) * 2.0),
+			Vector2(3.0, 3.0),
+			Vector3.UP,
+			i * 1.1,
+			Color(1, 1, 1, 0.6)
+		)
+	deco("Rug", Vector3(53, Y + 0.01, -1.5), Vector3(7.0, 0.02, 4.0), &"red_paint")
+	decal(&"grime", Vector3(53, Y + 0.05, -1.5), Vector2(6, 4))
+	decal(&"water_stain", Vector3(44, Y + 0.05, -9), Vector2(3, 3), Vector3.UP, 0.4)
+	decal(&"blood", Vector3(46, Y + 0.05, 6.6), Vector2(1.6, 1.6), Vector3.UP, 2.4)
+	decal(&"handprints", Vector3(54, Y + 1.4, 7.75), Vector2(1.2, 1.2), Vector3.FORWARD)
+	# Lounge furniture along the walls (clear of the hub paths).
+	prop(&"armchair", Vector3(40.2, Y, -12.4), PI / 4.0)
+	prop(&"armchair", Vector3(66.8, Y, -1.0), -PI / 2.0)
+	prop(&"bench", Vector3(46, Y, -13.5), 0.0)
+	prop(&"book_pile", Vector3(40.4, Y, -12.0), 0.3)
+	# Vignette 2: the founder's portrait slashed; the Group Vesper banner over the original crest.
+	var v: Node3D = vignette(
+		"V02_Portrait",
+		Vector3(53, Y + 5.6, 7.78),
+		"the founder's portrait slashed; Group Vesper banner over the crest",
+		PI
+	)
+	prop(&"portrait_slashed", Vector3(-6.0, -0.6, 0), 0.0, v)
+	prop(&"crest", Vector3(0, 0.4, 0), 0.0, v)
+	prop(&"banner", Vector3(0, 2.1, -0.06), 0.0, v)
+	prop(&"portrait", Vector3(6.0, -0.6, 0), 0.0, v)
+	signage("SANATORIUM VESPERHÖHE · MDCCCXCVIII", Vector3(53, Y + 8.4, 7.75), PI, 46, Color(0.85, 0.72, 0.45))
+	signage("REQUISITIONED — GROUP VESPER — 1951", Vector3(44, Y + 2.2, -13.75), 0.0, 22, Color(0.92, 0.92, 0.85))
+	signage("ACCUEIL · EMPFANG", Vector3(53, Y + 2.4, -6.62), 0.0, 24, Color(0.95, 0.85, 0.6))
+	# Mezzanine: the reel desk, bookcases (S1 entrance at the west end).
+	prop(&"bookcase", Vector3(39.3, MEZZ, 7.4), PI)
+	prop(&"bookcase", Vector3(41.2, MEZZ, 7.75), PI)
+	prop(&"desk", Vector3(42.5, MEZZ, 6.6), PI)
+	prop(&"chair", Vector3(42.5, MEZZ, 5.8), PI)
+	_director_office()
+	# Lights: warm sconces (power), the chandelier hall lamp (shadowed), moon shafts from the windows.
+	for p: Vector3 in [
+		Vector3(38.25, Y + 2.6, 3),
+		Vector3(67.75, Y + 2.6, -4),
+		Vector3(38.25, Y + 2.6, -4),
+		Vector3(46, Y + 2.6, -13.75),
+		Vector3(60, Y + 2.6, -13.75)
+	]:
+		var yaw: float = PI / 2.0 if p.x < 39 else (-PI / 2.0 if p.x > 67 else 0.0)
+		fixture_light(&"sconce", p, warm, 0.8, 7.0, PoweredLight.Pattern.NONE, true, 0, yaw)
+	fixture_light(&"pendant", Vector3(53, Y + 7.6, -3), warm, 1.8, 18.0, PoweredLight.Pattern.NONE, true, 55)
+	for wx: float in [46.0, 54.0]:
+		spot_light(Vector3(wx, Y + 5.5, 10.5), Vector3(wx - 1.0, Y, 2.0), Color(0.6, 0.7, 1.0), 1.4, 20.0, 16.0)
+	fx(AtmosFx.Kind.DUST, Vector3(53, Y + 4.0, -2), Vector3(12, 3.5, 8))
+	fx(AtmosFx.Kind.DUST, Vector3(25, -3.0, -3), Vector3(8, 1.5, 1.2))
+	# Walkway: frost and drifting snow through the broken roof lights.
+	decal(&"frost", Vector3(17, 0.05, -3), Vector2(3, 3))
+	fx(AtmosFx.Kind.SNOW_DRIFT, Vector3(18, 2.8, -3), Vector3(1.0, 0.2, 1.0), Vector3.DOWN)
+	reverb(&"Reverb_Hall", Vector3(38, -8.5, -14), Vector3(68, 1.0, 8))
+	reverb(&"Reverb_Room", Vector3(13.2, -8.5, -4.6), Vector3(38, 4.0, -1.4), 0.5)
+	ambience(Vector3(48, -6, -8), &"room_tone")
+
+
+# S1 Director's Office behind the mezzanine bookcase (VESPER_PEAK §3 S1): the room shell and its
+# dressing (map table, Haemmer's pistol case, files). Visual only — Step 14 opens the bookcase and
+# adds the walkable floor, collision and navigation.
+func _director_office() -> void:
+	var lo: Vector3 = Vector3(33.0, MEZZ, 2.6)
+	var hi: Vector3 = Vector3(37.8, MEZZ + 3.2, 8.2)
+	deco(
+		"S1_Floor",
+		Vector3((lo.x + hi.x) * 0.5, MEZZ - 0.1, (lo.z + hi.z) * 0.5),
+		Vector3(hi.x - lo.x, 0.2, hi.z - lo.z),
+		&"wood"
+	)
+	deco(
+		"S1_Ceiling",
+		Vector3((lo.x + hi.x) * 0.5, hi.y, (lo.z + hi.z) * 0.5),
+		Vector3(hi.x - lo.x, 0.2, hi.z - lo.z),
+		&"plaster"
+	)
+	deco("S1_WallW", Vector3(lo.x, MEZZ + 1.6, (lo.z + hi.z) * 0.5), Vector3(0.2, 3.2, hi.z - lo.z), &"plaster")
+	deco("S1_WallN", Vector3((lo.x + hi.x) * 0.5, MEZZ + 1.6, hi.z), Vector3(hi.x - lo.x, 3.2, 0.2), &"plaster")
+	deco("S1_WallS", Vector3((lo.x + hi.x) * 0.5, MEZZ + 1.6, lo.z), Vector3(hi.x - lo.x, 3.2, 0.2), &"plaster")
+	var v: Node3D = vignette(
+		"S1_DirectorsOffice",
+		Vector3(35.4, MEZZ, 5.4),
+		"Director's Office: survey map table, Haemmer's service pistol case, files"
+	)
+	deco("S1_MapTable", Vector3(35.4, MEZZ + 0.8, 5.6), Vector3(1.8, 0.06, 1.2), &"wood")
+	deco("S1_Map", Vector3(35.4, MEZZ + 0.84, 5.6), Vector3(1.6, 0.01, 1.0), &"paper")
+	prop(&"filing_cabinet", Vector3(33.5, MEZZ, 7.6), PI / 2.0, v)
+	prop(&"filing_cabinet", Vector3(33.5, MEZZ, 3.4), PI / 2.0, v)
+	deco("S1_PistolCase", Vector3(34.0, MEZZ + 1.2, 5.6), Vector3(0.1, 0.5, 0.8), &"glass_clear")
+	prop(&"book_pile", Vector3(36.6, MEZZ + 0.84, 5.2), 0.5)
+	fixture_light(
+		&"", Vector3(35.4, MEZZ + 2.6, 5.4), Color(1.0, 0.7, 0.4), 0.5, 4.5, PoweredLight.Pattern.FLICKER, false
+	)

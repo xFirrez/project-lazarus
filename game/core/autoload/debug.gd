@@ -67,6 +67,7 @@ func _register_builtin_commands() -> void:
 	ProgressionCommands.register(commands)
 	WonderCommands.register(commands)
 	RenderCommands.register(commands)
+	AtmosphereCommands.register(commands)
 	ZombieCommands.register(commands)
 	SurvivalCommands.register(commands)
 	MapCommands.register(commands)

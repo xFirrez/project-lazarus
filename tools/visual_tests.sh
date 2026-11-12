@@ -30,7 +30,7 @@ run_visual() { # name map resolution [session args...]
   local log="$ROOT/.test-results/visual_${name}.log" json="$ROOT/.test-results/visual_${name}.json"
   rm -f "$json"
   set +e
-  timeout 280 "${runner[@]}" "$GODOT" --path "$GAME_DIR" --audio-driver Dummy "${DRIVER[@]}" --resolution "$res" \
+  timeout "${VISUAL_TIMEOUT:-280}" "${runner[@]}" "$GODOT" --path "$GAME_DIR" --audio-driver Dummy "${DRIVER[@]}" --resolution "$res" \
     -- "${session[@]}" --map="$map" --profile=visual --autotest="res://tests/visual/${name}.gd" \
     --autotest-out="$json" --autotest-shots="$OUT" >"$log" 2>&1
   set -e
@@ -56,6 +56,7 @@ for t in "${TESTS[@]}"; do
     survivor_showcase) run_visual survivor_showcase vesper_peak 1280x720 || fail=1 ;;
     perk_showcase) run_visual perk_showcase vesper_peak 1280x720 || fail=1 ;;
     forge_showcase) run_visual forge_showcase vesper_peak 1280x720 || fail=1 ;;
+    vesper_art) run_visual vesper_art vesper_peak 1280x720 --solo ${VESPER_SHOTS:+--shots=$VESPER_SHOTS} || fail=1 ;;
     lobby_ui) run_visual lobby_ui vesper_peak 1280x720 --host=24599 --lobby || fail=1 ;;
     *) echo "unknown visual test $t" >&2; fail=1 ;;
   esac

@@ -31,3 +31,6 @@ game/content/props/**/*.glb -filter -diff -merge -text
 game/content/characters/**/*.glb -filter -diff -merge -text
 game/content/enemies/**/*.glb -filter -diff -merge -text
 game/content/weapons/m1911/*.glb -filter -diff -merge -text
+
+# Script-generated decal textures (tools/art/gen_decals.py, Step 13): normal git blobs
+game/content/decals/*.png -filter -diff -merge -text

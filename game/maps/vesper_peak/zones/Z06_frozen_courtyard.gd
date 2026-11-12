@@ -9,6 +9,7 @@ extends VesperZone
 
 const Y: float = -8.0
 const LIFT_C: Vector3 = Vector3(65.5, -8.0, -31.5)
+const PROPS: String = "res://content/props/%s/%s.glb"
 
 
 func build() -> void:
@@ -173,3 +174,155 @@ func _lift() -> void:
 		c.machine_path = c.get_path_to(lift)
 		c.machine = lift
 	lift.refresh()
+
+
+# --- Step 13 art pass (13A): the storm courtyard, motor pool, fountain, façade, waterfall ---------
+
+
+func dress() -> void:
+	trim = "exterior"
+	# Vehicles and the fountain: authored props over the greybox colliders.
+	for t: Array in [["Truck1", 0.0], ["Truck2", PI], ["HalfTrack", 0.1]]:
+		hide_greybox(String(t[0]))
+		var body: Node3D = geometry.get_node(String(t[0])) as Node3D
+		var truck: Node3D = glb(
+			PROPS % ["truck_cargo", "truck_cargo"],
+			body.position - Vector3(0, body.position.y - Y, 0),
+			float(t[1]),
+			0.95 if t[0] == "HalfTrack" else 1.0
+		)
+		if truck != null:
+			truck.name = "Prop_%s" % t[0]
+		# Red emergency beacons on the cab roofs.
+		var cab: Vector3 = body.position + Vector3(0, 1.45, 2.3 if float(t[1]) < 1.0 else -2.3)
+		prop(&"beacon", cab)
+		fixture_light(
+			&"", cab + Vector3(0, 0.25, 0), Color(1.0, 0.12, 0.08), 1.2, 7.0, PoweredLight.Pattern.BLINK, false
+		)
+	skin("Jeep", &"jeep_overturned", Vector3.ZERO, 0.4)
+	for f: String in ["FountainBase", "FountainMid", "FountainTop"]:
+		hide_greybox(f)
+	glb(PROPS % ["fountain_frozen", "fountain_frozen"], Vector3(28, Y, -49), 0.0, 1.1)
+	prop(&"icicles", Vector3(28, Y + 2.6, -45.6), 0.0)
+	prop(&"icicles", Vector3(28, Y + 2.6, -52.4), PI)
+	for s: String in ["SandbagsA", "SandbagsB"]:
+		hide_greybox(s)
+	# Two 4 m sandbag pieces per 6 m line, two courses high.
+	for i: int in 2:
+		for o: float in [-1.0, 1.0]:
+			glb(PROPS % ["sandbag_wall", "sandbag_wall"], Vector3(18 + o + i * 0.1, Y + i * 0.45, -30), 0.0)
+			glb(PROPS % ["sandbag_wall", "sandbag_wall"], Vector3(40, Y + i * 0.45, -60 + o + i * 0.1), PI / 2.0)
+	for p: Vector3 in [Vector3(4, Y, -46), Vector3(28, Y, -30.5), Vector3(52, Y, -66), Vector3(28, Y, -70)]:
+		glb(PROPS % ["lamp_post", "lamp_post"], p, 0.0, 1.2)
+	# Motor pool: fuel drums, crates, a tool rack in the garage.
+	for p: Array in [[Vector3(-2.5, Y, -36.5), 0.3], [Vector3(-3.4, Y, -37.2), 1.2], [Vector3(9.0, Y, -61.0), 0.0]]:
+		glb(PROPS % ["supply_crate", "supply_crate"], p[0], float(p[1]))
+	prop(&"drum_rack", Vector3(-8.4, Y, -48.5), PI / 2.0)
+	prop(&"crate_stack", Vector3(9.5, Y, -48.0), 0.6)
+	prop(&"toolrack", Vector3(-9.35, Y, -30.5), PI / 2.0)
+	signage("GROUP VESPER · MOTOR POOL 3", Vector3(-3.15, Y + 2.9, -32.5), PI / 2.0, 30, Color(0.92, 0.9, 0.8))
+	# Vignette 5: 200 coffins stacked under tarps, most broken open from inside.
+	var v: Node3D = vignette(
+		"V05_Coffins", Vector3(-6.5, Y, -62.5), "200 coffins under tarps, most broken open from inside"
+	)
+	prop(&"tarp_stack", Vector3(-1.0, 0, 2.0), 0.0, v)
+	prop(&"tarp_stack", Vector3(-2.4, 0, -0.6), 0.05, v)
+	prop(&"tarp_stack", Vector3(-1.4, 0, -3.2), -0.04, v)
+	for c: Array in [
+		[Vector3(1.6, 0, -1.2), 0.4],
+		[Vector3(2.2, 0, 1.4), -0.3],
+		[Vector3(0.8, 0, -4.4), 1.4],
+		[Vector3(2.6, 0, -3.0), 2.6]
+	]:
+		prop(&"coffin_open", c[0], float(c[1]), v)
+	prop(&"coffin", Vector3(1.2, 0, 3.6), 1.2, v)
+	signage(
+		"200 × SARG / COFFIN — LAZARUS PROGRAMME", Vector3(-9.75, Y + 2.0, -62.0), PI / 2.0, 22, Color(0.95, 0.95, 0.9)
+	)
+	# The collapsed greenhouse: iron ribs and broken panes over the low wall.
+	_greenhouse()
+	# Frozen waterfall against the cliff (S2 behind it).
+	hide_greybox("Waterfall")
+	for i: int in 7:
+		deco(
+			"IceFall_%d" % i,
+			Vector3(-9.4, Y + 3.0 + sin(i) * 0.4, -73.4 + i * 1.15),
+			Vector3(1.1 + (i % 3) * 0.25, 6.0 + (i % 2), 1.0),
+			&"ice",
+			Vector3(0, 0, 0.04 * (i - 3))
+		)
+	prop(&"icicles", Vector3(-9.0, Y + 6.2, -70), PI / 2.0)
+	fog(Vector3(-7.5, Y + 1.0, -70), Vector3(4, 2, 8), Color(0.7, 0.8, 0.95), 0.4)
+	# The sanatorium façade looming over the north wall, lit windows (contrast accent).
+	_facade()
+	# Snow banks guiding the fountain loop (low; visual only) and drifts along the walls.
+	for i: int in 10:
+		var a: float = TAU * i / 10.0 + 0.3
+		if i % 3 == 2:
+			continue
+		var p: Vector3 = Vector3(28, Y - 0.2, -49) + Vector3(cos(a) * 15.5, 0, sin(a) * 12.5)
+		var mi: MeshInstance3D = prop(&"coal_pile", p, a)
+		mi.material_override = _mat(&"snow")
+		mi.scale = Vector3(1.6, 0.35, 1.0)
+	# Icicle-hung archways over D04 and the ramp.
+	prop(&"icicles", Vector3(52, Y + 3.2, -20.4), 0.0)
+	prop(&"icicles", Vector3(6, Y + 2.6, -20.4), 0.0)
+	# Storm FX: blowing snow across the yard, drifts at the gates.
+	fx(AtmosFx.Kind.SNOW_DRIFT, Vector3(28, Y + 1.0, -49), Vector3(30, 0.6, 24), Vector3(1, 0, 0.3))
+	fx(AtmosFx.Kind.SNOW_DRIFT, Vector3(-6, Y + 1.2, -76), Vector3(2.0, 0.6, 1.0), Vector3.BACK)
+	fx(AtmosFx.Kind.HAZE, Vector3(28, Y + 1.5, -49), Vector3(28, 1.0, 22))
+	# Decals: tracks, blood, scorch by the drums, stencils.
+	decal(&"blood", Vector3(15, Y + 0.05, -40), Vector2(2, 2), Vector3.UP, 0.2)
+	decal(&"blood", Vector3(45, Y + 0.05, -52), Vector2(1.5, 1.5), Vector3.UP, 1.9)
+	decal(&"scorch", Vector3(-6.5, Y + 0.05, -56), Vector2(3.5, 3.5))
+	decal(&"grime", Vector3(2, Y + 0.05, -48), Vector2(5, 8), Vector3.UP, 0.1)
+	decal(&"hazard_stripes", Vector3(64.6, Y + 0.05, -31.5), Vector2(0.8, 4.4), Vector3.UP)
+	signage("LASTENAUFZUG · FREIGHT LIFT", Vector3(62.2, Y + 3.0, -28.85), PI, 22, Color(0.95, 0.8, 0.2))
+	reverb(&"Reverb_Exterior", Vector3(-10, -8.5, -78), Vector3(66, 2.0, -20))
+	reverb(&"Reverb_Room", Vector3(-9.6, -8.5, -36), Vector3(-3.0, -4.4, -29), 0.6)
+
+
+func _greenhouse() -> void:
+	var b: MeshBatch = MeshBatch.new()
+	var iron: Material = VesperProps.m(&"metal")
+	var glass: Material = VesperProps.m(&"glass_clear")
+	for i: int in 5:
+		var z: float = -74.0 + i * 2.0
+		for side: float in [-1.0, 1.0]:
+			b.box(Vector3(0.08, 2.4, 0.08), Vector3(34 + side * 4.0, Y + 3.2, z), iron, Vector3(0, 0, side * 0.5))
+		b.box(Vector3(8.4, 0.08, 0.08), Vector3(34, Y + 4.3, z), iron, Vector3(0, 0, 0.12 * (i - 2)))
+	for i: int in 4:
+		b.box(
+			Vector3(1.9, 0.02, 1.9),
+			Vector3(31.5 + (i % 2) * 5.0, Y + 3.6 - i * 0.4, -72.5 + i * 2.0),
+			glass,
+			Vector3(0.3 * (i - 1.5), 0, 0.6)
+		)
+	art.add_child(b.instance("Greenhouse", 70.0))
+	for i: int in 4:
+		decal(&"frost", Vector3(31 + i * 2.0, Y + 2.05, -70), Vector2(2, 2))
+
+
+func _facade() -> void:
+	var b: MeshBatch = MeshBatch.new()
+	var stone: Material = _mat(&"facade")
+	var roofm: Material = _mat(&"metal")
+	var lit: Material = VesperProps.m(&"warm_lit")
+	var dark: Material = VesperProps.m(&"black")
+	# East wing upper floors (above the lobby) and a mansard roof; west service block.
+	b.box(Vector3(30, 7.0, 21), Vector3(53, 4.6, -3), stone)
+	b.box(Vector3(31, 0.4, 22), Vector3(53, 8.3, -3), roofm)
+	b.add(MeshBatch.Shape.PRISM, Vector3(30, 4.0, 20), Transform3D(Basis.IDENTITY, Vector3(53, 10.5, -3)), roofm)
+	b.box(Vector3(14, 10.0, 6), Vector3(75, 7.0, -4.8), stone)
+	b.add(MeshBatch.Shape.PRISM, Vector3(14, 3.0, 6), Transform3D(Basis.IDENTITY, Vector3(75, 13.5, -4.8)), roofm)
+	b.box(Vector3(0.6, 6.0, 0.6), Vector3(60, 14.0, -6), stone)
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = 6
+	for row: int in 2:
+		for i: int in 9:
+			var x: float = 40.0 + i * 3.2
+			var lit_on: bool = rng.randf() < 0.35
+			b.box(Vector3(1.2, 1.6, 0.06), Vector3(x, 3.0 + row * 2.8, -13.53), lit if lit_on else dark)
+	art.add_child(b.instance("SanatoriumFacade", 400.0))
+	for p: Vector3 in [Vector3(46.4, 3.0, -14.4), Vector3(56.0, 5.8, -14.4)]:
+		fixture_light(&"", p, Color(1.0, 0.7, 0.4), 0.8, 8.0, PoweredLight.Pattern.NONE, false)

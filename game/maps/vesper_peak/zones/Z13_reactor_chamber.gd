@@ -13,8 +13,10 @@ const WALL_R: float = 25.4
 const SEGMENTS: int = 48
 # Openings in the cavern wall (degrees, atan2(dz, dx)): lower band (ring level) / upper band.
 const LOWER_GAPS: Array = [-142.2, 90.0, -90.0, 0.0]
-const UPPER_GAPS: Array = [163.3, -24.4]
-const UPPER_OPEN: Array = [[-38.0, -34.4], [-28.0, -24.4]]  # [bottom, top] of each upper gap
+# Upper-wall openings: the D14 shaft door, the Reactor Bridge gantry and (Step 13) the window the
+# Z12 observation glass looks through (segment centred 11.25°).
+const UPPER_GAPS: Array = [163.3, -24.4, 11.25]
+const UPPER_OPEN: Array = [[-38.0, -34.4], [-28.0, -24.4], [-35.5, -28.6]]  # [bottom, top] of each upper gap
 
 
 func build() -> void:
@@ -266,3 +268,83 @@ func _core_and_forge() -> void:
 		_on_ring(-135.0, 24.0) + Vector3(0, 6, 0)
 	]:
 		lamp(p, Color(1.0, 0.8, 0.55), 1.4, 18.0)
+
+
+# --- Step 13 art pass (13D): the reactor core, cable bundles, arcs, heartbeat, the Forge platform -
+
+
+func dress() -> void:
+	trim = "cavern"
+	var core_pos: Vector3 = C + Vector3(0, 4.0, 0)
+	var state: ReactorState = geometry.get_node_or_null("ReactorState") as ReactorState
+	# The core and its rings animate (ReactorState): keep them out of the static batch.
+	for n: String in ["ReactorCore", "ContainmentRing1", "ContainmentRing2", "ContainmentRing3"]:
+		var mi: Node = geometry.get_node_or_null(n)
+		if mi != null:
+			mi.set_meta(&"no_batch", true)
+	# Heartbeat sync: the core's pulse follows the reactor drone's playback (AmbienceLibrary
+	# REACTOR_BPM), so light and sound thump together.
+	if state != null:
+		for e: Node in audio.get_children():
+			if e is AmbienceEmitter and (e as AmbienceEmitter).event == &"amb_reactor":
+				state.heartbeat = e as AmbienceEmitter
+	# Cable bundles "thick as tree trunks" from the containment rings to the cavern wall.
+	var b: MeshBatch = MeshBatch.new()
+	var rubber: Material = VesperProps.m(&"rubber")
+	var brass: Material = VesperProps.m(&"brass")
+	for i: int in 6:
+		var a: float = deg_to_rad(15.0 + 60.0 * i)
+		var dir: Vector3 = Vector3(cos(a), 0, sin(a))
+		var p0: Vector3 = core_pos + dir * 7.5 + Vector3(0, -0.5 + (i % 2) * 1.2, 0)
+		var p1: Vector3 = C + dir * (WALL_R - 0.2) + Vector3(0, 9.0 + (i % 3) * 2.0, 0)
+		var mid: Vector3 = (p0 + p1) * 0.5 + Vector3(0, -2.5, 0)  # sag
+		for seg: Array in [[p0, mid], [mid, p1]]:
+			var q0: Vector3 = seg[0]
+			var q1: Vector3 = seg[1]
+			b.add(
+				MeshBatch.Shape.CYLINDER,
+				Vector3(0.9, q0.distance_to(q1) + 0.3, 0.9),
+				Transform3D(_basis_along(q1 - q0) * Basis(Vector3.RIGHT, PI / 2.0), (q0 + q1) * 0.5),
+				rubber
+			)
+		b.cyl(0.6, 0.4, mid, brass)
+		# The wall end: a brass collar and a vertical run down to the ring.
+		b.cyl(0.7, 0.6, p1, brass)
+		b.cyl(0.35, p1.y - (C.y + 0.5), Vector3(p1.x, (p1.y + C.y + 0.5) * 0.5, p1.z) + dir * 0.4, rubber)
+	art.add_child(b.instance("CableBundles", 200.0))
+	# Pit: the drop is lit from below; arcs crackle between the rings (energy wisps + pulsing light).
+	fixture_light(&"", C + Vector3(0, -8.0, 0), Color(0.3, 1.0, 0.5), 2.0, 22.0, PoweredLight.Pattern.PULSE, true)
+	for i: int in 4:
+		var a2: float = TAU * i / 4.0 + 0.4
+		var p: Vector3 = core_pos + Vector3(cos(a2) * 6.0, sin(a2 * 2.0) * 1.5, sin(a2) * 6.0)
+		fx(AtmosFx.Kind.ENERGY, p, Vector3(0.6, 0.6, 0.6))
+	fx(AtmosFx.Kind.DUST, C + Vector3(0, 6.0, 0), Vector3(20, 8, 20))
+	fx(AtmosFx.Kind.HAZE, C + Vector3(0, -1.0, 0), Vector3(14, 2.0, 14))
+	fog(C + Vector3(0, -6.0, 0), Vector3(36, 10, 36), Color(0.35, 0.8, 0.45), 0.12, Color(0.0, 0.03, 0.01))
+	# Lower Ring: rim lights on the wall (brass cages), grime, frost by the coolant sector.
+	for i: int in 8:
+		var a3: float = TAU * i / 8.0 + 0.2
+		var wp: Vector3 = C + Vector3(cos(a3), 0, sin(a3)) * (WALL_R - 0.25) + Vector3(0, 3.2, 0)
+		prop(&"caged_bulb", wp)
+		decal(&"grime", C + Vector3(cos(a3), 0, sin(a3)) * 22.0 + Vector3(0, 0.05, 0), Vector2(4, 4), Vector3.UP, a3)
+	for k: int in 3:
+		var a4: float = deg_to_rad(-30.0 + 30.0 * k)
+		decal(&"frost", C + Vector3(cos(a4), 0, sin(a4)) * 22.0 + Vector3(0, 0.05, 0), Vector2(5, 5), Vector3.UP, a4)
+	decal(
+		&"hazard_stripes", _on_ring(45.0, 22.0) + Vector3(0, 0.05, 0), Vector2(0.6, 6.0), Vector3.UP, deg_to_rad(-45.0)
+	)
+	decal(
+		&"hazard_stripes", _on_ring(-45.0, 22.0) + Vector3(0, 0.05, 0), Vector2(0.6, 6.0), Vector3.UP, deg_to_rad(45.0)
+	)
+	signage("LAZARUS-REAKTOR · KERN 1", Vector3(28.0, -40.0, -24.95), PI, 60, Color(0.6, 1.0, 0.7))
+	# Observation balcony desk + chair; spoke vents.
+	skin("ObsDesk", &"console", Vector3.ZERO, -PI / 2.0)
+	prop(&"chair", Vector3(4.6, -38.0, -42.5), PI / 2.0)
+	# Vignette 10: Haemmer's officer cap on the Forge platform rail.
+	var v: Node3D = vignette(
+		"V10_HaemmerCap", Vector3(31.5, -33.0, -56.6), "Haemmer's officer cap on the Forge platform rail"
+	)
+	prop(&"cap", Vector3(0, 0.0, 0), 0.6, v)
+	fixture_light(&"", Vector3(31.5, -31.5, -56.6), Color(1.0, 0.85, 0.6), 0.4, 3.0, PoweredLight.Pattern.NONE, false)
+	reverb(&"Reverb_Cavern", Vector3(0, -52, -78), Vector3(56, -17, -22))
+	reverb(&"Reverb_Tunnel", Vector3(-6, -49, -67), Vector3(0, -15, -37))

@@ -22,10 +22,14 @@ func _process(_delta: float) -> bool:
 	if _frames < 3:
 		return false
 	var out: Dictionary = collect(_root)
-	var f: FileAccess = FileAccess.open(OUT, FileAccess.WRITE)
+	var path: String = OUT
+	for a: String in OS.get_cmdline_user_args():
+		if a.begins_with("--out="):
+			path = a.trim_prefix("--out=")
+	var f: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(JSON.stringify({"map": "vesper_peak", "nodes": out}, " ", true))
 	f.close()
-	print("gameplay baseline: %d nodes -> %s" % [out.size(), OUT])
+	print("gameplay baseline: %d nodes -> %s" % [out.size(), path])
 	_root.queue_free()
 	return true
 

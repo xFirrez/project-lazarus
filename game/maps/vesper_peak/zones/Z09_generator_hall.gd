@@ -65,3 +65,60 @@ func build() -> void:
 	lamp(Vector3(-30, Y + 5.5, -60), Color(1.0, 0.1, 0.05), 0.6, 8.0, false)  # emergency red
 	ambience(Vector3(-20, Y + 3, -52), &"generator_hall")
 	occluder("Occ_Rock", Vector3(-20, Y + 9.5, -52.5), Vector3(28, 4, 23))
+
+
+# --- Step 13 art pass (13C): generators, the control booth, power-on cascade polish ---------------
+
+
+func dress() -> void:
+	trim = "industrial"
+	var sodium: Color = Color(1.0, 0.72, 0.38)
+	for i: int in 3:
+		skin("Generator%d" % (i + 1), &"generator", Vector3.ZERO, 0.0)
+		var top: Vector3 = Vector3(-26 + i * 7.0, Y + 4.8, -52)
+		fx(AtmosFx.Kind.STEAM, top + Vector3(0.8, 0.6, 1.9), Vector3(0.1, 0.1, 0.1))
+		# Status lamps on each generator wake with the cascade (green after power).
+		fixture_light(
+			&"", Vector3(-26 + i * 7.0, Y + 1.6, -48.9), Color(0.4, 1.0, 0.5), 0.4, 3.5, PoweredLight.Pattern.NONE, true
+		)
+		decal(&"grime", Vector3(-26 + i * 7.0, Y + 0.05, -52), Vector2(5, 8))
+	# Sodium high-bay lamps (replace the plain lamps' look; two shadowed).
+	for i: int in 3:
+		prop(&"pendant", Vector3(-26 + i * 7.0, Y + 6.6, -46))
+	fixture_light(&"", Vector3(-19, Y + 6.2, -58), sodium, 1.2, 14.0, PoweredLight.Pattern.NONE, true, 40)
+	# Floor grates: green reactor light from below (VESPER_PEAK §8.2).
+	for g: Vector3 in [Vector3(-17.0, Y - 0.6, -45.8), Vector3(-9.0, Y - 0.6, -57.2)]:
+		fixture_light(&"", g, Color(0.35, 1.0, 0.5), 0.9, 4.0, PoweredLight.Pattern.PULSE, false)
+		var fx_1: GPUParticles3D = fx(AtmosFx.Kind.STEAM, g + Vector3(0, 0.6, 0), Vector3(0.5, 0.05, 0.5))
+		fx_1.amount = 10
+	# Control booth: the lever bank, consoles, the chalk tally (vignette 7).
+	skin("LeverBank", &"console", Vector3(0, -0.7, 0.1), PI)
+	prop(&"console", Vector3(-28.0, Y + 3.0, -63.2), PI)
+	prop(&"chair", Vector3(-29.0, Y + 3.0, -61.6), 0.2)
+	var v: Node3D = vignette(
+		"V07_ChalkTally",
+		Vector3(-33.6, Y + 4.0, -61),
+		"a chalk tally of days on the booth wall — someone survived for weeks"
+	)
+	for i: int in 3:
+		decal(
+			&"tally",
+			v.position + Vector3(0.05, -0.6 + i * 0.5, -1.0 + i * 0.9),
+			Vector2(1.0, 1.0),
+			Vector3.RIGHT,
+			0.0,
+			Color(1, 1, 1, 0.85)
+		)
+	prop(&"book_pile", Vector3(0.4, -1.0, 0.8), 0.0, v)
+	deco("V07_Bedroll", v.position + Vector3(0.9, -0.95, 1.4), Vector3(0.7, 0.1, 1.9), &"canvas")
+	prop(&"gas_tank", Vector3(1.4, -1.0, -0.6), 0.0, v)
+	signage("HAUPTSCHALTER · MAIN POWER", Vector3(-31.5, Y + 5.0, -63.75), 0.0, 26, Color(0.95, 0.8, 0.2))
+	signage("MASCHINENHALLE — GENERATOR HALL", Vector3(-20, Y + 6.0, -40.75), PI, 34, Color(0.92, 0.9, 0.82))
+	decal(&"hazard_stripes", Vector3(-27.5, Y + 0.05, -53.6), Vector2(2.6, 0.6))
+	fixture_light(
+		&"caged_bulb", Vector3(-30, Y + 6.3, -60), Color(1.0, 0.12, 0.06), 0.5, 7.0, PoweredLight.Pattern.STROBE, false
+	)
+	fx(AtmosFx.Kind.DUST, Vector3(-20, Y + 3.5, -52), Vector3(13, 3, 10))
+	fog(Vector3(-20, Y + 0.6, -52), Vector3(28, 1.2, 22), Color(0.5, 0.45, 0.4), 0.35)
+	reverb(&"Reverb_Industrial", Vector3(-34, -22, -64), Vector3(-6, -11, -41))
+	reverb(&"Reverb_Tunnel", Vector3(-29, -19, -41), Vector3(-26, -10, -28))

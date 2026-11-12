@@ -12,13 +12,16 @@ const AGENT_HEIGHT: float = 1.8
 
 var nav: NavTiles = null
 var zones: Array[VesperZone] = []
+var art: VesperArt = null
 
 
 func _ready() -> void:
-	_environment()
+	art = VesperArt.new()
+	art.build(self)  # environment, sky, moon, backdrop, storm, searchlights (Step 13)
 	for c: Node in get_children():
 		if c is VesperZone:
 			zones.append(c as VesperZone)
+	art.finish(self)
 	nav = NavTiles.new()
 	nav.name = "Nav"
 	nav.template = make_navmesh()
@@ -41,6 +44,7 @@ func _ready() -> void:
 
 
 func _on_match_setup(m: Match) -> void:
+	art.on_match_setup(m)
 	if m.session != null:
 		m.session.flag_changed.connect(_on_flag)
 
@@ -127,28 +131,3 @@ func _shots() -> void:
 		add_child(cam)
 		cam.look_at_from_position(s[1], s[2])
 		cam.add_to_group(&"screenshot_shot")
-
-
-func _environment() -> void:
-	var we: WorldEnvironment = WorldEnvironment.new()
-	we.name = "Environment"
-	var env: Environment = Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.1, 0.12, 0.18)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.5, 0.55, 0.68)
-	env.ambient_light_energy = 0.6
-	env.fog_enabled = true
-	env.fog_light_color = Color(0.55, 0.6, 0.72)
-	env.fog_density = 0.01
-	we.environment = env
-	add_child(we)
-	var moon: DirectionalLight3D = DirectionalLight3D.new()
-	moon.name = "Moon"
-	moon.rotation_degrees = Vector3(-50, 30, 0)
-	moon.light_color = Color(0.7, 0.78, 1.0)
-	moon.light_energy = 0.8
-	moon.shadow_enabled = true
-	moon.directional_shadow_max_distance = 80.0
-	moon.add_to_group(&"shadow_light")
-	add_child(moon)

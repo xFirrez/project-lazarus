@@ -80,3 +80,23 @@ func test_authorized_teleport() -> void:
 	var seq: int = v.authorize(Vector3(50, 0, 0), 0.1)
 	assert_eq(v.validate(0.15, Vector3(50, 0, 0), seq), MovementValidator.Result.ACCEPT)
 	assert_eq(v.corrections, 0, "authorized moves are not violations")
+
+
+# I-031: right after a join the owner's host-clock estimate can lag the host's clock; the first
+# state acknowledging a teleport is accepted at the authorized spot whatever its stamp, and the
+# owner's later states then validate against the owner's own timeline.
+func test_teleport_ack_with_lagging_owner_clock() -> void:
+	v.validate(0.0, Vector3.ZERO, 0)
+	var seq: int = v.authorize(Vector3(50, 0, 0), 10.0)  # host clock 10 s, owner thinks ~2 s
+	assert_eq(v.validate(2.0, Vector3(50.05, 0, 0), seq), MovementValidator.Result.ACCEPT, "ack accepted")
+	assert_eq(v.validate(2.0 + RATE, Vector3(50.1, 0, 0), seq), MovementValidator.Result.ACCEPT, "then walks on")
+	assert_eq(v.corrections, 0)
+
+
+func test_teleport_ack_elsewhere_is_not_free() -> void:
+	v.validate(0.0, Vector3.ZERO, 0)
+	var seq: int = v.authorize(Vector3(50, 0, 0), 10.0)
+	assert_eq(v.validate(2.0, Vector3(80, 0, 0), seq), MovementValidator.Result.STALE, "lagging + wrong spot ignored")
+	assert_eq(
+		v.validate(10.2, Vector3(80, 0, 0), seq), MovementValidator.Result.CORRECT, "far from the snap: corrected"
+	)

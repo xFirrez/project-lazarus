@@ -85,7 +85,14 @@ func _run() -> void:
 	await _step("late_join")
 	# 1. R2 by the client.
 	var r2: ResonanceRelay = m.relays.relays[1]
-	m.players.host_teleport(_client, r2.global_position + Vector3(1.2, 0.05, 0))
+	var at_r2: Vector3 = r2.global_position + Vector3(1.2, 0.05, 0)
+	# A teleport sent right after the join can be undone on the client (I-031): wait until the
+	# host sees the client there, re-teleporting once.
+	for attempt: int in 2:
+		m.players.host_teleport(_client, at_r2)
+		var near: Callable = func() -> bool: return c.global_position.distance_to(at_r2) < 2.0
+		if await _until(near, 3.0):
+			break
 	await _wait(1.0)
 	Net.send_reliable(_client, &"_t_use", [r2.interact_id])
 	var started: bool = await _until(func() -> bool: return m.relays.state(1) == RelaySystem.State.CHARGING, 8.0)

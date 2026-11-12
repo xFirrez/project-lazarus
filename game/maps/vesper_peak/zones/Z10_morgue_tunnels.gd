@@ -92,3 +92,81 @@ func build() -> void:
 		lamp(Vector3(x, Y + 3.0, -16.0 if x < 0 else -19.5), Color(0.6, 1.0, 0.6), 0.6, 8.0, true, 0.3)
 	lamp(Vector3(-14, Y + 3.0, -28), Color(0.6, 1.0, 0.6), 0.6, 8.0, true, 0.3)
 	ambience(Vector3(13, Y + 2, -16), &"tunnel_drip")
+
+
+# --- Step 13 art pass (13C): the morgue, records, utility tunnels, the flooded section, Steam Purge
+
+
+func dress() -> void:
+	trim = "lab"
+	var green: Color = Color(0.55, 1.0, 0.6)
+	for i: int in 3:
+		skin("AutopsyTable%d" % i, &"autopsy_table", Vector3.ZERO, PI / 2.0)
+	hide_greybox("DrawerWall")
+	prop(&"drawer_wall", Vector3(19.3, Y, -10.45), PI)
+	prop(&"gurney", Vector3(6.0, Y, -20.4), PI / 2.0)
+	prop(&"cabinet", Vector3(4.5, Y, -14.0), PI / 2.0)
+	prop(&"filing_cabinet", Vector3(21.5, Y, -21.4), -PI / 2.0)
+	signage("LEICHENHALLE · MORGUE", Vector3(13, Y + 3.6, -21.75), 0.0, 30, Color(0.85, 0.88, 0.82))
+	# Vignette 8: one drawer chained shut, a cross scratched on it.
+	var v: Node3D = vignette(
+		"V08_ChainedDrawer", Vector3(21.0, Y + 0.6, -10.55), "one drawer chained shut with a cross scratched on it"
+	)
+	prop(&"chain", Vector3(0, 0.05, -0.05), PI / 2.0, v)
+	prop(&"chain", Vector3(0, -0.12, -0.05), PI / 2.0 + 0.2, v)
+	decal(&"cross_scratch", v.position + Vector3(0, 0.05, -0.05), Vector2(0.55, 0.55), Vector3.FORWARD)
+	# Emergency bulbs (green) in cages; one strobing in the trap tunnel.
+	for p: Vector3 in [
+		Vector3(13, Y + 4.2, -16),
+		Vector3(-8, Y + 3.3, -16.0),
+		Vector3(-14, Y + 3.3, -28),
+		Vector3(30, Y + 3.3, -19.5),
+		Vector3(44, Y + 3.3, -19.5)
+	]:
+		prop(&"caged_bulb", p)
+	fixture_light(
+		&"caged_bulb", Vector3(52, Y + 3.3, -19.5), Color(1.0, 0.15, 0.08), 0.6, 6.0, PoweredLight.Pattern.BLINK, false
+	)
+	fixture_light(
+		&"fluoro", Vector3(10, Y + 4.3, -13), Color(0.8, 1.0, 0.85), 0.5, 7.0, PoweredLight.Pattern.FLICKER, true, 35
+	)
+	# Utility tunnels: pipes (auto trim), steam vents of the purge trap, drips, the flooded floor.
+	for x: float in [30.0, 38.0, 46.0]:
+		prop(&"valve", Vector3(x, Y + 2.2, -20.8), 0.0)
+		var fx_1: GPUParticles3D = fx(
+			AtmosFx.Kind.STEAM, Vector3(x, Y + 3.2, -20.6), Vector3(0.1, 0.05, 0.1), Vector3(0, -0.2, 1)
+		)
+		fx_1.amount = 8
+	signage("DAMPFLEITUNG — LEBENSGEFAHR", Vector3(26, Y + 2.6, -20.75), 0.0, 22, Color(0.95, 0.8, 0.2))
+	decal(&"hazard_stripes", Vector3(28.2, Y + 0.05, -19.5), Vector2(0.6, 3.0))
+	decal(&"hazard_stripes", Vector3(47.8, Y + 0.05, -19.5), Vector2(0.6, 3.0))
+	var water: MeshInstance3D = deco("FloodWater", Vector3(37, Y + 0.07, -19.5), Vector3(14, 0.02, 3), &"glass_clear")
+	water.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for x: float in [32.0, 36.5, 41.0]:
+		fx(AtmosFx.Kind.DRIPS, Vector3(x, Y + 3.3, -19.0), Vector3(0.6, 0.05, 0.8), Vector3.DOWN)
+	fx(AtmosFx.Kind.DRIPS, Vector3(-14, Y + 3.3, -24), Vector3(0.6, 0.05, 2.0), Vector3.DOWN)
+	fx(AtmosFx.Kind.HAZE, Vector3(13, Y + 1.2, -16), Vector3(8, 0.8, 5))
+	fog(Vector3(36, Y + 0.6, -19.5), Vector3(16, 1.2, 3), Color(0.55, 0.7, 0.6), 0.45)
+	# Painted luminous symbols (EE clue) glow faintly; damp and blood.
+	for s: Vector3 in [
+		Vector3(4.2, Y + 2.0, -12),
+		Vector3(-10, Y + 2.0, -14.7),
+		Vector3(-15.3, Y + 2.0, -24),
+		Vector3(46, Y + 2.0, -18.2)
+	]:
+		fixture_light(&"", s + Vector3(0, 0, 0), Color(0.4, 1.0, 0.6), 0.25, 2.0, PoweredLight.Pattern.PULSE, false)
+	for p: Vector3 in [
+		Vector3(10, Y + 0.05, -15),
+		Vector3(-6, Y + 0.05, -16),
+		Vector3(-14, Y + 0.05, -30),
+		Vector3(52, Y + 0.05, -19.5)
+	]:
+		decal(&"water_stain", p, Vector2(3, 3), Vector3.UP, p.x)
+	decal(&"blood", Vector3(13.5, Y + 0.05, -15.6), Vector2(2.0, 2.0), Vector3.UP, 0.6)
+	decal(&"handprints", Vector3(8.0, Y + 1.3, -10.25), Vector2(1.0, 1.0), Vector3.FORWARD)
+	reverb(&"Reverb_Tile", Vector3(4, -20, -22), Vector3(22, -11, -10))
+	reverb(&"Reverb_Tunnel", Vector3(-15.5, -17, -17.5), Vector3(4, -12, -14.5))
+	reverb(&"Reverb_Tunnel", Vector3(-15.5, -19, -41), Vector3(-12.5, -12, -17.5))
+	reverb(&"Reverb_Tunnel", Vector3(22, -20, -21), Vector3(60, -12, -18))
+	ambience(Vector3(38, Y + 2, -19.5), &"tunnel_drip", -4.0)
+	ambience(Vector3(-14, Y + 2, -26), &"tunnel_drip", -4.0)

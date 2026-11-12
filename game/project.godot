@@ -251,6 +251,7 @@ toggle_net_overlay={
 3d_physics/layer_7="trigger"
 3d_physics/layer_8="nav_obstacle"
 3d_physics/layer_9="player_clip"
+3d_physics/layer_10="audio_zone"
 
 [navigation]
 
@@ -261,6 +262,13 @@ toggle_net_overlay={
 
 3d/physics_engine="Jolt Physics"
 common/physics_interpolation=true
+
+[shader_globals]
+
+wind_strength={
+"type": "float",
+"value": 0.35
+}
 
 [rendering]
 

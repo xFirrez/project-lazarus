@@ -43,6 +43,20 @@ const KIND_COLORS: Dictionary = {
 					c.queue_free()
 
 
+# Shows / hides every marker's greybox post + label under `root` (art-passed maps hide them in
+# normal play; the `markers_visible` console command brings them back).
+static func set_all_visuals(root: Node, on: bool) -> int:
+	var n: int = 0
+	for m: Node in root.get_tree().get_nodes_in_group(GROUP) if root.is_inside_tree() else []:
+		if not root.is_ancestor_of(m):
+			continue
+		for c: Node in m.get_children():
+			if c.has_meta(&"marker_visual") and c is Node3D:
+				(c as Node3D).visible = on
+				n += 1
+	return n
+
+
 func _ready() -> void:
 	add_to_group(GROUP)
 	if marker_id == &"":

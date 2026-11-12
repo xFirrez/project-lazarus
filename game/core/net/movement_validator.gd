@@ -5,6 +5,11 @@
 # A single jump larger than the teleport distance (+ free-fall allowance) is corrected at once.
 # On a violation the host keeps the last valid position, bumps the correction sequence and tells
 # the owner to snap back; states stamped with an older sequence are then ignored as stale.
+# After a host teleport / correction (`authorize`, `_correct`) the first state that carries the new
+# sequence AND stands within ACK_RADIUS of the authorized position is accepted whatever its stamp:
+# the owner's host-clock estimate can lag the host's own clock (clock sync settling right after a
+# join), and stamp-ordering those packets against the host's time froze the player for seconds
+# (I-031, Step 13).
 # Authority: host only. Pure logic (unit-tested in tests/unit/test_movement_validator.gd).
 class_name MovementValidator
 extends RefCounted
@@ -13,6 +18,7 @@ enum Result { ACCEPT, STALE, CORRECT }
 
 const MAX_FALL_SPEED: float = 60.0
 const MAX_GAP: float = 1.0
+const ACK_RADIUS: float = 2.0
 
 var tuning: PlayerTuning = null
 var kill_y: float = -30.0
@@ -25,6 +31,7 @@ var last_reason: String = ""
 
 var _excess_h: float = 0.0
 var _excess_up: float = 0.0
+var _await_ack: bool = false
 
 
 func _init(p_tuning: PlayerTuning) -> void:
@@ -36,9 +43,9 @@ func _init(p_tuning: PlayerTuning) -> void:
 func validate(p_stamp: float, pos: Vector3, seq: int, carry: Vector3 = Vector3.ZERO) -> Result:
 	if seq != expected_seq:
 		return Result.STALE
-	if not has_state:
-		_accept(p_stamp, pos)
-		return Result.ACCEPT
+	var ack: int = _check_ack(p_stamp, pos) if _await_ack or not has_state else -1
+	if ack >= 0:
+		return ack as Result
 	var dt: float = p_stamp - stamp
 	if dt <= 0.0:
 		return Result.STALE
@@ -67,7 +74,20 @@ func authorize(pos: Vector3, p_stamp: float) -> int:
 	position = pos
 	stamp = p_stamp
 	has_state = true
+	_await_ack = true
 	return expected_seq
+
+
+# The first state ever, or the first acknowledging a snap: (re-)base the owner's clock if it stands
+# where we put it. Returns a Result, or -1 to validate normally.
+func _check_ack(p_stamp: float, pos: Vector3) -> int:
+	if not has_state or pos.distance_to(position) <= ACK_RADIUS:
+		_await_ack = false
+		_accept(p_stamp, pos)
+		return Result.ACCEPT
+	if p_stamp <= stamp:
+		return Result.STALE
+	return -1
 
 
 func _accept(p_stamp: float, pos: Vector3) -> void:
@@ -82,4 +102,5 @@ func _correct(reason: String) -> Result:
 	expected_seq = (expected_seq + 1) % 65536
 	_excess_h = 0.0
 	_excess_up = 0.0
+	_await_ack = true
 	return Result.CORRECT

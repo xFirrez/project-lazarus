@@ -13,6 +13,9 @@ var core: MeshInstance3D = null
 var rings: Array[MeshInstance3D] = []
 var light: OmniLight3D = null
 var bridge_position: Vector3 = Vector3.ZERO
+## Step 13: the reactor drone emitter; when it plays, the core's heartbeat follows its playback
+## position (AmbienceLibrary.REACTOR_BPM) so the light thumps with the sound.
+var heartbeat: AmbienceEmitter = null
 var stage: Stage = Stage.DORMANT
 
 var _match: Match = null
@@ -63,7 +66,7 @@ func _process(delta: float) -> void:
 	for i: int in rings.size():
 		rings[i].rotate_object_local(Vector3.UP, _speed * delta * (1.0 + 0.4 * i) * (1.0 if i % 2 == 0 else -1.0))
 	_flash = maxf(_flash - delta * 0.4, 0.0)
-	var beat: float = 0.5 + 0.5 * sin(_t * TAU * 0.8)
+	var beat: float = heartbeat_beat()
 	var energy: float = [0.15, 0.8 + 0.5 * beat, 2.5 + 1.2 * beat][stage] + _flash * 6.0
 	if _core_mat != null:
 		_core_mat.emission_energy_multiplier = energy
@@ -71,3 +74,15 @@ func _process(delta: float) -> void:
 		core.scale = Vector3.ONE * ([0.9, 1.0, 1.15][stage] + _flash * 0.3)
 	if light != null:
 		light.light_energy = [0.0, 3.0 + 2.0 * beat, 9.0 + 3.0 * beat][stage] + _flash * 20.0
+
+
+# 0..1 pulse: a double thump per beat (audio-synced when the drone is playing).
+func heartbeat_beat() -> float:
+	var period: float = 60.0 / AmbienceLibrary.REACTOR_BPM
+	var t: float = _t
+	if heartbeat != null and is_instance_valid(heartbeat.player):
+		var p: AudioStreamPlayer3D = heartbeat.player as AudioStreamPlayer3D
+		if p != null and p.playing:
+			t = p.get_playback_position()
+	var ph: float = fmod(t, period)
+	return clampf(exp(-ph * 6.0) + 0.6 * exp(-maxf(ph - 0.28, 0.0) * 8.0) * float(ph > 0.28), 0.0, 1.0)
