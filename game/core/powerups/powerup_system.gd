@@ -166,7 +166,7 @@ func drop_position(at: Vector3) -> Vector3:
 
 
 func host_spawn(type: StringName, pos: Vector3) -> int:
-	if not is_authority() or not TYPES.has(type):
+	if not is_authority() or not TYPES.has(type) or not pos.is_finite():
 		return -1
 	var id: int = _next_id
 	_next_id += 1

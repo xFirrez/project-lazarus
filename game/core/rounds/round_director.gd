@@ -48,6 +48,7 @@ var special_id: StringName = &""
 var next_special: StringName = &""
 var special_archetype: ZombieArchetype = null  # host
 var special_left: int = 0  # host: special enemies still to spawn this round
+var special_pending: int = 0  # host: taken by the SpawnDirector, rift still crackling
 var special_ids: Dictionary = {}  # host: alive special enemies of this round
 var special_health_value: float = 400.0  # host
 var special_rounds_played: int = 0  # host: k for the special count / health growth
@@ -119,6 +120,7 @@ func host_start_round(r: int) -> void:
 	queue.clear()
 	special_ids.clear()
 	special_left = 0
+	special_pending = 0
 	special_id = _special_for(current_round)
 	forced_special = &""
 	special_archetype = zombies.archetype(special_id) if special_id != &"" and zombies != null else null
@@ -174,12 +176,20 @@ func host_take_special() -> ZombieArchetype:
 	if special_left <= 0 or special_archetype == null:
 		return null
 	special_left -= 1
+	special_pending += 1
 	return special_archetype
 
 
 func host_register_special(a: ZombieActor) -> void:
+	special_pending = maxi(special_pending - 1, 0)
 	round_ids[a.net_id] = true
 	special_ids[a.net_id] = true
+
+
+# A rift's spawn failed (or the round was cleared): the enemy goes back to the queue.
+func host_return_special() -> void:
+	special_pending = maxi(special_pending - 1, 0)
+	special_left += 1
 
 
 # Debug `special_round [enemy]`: the next round is a special round (starts it now when active).
@@ -204,6 +214,7 @@ func host_skip_round() -> void:
 		return
 	queue.clear()
 	special_left = 0
+	special_pending = 0
 	for id: int in round_ids.keys():
 		var a: ZombieActor = zombies.actors.get(id, null)
 		if a != null:
@@ -261,7 +272,8 @@ func _on_zombie_died(a: ZombieActor, _source: int) -> void:
 		return
 	round_ids.erase(a.net_id)
 	killed += 1
-	if special_ids.erase(a.net_id) and is_special_round() and special_left == 0 and special_ids.is_empty():
+	var last: bool = special_left == 0 and special_pending == 0
+	if special_ids.erase(a.net_id) and is_special_round() and last and special_ids.is_empty():
 		special_last_killed.emit(a)
 	_check_end()
 
@@ -281,7 +293,7 @@ func _on_zombie_requeued(_arch: ZombieArchetype, tier: int, reason: String, net_
 func _check_end() -> void:
 	if phase != Phase.ACTIVE or killed < total or not queue.is_empty() or not round_ids.is_empty():
 		return
-	if special_left > 0:
+	if special_left > 0 or special_pending > 0:
 		return
 	_log("round_end %d" % current_round)
 	round_ended.emit(current_round)

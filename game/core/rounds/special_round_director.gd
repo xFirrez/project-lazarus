@@ -141,7 +141,7 @@ func _on_zombie_died(a: ZombieActor, _source: int) -> void:
 	if late_wardens.has(a.net_id):
 		late_wardens.erase(a.net_id)
 		if match_node.powerups != null:
-			match_node.powerups.host_spawn(&"free_upgrade", match_node.powerups.drop_position(a.global_position))
+			match_node.powerups.host_spawn(&"free_upgrade", guaranteed_drop_position(a.global_position))
 
 
 func _burst(a: ZombieActor, arch: ZombieArchetype) -> void:
@@ -174,8 +174,26 @@ func _on_last_special(a: ZombieActor) -> void:
 	if match_node.powerups == null:
 		return
 	max_ammo_drops += 1
-	match_node.powerups.host_spawn(&"max_ammo", match_node.powerups.drop_position(a.global_position))
+	match_node.powerups.host_spawn(&"max_ammo", guaranteed_drop_position(a.global_position))
 	Log.info(&"special", "Last special enemy of round %d: Max Ammo" % match_node.rounds.current_round)
+
+
+# Guaranteed drops (last Galvanic, late Warden) land where the enemy died when a player can reach
+# that spot, otherwise at the nearest standing player (a mid-leap or off-mesh death).
+func guaranteed_drop_position(at: Vector3) -> Vector3:
+	var p: Vector3 = match_node.powerups.drop_position(at)
+	if p.is_finite():
+		return p
+	var best: Vector3 = at
+	var best_d: float = INF
+	for pc: PlayerCharacter in match_node.players.avatars.values():
+		if pc.health.is_downed or pc.spectating:
+			continue
+		var d: float = pc.global_position.distance_to(at)
+		if d < best_d:
+			best_d = d
+			best = pc.global_position + Vector3.UP * 0.1
+	return best
 
 
 func _on_round_started(r: int) -> void:

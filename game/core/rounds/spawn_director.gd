@@ -51,7 +51,7 @@ func _physics_process(delta: float) -> void:
 	if rounds == null or not RoundDirector.is_authority() or rounds.phase != RoundDirector.Phase.ACTIVE:
 		_timer = 0.0
 		_special_timer = 0.0
-		rifts.clear()
+		rifts.clear()  # RoundDirector resets its pending count at the next round start / skip
 		return
 	_tick_rifts(delta)
 	_tick_special(delta)
@@ -126,7 +126,7 @@ func _tick_rifts(delta: float) -> void:
 			rounds.special_health_value
 		)
 		if a == null:
-			rounds.special_left += 1
+			rounds.host_return_special()
 			continue
 		rounds.host_register_special(a)
 		var nearest: float = INF
