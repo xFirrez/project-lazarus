@@ -9,7 +9,13 @@
 #   owner -> host : `_wswitch` [weapon_id] ; host -> all: `_wswitch_r` [peer, weapon_id]
 #   any   -> host : `_wgive`   [weapon_id] (debug) ; host -> all: `_wloadout` [peer, ids, current, lethal]
 #   owner -> host : `_wthrow`  [seq, origin xyz, velocity xyz, fuse] ; host -> all: `_wthrow_r` [peer, ...]
-#   host  -> all  : `_wexplode` [peer, seq, x, y, z]
+#   host  -> all  : `_wexplode` [peer, seq, x, y, z, weapon_id]
+#   host  -> all  : `_wproj`   [peer, weapon_id, seq, ox,oy,oz, dx,dy,dz]  projectile launched (Step 9)
+#   host  -> all  : `_wpexplode` [key, weapon_id, x, y, z]  projectile / tripmine detonated
+#   owner -> host : `_wtac`    [seq, origin xyz, velocity xyz]  throw a Drummer Decoy
+#   owner -> host : `_wmine`   [seq, x, y, z, yaw] ; host -> all: `_wmine_r` [peer, seq, x, y, z, yaw]
+#   host  -> joiner: `_wmines_full` [[peer, seq, x, y, z, yaw]...]
+# `_wloadout` also carries equipment: [peer, ids, current, lethal, melee, tactical, tac_n, placeable, place_n].
 #   host  -> owner: `_wcheat`  [infinite_ammo]
 # The host validates every claim with HitValidator, recomputes damage from the definition and
 # applies it through TargetRegistry. The host's own shots take the same path without the network.
@@ -35,6 +41,10 @@ var loadouts: Dictionary = {}  # host: peer -> {ids: Array[StringName], current:
 var grenades: Dictionary = {}  # key -> Grenade (local copies)
 var shots_relayed: int = 0
 var mirrored: Dictionary = {}  # every peer: peer -> [ids, current, lethal] from `_wloadout`
+var projectiles: Dictionary = {}  # key -> Projectile (local copies)
+var mines: Dictionary = {}  # key -> Tripmine (every peer)
+var attraction: Callable = Callable()  # host: func(decoy: Node3D, def) -> registers a zombie attractor
+var explosions: int = 0  # host: explosions applied (tests)
 
 var _outbox: Array = []
 var _standalone_controllers: Array[WeaponController] = []
@@ -69,6 +79,12 @@ func _ready() -> void:
 	Net.register_message(&"_wthrow_r", _on_msg_throw_relay)
 	Net.register_message(&"_wexplode", _on_msg_explode)
 	Net.register_message(&"_wcheat", _on_msg_cheat)
+	Net.register_message(&"_wproj", _on_msg_proj)
+	Net.register_message(&"_wpexplode", _on_msg_pexplode)
+	Net.register_message(&"_wtac", _on_msg_tac)
+	Net.register_message(&"_wmine", _on_msg_mine)
+	Net.register_message(&"_wmine_r", _on_msg_mine_relay)
+	Net.register_message(&"_wmines_full", _on_msg_mines_full)
 	Net.register_stream(STREAM_FIRE, _on_fire_stream)
 	Net.peer_joined.connect(_on_peer_joined)
 	Net.peer_left.connect(_on_peer_left)
@@ -92,7 +108,13 @@ func _exit_tree() -> void:
 		&"_wthrow",
 		&"_wthrow_r",
 		&"_wexplode",
-		&"_wcheat"
+		&"_wcheat",
+		&"_wproj",
+		&"_wpexplode",
+		&"_wtac",
+		&"_wmine",
+		&"_wmine_r",
+		&"_wmines_full"
 	]:
 		Net.unregister_message(msg)
 	Net.unregister_stream(STREAM_FIRE)
@@ -121,6 +143,8 @@ static func submit_shot(
 	if is_authority():
 		ws._host_process_shot(c.player.peer_id, claim)
 	else:
+		if def.behavior == &"projectile":
+			ws._spawn_projectile(def, c.player.peer_id, seq, ctx.origin, ws.projectile_dir(ctx), false)
 		ws._outbox.append(claim)
 
 
@@ -169,6 +193,37 @@ static func submit_throw(
 		Net.send_reliable(1, &"_wthrow", [seq, origin.x, origin.y, origin.z, vel.x, vel.y, vel.z, fuse])
 
 
+# Owner: throw a tactical (Drummer Decoy) — same flow as frags, counted against `tac_n`.
+static func submit_tactical(
+	c: WeaponController, def: WeaponDefinition, seq: int, origin: Vector3, vel: Vector3
+) -> void:
+	var ws: WeaponSync = instance(c)
+	if ws == null:
+		return
+	var peer: int = c.player.peer_id
+	if is_authority():
+		ws._host_throw(peer, def, seq, origin, vel, def.fuse_time)
+	else:
+		ws._spawn_grenade(def, peer, seq, origin, vel, def.fuse_time, false)
+		Net.send_reliable(1, &"_wtac", [seq, origin.x, origin.y, origin.z, vel.x, vel.y, vel.z])
+
+
+# Owner: place a tripmine at `pos` (on the floor in front of the player).
+static func submit_mine(c: WeaponController, seq: int, pos: Vector3, yaw: float) -> void:
+	var ws: WeaponSync = instance(c)
+	if ws == null:
+		return
+	if is_authority():
+		ws._host_place_mine(c.player.peer_id, seq, pos, yaw)
+	else:
+		Net.send_reliable(1, &"_wmine", [seq, pos.x, pos.y, pos.z, yaw])
+
+
+# Deterministic flight direction of a projectile shot (spread from the shot seed).
+func projectile_dir(ctx: WeaponBehavior.ShotContext) -> Vector3:
+	return Ballistics.spread_direction(ctx.forward, ctx.spread_deg, Ballistics.make_rng(ctx.seed))
+
+
 # Any peer: ask the host for a weapon (debug `give`; purchases use the same host path in Step 6).
 func request_give(weapon_id: StringName) -> void:
 	if is_authority():
@@ -182,11 +237,13 @@ func request_give(weapon_id: StringName) -> void:
 
 func host_give(peer_id: int, weapon_id: StringName) -> bool:
 	var def: WeaponDefinition = WeaponCatalog.get_def(weapon_id)
-	if def == null or def.is_melee() or def.weapon_class == WeaponDefinition.WeaponClass.LETHAL:
+	if def == null or def.weapon_class == WeaponDefinition.WeaponClass.LETHAL or weapon_id == WeaponController.KNIFE_ID:
 		return false
 	var lo: Dictionary = _loadout(peer_id)
 	if bool(lo.get("last_stand", false)):
 		return false
+	if def.is_equipment():
+		return _host_give_equipment(peer_id, lo, def)
 	var ids: Array = lo["ids"]
 	if not ids.has(weapon_id):
 		if ids.size() >= PRIMARY_SLOTS:
@@ -199,6 +256,37 @@ func host_give(peer_id: int, weapon_id: StringName) -> bool:
 	lo["current"] = weapon_id
 	_broadcast_loadout(peer_id)
 	return true
+
+
+# Melee upgrade / tactical / placeable (GAME_DESIGN §3.4): equipment slots, not primaries.
+func _host_give_equipment(peer_id: int, lo: Dictionary, def: WeaponDefinition) -> bool:
+	match def.weapon_class:
+		WeaponDefinition.WeaponClass.MELEE:
+			lo["melee"] = def.id
+			validator.give(peer_id, def)
+		WeaponDefinition.WeaponClass.TACTICAL:
+			lo["tactical"] = def.id
+			lo["tac_n"] = def.carry_max
+		WeaponDefinition.WeaponClass.PLACEABLE:
+			lo["placeable"] = def.id
+			lo["place_n"] = def.carry_start
+		_:
+			return false
+	_broadcast_loadout(peer_id)
+	return true
+
+
+# Host: does the player hold this weapon or equipment (box eligibility, wall-buy ownership)?
+func host_owns(peer_id: int, weapon_id: StringName) -> bool:
+	var lo: Dictionary = _loadout(peer_id)
+	if (lo["ids"] as Array).has(weapon_id):
+		return true
+	if StringName(lo.get("melee", &"")) == weapon_id:
+		return true
+	if StringName(lo.get("placeable", &"")) == weapon_id:
+		return true
+	var def: WeaponDefinition = WeaponCatalog.get_def(weapon_id)
+	return StringName(lo.get("tactical", &"")) == weapon_id and def != null and int(lo.get("tac_n", 0)) >= def.carry_max
 
 
 func host_refill(peer_id: int) -> void:
@@ -229,8 +317,14 @@ func host_add_lethal(peer_id: int, amount: int) -> void:
 		return
 	var lo: Dictionary = loadouts[peer_id]
 	var next: int = mini(int(lo["lethal"]) + amount, frag.carry_max)
-	if next != int(lo["lethal"]):
-		lo["lethal"] = next
+	var changed: bool = next != int(lo["lethal"])
+	lo["lethal"] = next
+	# Tripmines refill to 2 per round (GAME_DESIGN §4.3).
+	var mine_def: WeaponDefinition = WeaponCatalog.get_def(StringName(lo.get("placeable", &"")))
+	if mine_def != null and int(lo.get("place_n", 0)) < mine_def.carry_max:
+		lo["place_n"] = mine_def.carry_max
+		changed = true
+	if changed:
 		_broadcast_loadout(peer_id)
 
 
@@ -310,7 +404,17 @@ func host_export(peer_id: int) -> Dictionary:
 	var ammo: Dictionary = {}
 	for wid: String in ids:
 		ammo[wid] = (validator.ammo(peer_id, StringName(wid)) as Array).duplicate()
-	return {"ids": ids, "current": current, "lethal": int(lo["lethal"]), "ammo": ammo}
+	return {
+		"ids": ids,
+		"current": current,
+		"lethal": int(lo["lethal"]),
+		"ammo": ammo,
+		"melee": String(lo.get("melee", WeaponController.KNIFE_ID)),
+		"tactical": String(lo.get("tactical", "")),
+		"tac_n": int(lo.get("tac_n", 0)),
+		"placeable": String(lo.get("placeable", "")),
+		"place_n": int(lo.get("place_n", 0))
+	}
 
 
 # HOST: restores an exported loadout onto (a new peer id for) the same player.
@@ -333,10 +437,18 @@ func host_import(peer_id: int, data: Dictionary) -> void:
 	if knife != null:
 		validator.give(peer_id, knife)
 	var cur: StringName = StringName(String(data.get("current", "")))
+	var melee: StringName = StringName(String(data.get("melee", String(WeaponController.KNIFE_ID))))
+	if WeaponCatalog.get_def(melee) != null:
+		validator.give(peer_id, WeaponCatalog.get_def(melee))
 	loadouts[peer_id] = {
 		"ids": ids,
 		"current": cur if ids.has(cur) else (ids[0] if not ids.is_empty() else &""),
-		"lethal": int(data.get("lethal", 0))
+		"lethal": int(data.get("lethal", 0)),
+		"melee": melee,
+		"tactical": StringName(String(data.get("tactical", ""))),
+		"tac_n": int(data.get("tac_n", 0)),
+		"placeable": StringName(String(data.get("placeable", ""))),
+		"place_n": int(data.get("place_n", 0))
 	}
 	_broadcast_loadout(peer_id)
 
@@ -348,7 +460,7 @@ func digest_of(peer_id: int) -> String:
 	var lo: Dictionary = loadouts[peer_id]
 	var ids: Array = _id_strings(lo["ids"])
 	ids.sort()
-	return "%s/%d" % [",".join(PackedStringArray(ids)), int(lo["lethal"])]
+	return "%s/%d/%s" % [",".join(PackedStringArray(ids)), int(lo["lethal"]), String(lo.get("melee", "knife"))]
 
 
 # Same format as digest_of, from the replicated loadout mirror (clients).
@@ -358,7 +470,7 @@ func mirror_digest_of(peer_id: int) -> String:
 	var m: Array = mirrored[peer_id]
 	var ids: Array = _id_strings(m[0])
 	ids.sort()
-	return "%s/%d" % [",".join(PackedStringArray(ids)), int(m[2])]
+	return "%s/%d/%s" % [",".join(PackedStringArray(ids)), int(m[2]), String(m[3]) if m.size() > 3 else "knife"]
 
 
 func is_last_stand(peer_id: int) -> bool:
@@ -384,16 +496,35 @@ func _loadout(peer_id: int) -> Dictionary:
 		loadouts[peer_id] = {
 			"ids": ids,
 			"current": ids[0] if not ids.is_empty() else &"",
-			"lethal": frag.carry_start if frag != null else 0
+			"lethal": frag.carry_start if frag != null else 0,
+			"melee": WeaponController.KNIFE_ID,
+			"tactical": &"",
+			"tac_n": 0,
+			"placeable": &"",
+			"place_n": 0
 		}
 	return loadouts[peer_id]
 
 
 func _broadcast_loadout(peer_id: int) -> void:
-	var lo: Dictionary = _loadout(peer_id)
-	var payload: Array = [peer_id, _id_strings(lo["ids"]), String(lo["current"]), int(lo["lethal"])]
+	var payload: Array = _loadout_payload(peer_id)
 	Net.send_reliable(0, &"_wloadout", payload)
 	_apply_loadout(payload)
+
+
+func _loadout_payload(peer_id: int) -> Array:
+	var lo: Dictionary = _loadout(peer_id)
+	return [
+		peer_id,
+		_id_strings(lo["ids"]),
+		String(lo["current"]),
+		int(lo["lethal"]),
+		String(lo.get("melee", WeaponController.KNIFE_ID)),
+		String(lo.get("tactical", "")),
+		int(lo.get("tac_n", 0)),
+		String(lo.get("placeable", "")),
+		int(lo.get("place_n", 0))
+	]
 
 
 func _host_process_shot(peer_id: int, claim: Array) -> void:
@@ -420,6 +551,13 @@ func _host_process_shot(peer_id: int, claim: Array) -> void:
 	var origin: Vector3 = Vector3(float(claim[3]), float(claim[4]), float(claim[5]))
 	var forward: Vector3 = Vector3(float(claim[6]), float(claim[7]), float(claim[8]))
 	_relay_fire(peer_id, def, int(claim[10]), origin, forward, float(claim[9]))
+	if def.behavior == &"projectile":
+		var ctx: WeaponBehavior.ShotContext = WeaponBehavior.ShotContext.new()
+		ctx.forward = forward
+		ctx.spread_deg = float(claim[9])
+		ctx.seed = int(claim[10])
+		_host_launch(peer_id, def, int(claim[1]), _shooter_eye(peer_id, origin), projectile_dir(ctx))
+		return
 	var eye: Vector3 = _shooter_eye(peer_id, origin)
 	var space: PhysicsDirectSpaceState3D = get_viewport().get_world_3d().direct_space_state
 	var killed: Array[HitTarget] = []
@@ -504,19 +642,37 @@ func _host_switch(peer_id: int, weapon_id: StringName) -> void:
 
 func _host_throw(peer_id: int, def: WeaponDefinition, seq: int, origin: Vector3, vel: Vector3, fuse: float) -> void:
 	var lo: Dictionary = _loadout(peer_id)
-	if int(lo["lethal"]) <= 0:
-		validator._reject(HitValidator.Result.NO_AMMO, "peer %d has no lethals" % peer_id)
+	var tactical: bool = def.weapon_class == WeaponDefinition.WeaponClass.TACTICAL
+	var count_key: String = "tac_n" if tactical else "lethal"
+	if int(lo.get(count_key, 0)) <= 0 or tactical and StringName(lo.get("tactical", &"")) != def.id:
+		validator._reject(HitValidator.Result.NO_AMMO, "peer %d has no %s" % [peer_id, def.id])
 		return
-	lo["lethal"] = int(lo["lethal"]) - 1
+	lo[count_key] = int(lo[count_key]) - 1
 	var fuse_clamped: float = clampf(fuse, 0.0, def.fuse_time)
 	var g: Grenade = _spawn_grenade(def, peer_id, seq, origin, vel, fuse_clamped, true)
 	g.exploded.connect(_on_grenade_exploded)
-	Net.send_reliable(0, &"_wthrow_r", [peer_id, seq, origin.x, origin.y, origin.z, vel.x, vel.y, vel.z, fuse_clamped])
+	if tactical:
+		_broadcast_loadout(peer_id)
+		if attraction.is_valid():
+			attraction.call(g, def)
+	Net.send_reliable(
+		0, &"_wthrow_r", [peer_id, seq, origin.x, origin.y, origin.z, vel.x, vel.y, vel.z, fuse_clamped, String(def.id)]
+	)
 
 
 func _on_grenade_exploded(g: Grenade, pos: Vector3) -> void:
 	grenades.erase(g.key)
-	var def: WeaponDefinition = g.def
+	host_explode(g.def, g.peer_id, pos)
+	Net.send_reliable(
+		0, &"_wexplode", [g.peer_id, g.key.get_slice(":", 1).to_int(), pos.x, pos.y, pos.z, String(g.def.id)]
+	)
+
+
+# HOST: splash damage of an explosive (GAME_DESIGN §4.3): `splash_damage_centre` falling linearly
+# to `splash_damage_edge` at `splash_radius` (line of sight from the blast), to every live target;
+# the owner takes up to `self_damage_max` with the same falloff (§3.2; friendly fire is off).
+func host_explode(def: WeaponDefinition, peer_id: int, pos: Vector3) -> void:
+	explosions += 1
 	var space: PhysicsDirectSpaceState3D = get_viewport().get_world_3d().direct_space_state
 	if targets != null:
 		for id: int in targets.targets.keys():
@@ -531,19 +687,118 @@ func _on_grenade_exploded(g: Grenade, pos: Vector3) -> void:
 				def.splash_damage_centre, def.splash_damage_edge, def.splash_radius, d
 			)
 			var info: DamageInfo = DamageInfo.make(
-				amount, WeaponDefinition.Hitzone.TORSO, DamageInfo.Kind.EXPLOSIVE, def.id, g.peer_id
+				amount, WeaponDefinition.Hitzone.TORSO, DamageInfo.Kind.EXPLOSIVE, def.id, peer_id
 			)
 			info.distance = d
 			info.position = pos
 			targets.host_damage(t, info)
-	if players != null and players.avatars.has(g.peer_id):
-		var thrower: PlayerCharacter = players.avatars[g.peer_id]
-		var pd: float = pos.distance_to(thrower.global_position + Vector3.UP * 0.9)
-		if pd <= def.splash_radius:
-			var frac: float = DamageModel.splash_damage(1.0, 0.0, def.splash_radius, pd)
-			players.damage_player(g.peer_id, def.self_damage_max * frac, pos, HealthComponent.DamageType.EXPLOSIVE)
-	Net.send_reliable(0, &"_wexplode", [g.peer_id, g.key.get_slice(":", 1).to_int(), pos.x, pos.y, pos.z])
+	if players != null and players.avatars.has(peer_id):
+		var owner_avatar: PlayerCharacter = players.avatars[peer_id]
+		var pd: float = pos.distance_to(owner_avatar.global_position + Vector3.UP * 0.9)
+		var dmg: float = DamageModel.self_damage(def, pd)
+		if dmg > 0.0:
+			players.damage_player(peer_id, dmg, pos, HealthComponent.DamageType.EXPLOSIVE)
 	WeaponFx.of(self).explosion(pos, def.splash_radius)
+	Audio.play_event_3d(&"frag_explode", pos)
+
+
+# HOST: launches the authoritative projectile of an accepted shot and relays it.
+func _host_launch(peer_id: int, def: WeaponDefinition, seq: int, eye: Vector3, dir: Vector3) -> void:
+	var p: Projectile = _spawn_projectile(def, peer_id, seq, eye, dir, true)
+	p.struck.connect(_on_projectile_struck)
+	p.detonated.connect(_on_projectile_detonated)
+	Net.send_reliable(0, &"_wproj", [peer_id, String(def.id), seq, eye.x, eye.y, eye.z, dir.x, dir.y, dir.z])
+
+
+func _spawn_projectile(
+	def: WeaponDefinition, peer_id: int, seq: int, eye: Vector3, dir: Vector3, auth: bool
+) -> Projectile:
+	var key: String = "p%d:%d" % [peer_id, seq]
+	if projectiles.has(key) and is_instance_valid(projectiles[key]):
+		var existing: Projectile = projectiles[key]
+		if auth and not existing.authoritative:
+			existing.queue_free()  # host-local predicted copy (never happens for host shooters)
+		else:
+			return existing
+	var p: Projectile = Projectile.create(def, key, peer_id, ProjectileBehavior.launch_velocity(def, dir), auth)
+	if players != null and players.avatars.has(peer_id):
+		p.exclude = []  # player capsules are not on the world layer; nothing to exclude
+	var parent: Node = Match.current if Match.current != null else get_parent()
+	parent.add_child(p)
+	p.global_position = ProjectileBehavior.launch_origin(eye, dir)
+	projectiles[key] = p
+	p.tree_exiting.connect(func() -> void: projectiles.erase(key))
+	return p
+
+
+func _on_projectile_struck(p: Projectile, t: HitTarget, zone: int, pos: Vector3) -> void:
+	if targets == null or t == null or not t.alive or t.target_id <= 0:
+		return
+	var info: DamageInfo = DamageInfo.make(p.def.damage, zone, DamageInfo.Kind.EXPLOSIVE, p.def.id, p.peer_id)
+	info.position = pos
+	info.distance = p.traveled
+	targets.host_damage(t, info)
+
+
+func _on_projectile_detonated(p: Projectile, pos: Vector3) -> void:
+	projectiles.erase(p.key)
+	host_explode(p.def, p.peer_id, pos)
+	Net.send_reliable(0, &"_wpexplode", [p.key, String(p.def.id), pos.x, pos.y, pos.z])
+
+
+# HOST: tripmines (GAME_DESIGN §4.3): `place_limit` placed per player, counted against `place_n`.
+func _host_place_mine(peer_id: int, seq: int, pos: Vector3, yaw: float) -> void:
+	var lo: Dictionary = _loadout(peer_id)
+	var def: WeaponDefinition = WeaponCatalog.get_def(StringName(lo.get("placeable", &"")))
+	if def == null or int(lo.get("place_n", 0)) <= 0:
+		return
+	if players != null and players.avatars.has(peer_id):
+		var a: PlayerCharacter = players.avatars[peer_id]
+		if a.global_position.distance_to(pos) > 4.0:
+			return
+	var placed: int = 0
+	for m: Tripmine in mines.values():
+		if m.peer_id == peer_id:
+			placed += 1
+	if placed >= def.place_limit:
+		return
+	lo["place_n"] = int(lo["place_n"]) - 1
+	_broadcast_loadout(peer_id)
+	_spawn_mine(def, peer_id, seq, pos, yaw)
+	Net.send_reliable(0, &"_wmine_r", [peer_id, seq, pos.x, pos.y, pos.z, yaw])
+
+
+func _spawn_mine(def: WeaponDefinition, peer_id: int, seq: int, pos: Vector3, yaw: float) -> Tripmine:
+	var key: String = "m%d:%d" % [peer_id, seq]
+	if mines.has(key):
+		return mines[key]
+	var m: Tripmine = Tripmine.create(def, key, peer_id)
+	var parent: Node = Match.current if Match.current != null else get_parent()
+	parent.add_child(m)
+	m.global_position = pos
+	m.rotation.y = yaw
+	mines[key] = m
+	m.tree_exiting.connect(func() -> void: mines.erase(key))
+	if is_authority():
+		m.triggered.connect(_on_mine_triggered)
+	return m
+
+
+func _on_mine_triggered(m: Tripmine) -> void:
+	var pos: Vector3 = m.global_position + Vector3.UP * 0.1
+	mines.erase(m.key)
+	m.queue_free()
+	host_explode(m.def, m.peer_id, pos)
+	Net.send_reliable(0, &"_wpexplode", [m.key, String(m.def.id), pos.x, pos.y, pos.z])
+
+
+# HOST: removes a player's placed tripmines (bled out / left).
+func host_clear_mines(peer_id: int) -> void:
+	for key: String in mines.keys():
+		var m: Tripmine = mines[key]
+		if m.peer_id == peer_id:
+			mines.erase(key)
+			m.queue_free()
 
 
 func _spawn_grenade(
@@ -642,7 +897,8 @@ func _on_msg_loadout(sender: int, p: Array) -> void:
 
 
 func _apply_loadout(p: Array) -> void:
-	mirrored[int(p[0])] = [(p[1] as Array).duplicate(), String(p[2]), int(p[3])]
+	var melee: String = String(p[4]) if p.size() > 4 else String(WeaponController.KNIFE_ID)
+	mirrored[int(p[0])] = [(p[1] as Array).duplicate(), String(p[2]), int(p[3]), melee]
 	if players == null:
 		return
 	var peer: int = int(p[0])
@@ -651,6 +907,8 @@ func _apply_loadout(p: Array) -> void:
 	var avatar: PlayerCharacter = players.avatars[peer]
 	if avatar.is_local:
 		avatar.weapons.apply_loadout(p[1], StringName(p[2]), int(p[3]))
+		if p.size() > 8:
+			avatar.weapons.apply_equipment(StringName(p[4]), StringName(p[5]), int(p[6]), StringName(p[7]), int(p[8]))
 	else:
 		avatar.weapons.set_remote_weapon(WeaponCatalog.get_def(StringName(p[2])))
 
@@ -670,7 +928,9 @@ func _on_msg_throw(sender: int, p: Array) -> void:
 func _on_msg_throw_relay(sender: int, p: Array) -> void:
 	if sender != 1 or Net.is_host() or int(p[0]) == Net.local_id():
 		return
-	var def: WeaponDefinition = WeaponCatalog.get_def(WeaponController.FRAG_ID)
+	var def: WeaponDefinition = WeaponCatalog.get_def(StringName(p[9]) if p.size() > 9 else WeaponController.FRAG_ID)
+	if def == null:
+		return
 	_spawn_grenade(
 		def,
 		int(p[0]),
@@ -689,10 +949,75 @@ func _on_msg_explode(sender: int, p: Array) -> void:
 	if grenades.has(key) and is_instance_valid(grenades[key]):
 		(grenades[key] as Grenade).queue_free()
 	grenades.erase(key)
-	var def: WeaponDefinition = WeaponCatalog.get_def(WeaponController.FRAG_ID)
-	WeaponFx.of(self).explosion(
-		Vector3(float(p[2]), float(p[3]), float(p[4])), def.splash_radius if def != null else 4.0
-	)
+	var def: WeaponDefinition = WeaponCatalog.get_def(StringName(p[5]) if p.size() > 5 else WeaponController.FRAG_ID)
+	var pos: Vector3 = Vector3(float(p[2]), float(p[3]), float(p[4]))
+	WeaponFx.of(self).explosion(pos, def.splash_radius if def != null else 4.0)
+	Audio.play_event_3d(&"frag_explode", pos)
+
+
+func _on_msg_proj(sender: int, p: Array) -> void:
+	if sender != 1 or Net.is_host() or int(p[0]) == Net.local_id():
+		return
+	var def: WeaponDefinition = WeaponCatalog.get_def(StringName(p[1]))
+	if def != null:
+		_spawn_projectile(
+			def,
+			int(p[0]),
+			int(p[2]),
+			Vector3(float(p[3]), float(p[4]), float(p[5])),
+			Vector3(float(p[6]), float(p[7]), float(p[8])),
+			false
+		)
+
+
+func _on_msg_pexplode(sender: int, p: Array) -> void:
+	if sender != 1 or Net.is_host():
+		return
+	var key: String = String(p[0])
+	if projectiles.has(key) and is_instance_valid(projectiles[key]):
+		(projectiles[key] as Projectile).queue_free()
+	projectiles.erase(key)
+	if mines.has(key) and is_instance_valid(mines[key]):
+		(mines[key] as Tripmine).queue_free()
+	mines.erase(key)
+	var def: WeaponDefinition = WeaponCatalog.get_def(StringName(p[1]))
+	var pos: Vector3 = Vector3(float(p[2]), float(p[3]), float(p[4]))
+	WeaponFx.of(self).explosion(pos, def.splash_radius if def != null else 4.0)
+	Audio.play_event_3d(&"frag_explode", pos)
+
+
+func _on_msg_tac(sender: int, p: Array) -> void:
+	if not Net.is_host():
+		return
+	var lo: Dictionary = _loadout(sender)
+	var def: WeaponDefinition = WeaponCatalog.get_def(StringName(lo.get("tactical", &"")))
+	if def == null:
+		return
+	var origin: Vector3 = Vector3(float(p[1]), float(p[2]), float(p[3]))
+	var known: Vector3 = _shooter_eye(sender, origin)
+	if known.distance_to(origin) > ORIGIN_SLACK:
+		origin = known
+	_host_throw(sender, def, int(p[0]), origin, Vector3(float(p[4]), float(p[5]), float(p[6])), def.fuse_time)
+
+
+func _on_msg_mine(sender: int, p: Array) -> void:
+	if Net.is_host():
+		_host_place_mine(sender, int(p[0]), Vector3(float(p[1]), float(p[2]), float(p[3])), float(p[4]))
+
+
+func _on_msg_mine_relay(sender: int, p: Array) -> void:
+	if sender != 1 or Net.is_host():
+		return
+	var lo_def: WeaponDefinition = WeaponCatalog.get_def(&"tripmines")
+	if lo_def != null:
+		_spawn_mine(lo_def, int(p[0]), int(p[1]), Vector3(float(p[2]), float(p[3]), float(p[4])), float(p[5]))
+
+
+func _on_msg_mines_full(sender: int, p: Array) -> void:
+	if sender != 1 or Net.is_host():
+		return
+	for e: Variant in p:
+		_on_msg_mine_relay(1, e as Array)
 
 
 func _on_msg_cheat(sender: int, p: Array) -> void:
@@ -733,12 +1058,18 @@ func _on_peer_joined(peer_id: int, _info: Dictionary) -> void:
 	for id: int in loadouts:
 		if id != peer_id:
 			var lo: Dictionary = loadouts[id]
-			Net.send_reliable(
-				peer_id, &"_wloadout", [id, _id_strings(lo["ids"]), String(lo["current"]), int(lo["lethal"])]
-			)
+			Net.send_reliable(peer_id, &"_wloadout", _loadout_payload(id))
+	var full: Array = []
+	for m: Tripmine in mines.values():
+		var mp: Vector3 = m.global_position
+		full.append([m.peer_id, m.key.get_slice(":", 1).to_int(), mp.x, mp.y, mp.z, m.rotation.y])
+	if not full.is_empty():
+		Net.send_reliable(peer_id, &"_wmines_full", full)
 
 
 func _on_peer_left(peer_id: int) -> void:
+	if is_authority():
+		host_clear_mines(peer_id)
 	loadouts.erase(peer_id)
 	mirrored.erase(peer_id)
 	validator.remove_peer(peer_id)

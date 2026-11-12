@@ -62,6 +62,7 @@ func _register_builtin_commands() -> void:
 	commands.register("quit", _cmd_quit, [], "Quit the game")
 	PlayerCommands.register(commands)
 	WeaponCommands.register(commands)
+	BoxCommands.register(commands)
 	RenderCommands.register(commands)
 	ZombieCommands.register(commands)
 	SurvivalCommands.register(commands)

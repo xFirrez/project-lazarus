@@ -18,6 +18,9 @@ extends Resource
 @export var starting_zone: StringName = &""
 # Script extending MapRules (maps/<id>/scripts/<id>_rules.gd); null = default rules.
 @export var rules_script: Script = null
+# Relic Box (Step 9): the MapMarker (kind &"box") id of the start location; "" = first by id.
+@export var box_start: StringName = &""
+@export var box_pool: RelicBoxPool = null  # null -> res://content/box/relic_box_pool.tres
 
 
 func zone_def(zone_id: StringName) -> ZoneDef:

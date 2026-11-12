@@ -15,7 +15,7 @@ man={"map":"vesper_peak","doc":"docs/VESPER_PEAK.md (§2-7). Checked by tests/in
 "zones":["Z01","Z03","Z04","Z05","Z06","Z07","Z08","Z09","Z10","Z11","Z12","Z13"],
 "doors":[{"id":k,"cost":v} for k,v in doors.items()],
 "door_total":sum(doors.values()),
-"wall_buys_live":["WallBuy_M14","WallBuy_Coachgun"],
+"wall_buys_live":["WallBuy_M14","WallBuy_Coachgun","WallBuy_MP40","WallBuy_Model37","WallBuy_M16","WallBuy_Tripmines","WallBuy_Kar98k","WallBuy_IceAxe","WallBuy_GreaseGun","WallBuy_Revolver"],
 "nodes":["PWR_MainSwitch","GND_Gondola","GND_Console_Z01","GND_Console_Z07","GND_CabinPanel","LFT_FreightLift","LFT_Console0","LFT_Console1","CHT_LaundryChute","CHT_Grate","CHT_GrateTarget","BRG_ReactorBridge"],
 "markers":markers}
 json.dump(man,open('maps/vesper_peak/markers_manifest.json','w'),indent=1)

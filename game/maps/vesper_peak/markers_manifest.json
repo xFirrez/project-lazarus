@@ -76,7 +76,15 @@
  "door_total": 17000,
  "wall_buys_live": [
   "WallBuy_M14",
-  "WallBuy_Coachgun"
+  "WallBuy_Coachgun",
+  "WallBuy_MP40",
+  "WallBuy_Model37",
+  "WallBuy_M16",
+  "WallBuy_Tripmines",
+  "WallBuy_Kar98k",
+  "WallBuy_IceAxe",
+  "WallBuy_GreaseGun",
+  "WallBuy_Revolver"
  ],
  "nodes": [
   "PWR_MainSwitch",
@@ -121,11 +129,6 @@
   {
    "id": "Perk_Quickdraw",
    "kind": "perk",
-   "zone": "Z03"
-  },
-  {
-   "id": "WB_MP40",
-   "kind": "wallbuy",
    "zone": "Z03"
   },
   {
@@ -176,11 +179,6 @@
   {
    "id": "Box_Z04",
    "kind": "box",
-   "zone": "Z04"
-  },
-  {
-   "id": "WB_Model37",
-   "kind": "wallbuy",
    "zone": "Z04"
   },
   {
@@ -246,16 +244,6 @@
   {
    "id": "Perk_Ironhide",
    "kind": "perk",
-   "zone": "Z06"
-  },
-  {
-   "id": "WB_M16",
-   "kind": "wallbuy",
-   "zone": "Z06"
-  },
-  {
-   "id": "WB_Tripmines",
-   "kind": "wallbuy",
    "zone": "Z06"
   },
   {
@@ -329,16 +317,6 @@
    "zone": "Z07"
   },
   {
-   "id": "WB_Kar98k",
-   "kind": "wallbuy",
-   "zone": "Z07"
-  },
-  {
-   "id": "WB_IceAxe",
-   "kind": "wallbuy",
-   "zone": "Z07"
-  },
-  {
    "id": "Box_Z07",
    "kind": "box",
    "zone": "Z07"
@@ -389,11 +367,6 @@
    "zone": "Z07"
   },
   {
-   "id": "WB_GreaseGun",
-   "kind": "wallbuy",
-   "zone": "Z08"
-  },
-  {
    "id": "Box_Z08",
    "kind": "box",
    "zone": "Z08"
@@ -432,11 +405,6 @@
    "id": "EE_TallyMarks",
    "kind": "ee",
    "zone": "Z09"
-  },
-  {
-   "id": "WB_Revolver",
-   "kind": "wallbuy",
-   "zone": "Z10"
   },
   {
    "id": "T2_SteamPurge",

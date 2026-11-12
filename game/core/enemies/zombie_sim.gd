@@ -142,8 +142,8 @@ func _think_pursue(dt: float) -> void:
 	need = need or (path_goal != Vector3.INF and tp.distance_to(path_goal) > REPATH_MOVE)
 	if need and not path_requested:
 		director.request_path(self)
-	# Attack when in reach of the target (not while crossing a link).
-	if attack_cooldown <= 0.0 and _in_reach(target):
+	# Attack when in reach of the target (not while crossing a link). Attractors are never attacked.
+	if attack_cooldown <= 0.0 and _in_reach(target) and not director.is_attractor(target):
 		_begin_attack(target)
 
 
@@ -166,6 +166,9 @@ func _in_reach(t: Node3D) -> bool:
 
 
 func _select_target() -> void:
+	var lure: int = _select_attractor()
+	if lure != 0:
+		return  # 1 = chasing an attractor, -1 = path budget spent (retry next think)
 	var cands: Array[Node3D] = director.live_targets()
 	if cands.is_empty():
 		target = null
@@ -202,6 +205,31 @@ func _select_target() -> void:
 			path_age = INF
 			has_slot = false
 	target_path_length = cur_len if best == target and cur_len < INF else best_len
+
+
+# Drummer Decoy pull (AC-9.6): the closest attractor within its radius by PATH distance wins over
+# every player. Returns 1 when chasing one, -1 when the path budget ran out, 0 otherwise.
+func _select_attractor() -> int:
+	var best: Node3D = null
+	var best_len: float = INF
+	for a: Node3D in director.live_attractors():
+		var radius: float = float(a.get_meta(&"attract_radius", 0.0))
+		if pos.distance_to(a.global_position) > radius:
+			continue  # straight line is a lower bound of the path distance
+		var l: float = director.path_length(self, pos, a.global_position)
+		if l < 0.0:
+			return -1
+		if l <= radius and l < best_len:
+			best_len = l
+			best = a
+	if best == null:
+		return 0
+	if target != best:
+		target = best
+		path_age = INF
+		has_slot = false
+	target_path_length = best_len
+	return 1
 
 
 # --- move (every physics frame) ---------------------------------------------------------------

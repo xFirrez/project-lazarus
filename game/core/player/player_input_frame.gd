@@ -20,6 +20,8 @@ var lethal_held: bool = false
 var switch_slot: int = -1  # 0-based slot requested this frame (keys 1-3), -1 = none
 var switch_delta: int = 0  # +1 next / -1 previous (wheel, gamepad)
 var interact: bool = false  # interact key held (purchases, repairs, revives)
+var tactical_pressed: bool = false  # edge: throw a Drummer Decoy (Step 9)
+var placeable_pressed: bool = false  # edge: place a tripmine (Step 9)
 
 
 func duplicate_frame() -> PlayerInputFrame:
@@ -39,4 +41,6 @@ func duplicate_frame() -> PlayerInputFrame:
 	f.switch_slot = switch_slot
 	f.switch_delta = switch_delta
 	f.interact = interact
+	f.tactical_pressed = tactical_pressed
+	f.placeable_pressed = placeable_pressed
 	return f

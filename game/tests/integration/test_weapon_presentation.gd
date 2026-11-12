@@ -1,6 +1,6 @@
 # AC-3.5 (numeric part): the viewmodel renders on its own layer with its own camera, the main
 # camera culls that layer, and in full ADS the sight point projects to the screen centre within
-# 1 px at 1080p for all 4 weapons (the rendered check is tests/visual/viewmodel_ads.gd).
+# 1 px at 1080p for every weapon (AC-9.2) (the rendered check is tests/visual/viewmodel_ads.gd).
 # AC-3.6: firing the MP40 at a wall for 60 s keeps decal / effect pools at their caps with no
 # node, object or memory growth.
 extends GutTest
@@ -23,8 +23,17 @@ func test_viewmodel_layer_and_camera() -> void:
 		assert_eq((m as MeshInstance3D).layers, Viewmodel.LAYER, "%s on the viewmodel layer" % m.name)
 
 
+# AC-9.2: every conventional weapon of the spec table (tests/data/weapons_spec.json).
+static func all_weapon_ids() -> Array[StringName]:
+	var spec: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/data/weapons_spec.json"))
+	var out: Array[StringName] = []
+	for wid: String in spec["weapons"]:
+		out.append(StringName(wid))
+	return out
+
+
 func test_ads_alignment_all_weapons() -> void:
-	for wid: StringName in [&"m1911", &"mp40", &"model37", &"kar98k"] as Array[StringName]:
+	for wid: StringName in all_weapon_ids():
 		var rig: W.Rig = W.build(self, [wid])
 		var vm: Viewmodel = rig.controller().viewmodel
 		vm.breath_enabled = false
@@ -37,6 +46,32 @@ func test_ads_alignment_all_weapons() -> void:
 		assert_true(err_1080 < 1.0, "%s sight within 1 px of centre at 1080p (%.3f px)" % [wid, err_1080])
 		rig.root.queue_free()
 		await Helper.step(self, 2)
+
+
+# AC-9.2: every weapon has draw / fire / reload (partial + empty, or the shell-by-shell set) /
+# sprint clips, a world model for third person + box display, and a full audio set.
+func test_clip_and_audio_sets_all_weapons() -> void:
+	var rig: W.Rig = W.build(self, [&"m1911"])
+	await Helper.step(self, 5)
+	var vm: Viewmodel = rig.controller().viewmodel
+	for wid: StringName in all_weapon_ids():
+		var def: WeaponDefinition = WeaponCatalog.get_def(wid)
+		vm.set_weapon(def, WeaponRuntime.new(def))
+		var lib: StringName = StringName(String(wid))
+		var clips: Array = [&"draw", &"fire", &"sprint", &"idle", &"holster"]
+		clips.append_array(
+			[&"reload_start", &"reload_shell"] if def.reload_per_shell else [&"reload_partial", &"reload_empty"]
+		)
+		for clip: StringName in clips:
+			assert_true(vm.anim.has_animation(StringName("%s/%s" % [lib, clip])), "%s has %s" % [wid, clip])
+		WeaponAudio.ensure(def)
+		for layer: String in ["mech", "body", "tail", "tail_in", "mag_out", "mag_in", "bolt", "raise"]:
+			assert_true(Audio.has_event(WeaponAudio.event(def, layer)), "%s audio %s" % [wid, layer])
+		var world: Node3D = (
+			def.world_scene.instantiate() as Node3D if def.world_scene != null else GreyboxGun.build(def, 1)
+		)
+		assert_not_null(world.get_node_or_null(^"Muzzle"), "%s world model has a Muzzle" % wid)
+		world.free()
 
 
 func test_hip_fire_crosshair_bloom() -> void:

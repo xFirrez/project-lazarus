@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="RelicBoxPool" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/box/relic_box_pool.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_ids = Array[StringName]([&"mp40", &"grease_gun", &"m14", &"m16", &"coachgun", &"model37", &"kar98k", &"revolver", &"mauser", &"skorpion", &"ppsh", &"ak47", &"fal", &"g3", &"auto12", &"dragunov", &"crossbow", &"china_lake", &"rpd", &"m60", &"mg42", &"law", &"decoy", &"ray_pistol", &"lazarus_conduit"])
+weights = PackedFloat32Array(8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 4.0, 4.0, 4.0, 5.0, 1.5, 1.0)
+wonder_ids = Array[StringName]([&"ray_pistol", &"lazarus_conduit"])
+conditions = {
+&"lazarus_conduit": "conduit_built"
+}
+cost = 950
+fire_sale_cost = 10
+spin_time = 4.5
+offer_time = 12.0
+doll_free_uses = 4
+doll_base = 0.15
+doll_step = 0.15
+doll_max = 0.75
+move_time = 4.0
+bad_luck_step = 0.1
+fire_sale_time = 30.0

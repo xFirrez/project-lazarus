@@ -1,0 +1,72 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.000, 0.420, 0, 0, 0, 0, -0.207, 0.403, 0, 0, 0, 0, 0.234, 0.386, 0, 0, 0, 0, -0.261, 0.370, 0, 0, 0, 0, 0.288, 0.353, 0, 0, 0, 0, -0.315, 0.336, 0, 0, 0, 0, 0.342, 0.319, 0, 0, 0, 0, -0.369, 0.302)
+}
+point_count = 8
+
+[resource]
+script = ExtResource("1")
+id = &"skorpion"
+display_name = "Skorpion"
+weapon_class = 1
+cost = 0
+behavior = &"hitscan"
+fire_mode = 1
+rpm = 850.0
+burst_count = 3
+damage = 35.0
+pellets = 1
+pellet_spread_deg = 0.0
+max_range = 100.0
+head_multiplier = 4.0
+neck_multiplier = 2.0
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 15.0
+range_max = 35.0
+min_damage_fraction = 0.6
+penetration = 1
+penetration_loss = 0.25
+mag_size = 20
+reserve_max = 200
+reload_partial_time = 1.8
+reload_empty_time = 2.3
+ammo_in_partial = 1.2
+ammo_in_empty = 1.6
+raise_time = 0.45
+lower_time = 0.3
+ads_time = 0.22
+sprint_out_time = 0.2
+ads_fov_multiplier = 0.85
+move_speed_multiplier = 1.0
+spread_hip = 2.6
+spread_ads = 0.15
+spread_move = 1.5
+spread_per_shot = 0.3
+spread_max = 4.5
+spread_recovery = 8.0
+recoil_random = 0.18
+recoil_ads_multiplier = 0.65
+recoil_recovery = 0.6
+recoil_recovery_speed = 6.0
+view_kick = 0.25
+vm_kick_back = 0.025
+vm_kick_rot = 2.0
+viewmodel_style = &"smg"
+viewmodel_color = Color(0.15, 0.15, 0.16, 1)
+viewmodel_offset = Vector3(0.15, -0.16, -0.3)
+sight_height = 0.068
+viewmodel_fov = 65.0
+scope_sway = 0.0
+tracer_every = 3
+shell_size = 0.01
+muzzle_flash_scale = 1.0
+sound_body_hz = 230.0
+sound_mech_hz = 3600.0
+sound_tail_s = 0.4
+sound_volume_db = -6.0
+recoil_pattern = SubResource("recoil")

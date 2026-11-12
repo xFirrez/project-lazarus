@@ -5,7 +5,7 @@ extends "res://tests/net/autotest_base.gd"
 
 var _client_id: int = 0
 var _input: Dictionary = {"fire": false}
-var _fired: bool = false
+var _shots_sent: int = 0
 var _rejections_before_cheats: int = -1
 
 
@@ -32,8 +32,10 @@ func _physics_process(_delta: float) -> void:
 					input["fire"] = false
 					return f
 		return
-	if not _fired and elapsed() > 4.0:
-		_fired = true
+	# A short burst (4 shots 0.4 s apart): one relayed shot is a single unreliable packet that a
+	# 2 % loss NetSim can drop (I-014).
+	if _shots_sent < 4 and elapsed() > 4.0 + 0.4 * _shots_sent:
+		_shots_sent += 1
 		var me2: PlayerCharacter = s.local_avatar()
 		var d: TargetDummy = Match.current.map_root.find_child("Dummy_20m", true, false) as TargetDummy
 		var dir: Vector3 = (d.zone_position(WeaponDefinition.Hitzone.TORSO) - me2.weapons.eye_position()).normalized()

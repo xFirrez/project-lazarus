@@ -50,6 +50,8 @@ func gather() -> PlayerInputFrame:
 	f.melee_pressed = Input.is_action_just_pressed(&"melee")
 	f.interact = Input.is_action_pressed(&"interact")
 	f.lethal_held = Input.is_action_pressed(&"lethal")
+	f.tactical_pressed = Input.is_action_just_pressed(&"tactical")
+	f.placeable_pressed = Input.is_action_just_pressed(&"placeable")
 	for i: int in 3:
 		if Input.is_action_just_pressed(StringName("weapon_slot_%d" % (i + 1))):
 			f.switch_slot = i

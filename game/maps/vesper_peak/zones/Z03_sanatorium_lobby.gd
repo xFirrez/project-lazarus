@@ -58,7 +58,7 @@ func build() -> void:
 	nav_areas.append(AABB(Vector3(13.2, -9.5, -5.0), Vector3(24.8, 13.0, 17.0)))  # walkway + W_U2 bay
 	nav_areas.append(AABB(Vector3(38, -9.5, -20.0), Vector3(30.2, 9.0, 32.0)))  # lobby + terrace + office
 	mark(&"perk", "Perk_Quickdraw", Vector3(40, Y, 1.5), "Quickdraw Fizz", true)
-	mark(&"wallbuy", "WB_MP40", Vector3(44, Y + 1.5, -13.8), "MP40 wall-buy (1000)")
+	wall_buy(&"mp40", Vector3(44, Y + 1.5, -13.8), 0.0).name = "WallBuy_MP40"  # VESPER_PEAK §5.1
 	mark(&"box", "Box_Z03", Vector3(49.5, Y, -6), "Relic Box START location")
 	mark(&"ee", "EE_Guestbook", Vector3(54.5, Y + 1.1, -6), "guestbook (S1 clue)")
 	mark(&"secret", "S1_Bookcase", Vector3(39, MEZZ, 7.6), "Director's Office entrance (S1)")

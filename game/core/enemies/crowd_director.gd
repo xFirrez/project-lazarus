@@ -31,6 +31,9 @@ var debug_draw: bool = false
 # Targets: PlayerSync avatars by default; tests may add any Node3D (stationary markers, bots).
 var players: PlayerSync = null
 var extra_targets: Array[Node3D] = []
+# Zombie attractors (Drummer Decoy, Step 9; Resonance Relays, Step 11): while one is alive, zombies
+# within its `attract_radius` meta (PATH distance) pursue it instead of players and never attack it.
+var attractors: Array[Node3D] = []
 var damage_hook: Callable = Callable()  # func(target: Node3D, amount: float, from: Vector3)
 
 # Statistics.
@@ -111,6 +114,42 @@ func live_targets() -> Array[Node3D]:
 		if is_instance_valid(t) and t.is_inside_tree() and not is_downed(t):
 			out.append(t)
 	return out
+
+
+func add_attractor(node: Node3D, radius: float) -> void:
+	node.set_meta(&"attract_radius", radius)
+	attractors.append(node)
+	for sim: ZombieSim in sims:
+		if sim.pos.distance_to(node.global_position) <= radius + 2.0:
+			sim.target_eval_timer = 0.0
+
+
+func live_attractors() -> Array[Node3D]:
+	var out: Array[Node3D] = []
+	for a: Node3D in attractors:
+		if is_instance_valid(a) and a.is_inside_tree():
+			out.append(a)
+	return out
+
+
+func is_attractor(t: Node3D) -> bool:
+	return t != null and is_instance_valid(t) and t.has_meta(&"attract_radius")
+
+
+# Drops freed attractors and makes the zombies that chased them pick a new target.
+func _prune_attractors() -> void:
+	if attractors.is_empty():
+		return
+	var live: Array[Node3D] = live_attractors()
+	if live.size() == attractors.size():
+		return
+	attractors = live
+	for sim: ZombieSim in sims:
+		if sim.target != null and not is_instance_valid(sim.target):
+			sim.target = null
+			sim.target_eval_timer = 0.0
+			sim.path_age = INF
+			sim.has_slot = false
 
 
 func is_downed(t: Node3D) -> bool:
@@ -221,6 +260,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var t0: int = Time.get_ticks_usec()
 	queries_this_frame = 0
+	_prune_attractors()
 	if not frozen:
 		_serve_paths()
 		_update_lod_and_think(delta)

@@ -19,6 +19,7 @@ var authoritative: bool = false
 
 var _done: bool = false
 var _bounce_cooldown: float = 0.0
+var _drum_timer: float = 0.0
 
 
 static func create(p_def: WeaponDefinition, p_key: String, p_peer: int, fuse: float, auth: bool) -> Grenade:
@@ -57,6 +58,13 @@ func _ready() -> void:
 	mi.mesh = sm
 	var mat: StandardMaterial3D = StandardMaterial3D.new()
 	mat.albedo_color = Color(0.25, 0.3, 0.2)
+	if def != null and def.weapon_class == WeaponDefinition.WeaponClass.TACTICAL:
+		# Drummer Decoy: a tin drummer monkey-sized toy (red coat, brass drum) with a glow.
+		sm.radius = 0.09
+		sm.height = 0.22
+		mat.albedo_color = def.viewmodel_color
+		mat.emission_enabled = true
+		mat.emission = Color(0.9, 0.6, 0.2)
 	mi.material_override = mat
 	add_child(mi)
 	body_entered.connect(_on_body_entered)
@@ -69,6 +77,11 @@ func _physics_process(delta: float) -> void:
 		if fuse_left < -COSMETIC_GRACE:
 			queue_free()
 		return
+	if def != null and def.weapon_class == WeaponDefinition.WeaponClass.TACTICAL:
+		_drum_timer -= delta
+		if _drum_timer <= 0.0:
+			_drum_timer = 0.45
+			Audio.play_event_3d(&"decoy_drum", global_position)
 	if fuse_left <= 0.0:
 		_done = true
 		if authoritative:

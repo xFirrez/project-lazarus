@@ -4,8 +4,9 @@
 #   Mag, Action (slide / bolt / pump), Muzzle, Eject (markers) and Sight (the sight point: the
 #   fibre-optic front-sight dot, or the scope reticle centre, coloured SIGHT_COLOR so the ADS
 #   alignment screenshot test can find it).
-# Styles: pistol | smg | shotgun | rifle_scoped. The weapon's local -Z is forward; Sight sits at
-# (0, def.sight_height, z_front).
+# Styles: pistol | smg | shotgun | rifle | lmg | launcher | crossbow | rifle_scoped. Step 9 adds
+# rifle / lmg / launcher / crossbow (the "greybox+" fallback of DEVELOPMENT_PLAN Step 9 risks).
+# The weapon's local -Z is forward; Sight sits at (0, def.sight_height, z_front).
 # Authority: local presentation.
 class_name GreyboxGun
 extends RefCounted
@@ -51,6 +52,54 @@ static func build(def: WeaponDefinition, layer: int = VIEWMODEL_LAYER) -> Node3D
 				root, "Rib", Vector3(0.012, h - 0.036, 0.46), Vector3(0, 0.036 + (h - 0.036) * 0.5 - 0.006, -0.3), dark
 			)
 			_post(root, "FrontPost", Vector2(0.004, 0.004), h - 0.008, h - 0.002, front, dark)
+		&"rifle":  # assault rifles: iron sights, curved/box magazine, wood or polymer furniture
+			front = -0.42
+			_box(root, "Receiver", Vector3(0.05, 0.065, 0.34), Vector3(0, 0, -0.08), body)
+			_cyl(root, "Barrel", 0.012, 0.32, Vector3(0, 0.012, -0.4), dark)
+			_box(root, "Handguard", Vector3(0.05, 0.05, 0.2), Vector3(0, 0.0, -0.3), wood)
+			_box(root, "Grip", Vector3(0.035, 0.1, 0.045), Vector3(0, -0.075, 0.04), dark, deg_to_rad(15))
+			_box(root, "Stock", Vector3(0.04, 0.07, 0.26), Vector3(0, -0.02, 0.2), wood)
+			var mag: Node3D = _node(root, "Mag", Vector3(0, -0.04, -0.12))
+			_box(mag, "MagBox", Vector3(0.03, 0.16, 0.05), Vector3(0, -0.07, 0), dark, deg_to_rad(-12))
+			var act: Node3D = _node(root, "Action", Vector3(0.03, 0.02, -0.03))
+			_box(act, "Charger", Vector3(0.02, 0.012, 0.04), Vector3.ZERO, dark)
+			_post(root, "RearSight", Vector2(0.03, 0.01), 0.033, h - 0.006, 0.04, dark)
+			_post(root, "FrontPost", Vector2(0.004, 0.004), 0.03, h - 0.002, front, dark)
+		&"lmg":  # belt-fed machine guns: big box receiver, bipod, ammo box
+			front = -0.5
+			_box(root, "Receiver", Vector3(0.07, 0.08, 0.4), Vector3(0, 0, -0.08), body)
+			_cyl(root, "Barrel", 0.016, 0.42, Vector3(0, 0.01, -0.48), dark)
+			_box(root, "Shroud", Vector3(0.045, 0.045, 0.24), Vector3(0, 0.01, -0.36), dark)
+			_box(root, "Grip", Vector3(0.035, 0.1, 0.045), Vector3(0, -0.08, 0.04), dark, deg_to_rad(15))
+			_box(root, "Stock", Vector3(0.045, 0.08, 0.26), Vector3(0, -0.02, 0.24), wood)
+			_box(root, "Bipod", Vector3(0.08, 0.01, 0.01), Vector3(0, -0.03, -0.55), dark)
+			var mag: Node3D = _node(root, "Mag", Vector3(-0.02, -0.06, -0.08))
+			_box(mag, "AmmoBox", Vector3(0.09, 0.1, 0.12), Vector3(-0.03, -0.04, 0), _mat(Color(0.25, 0.3, 0.2)))
+			var act: Node3D = _node(root, "Action", Vector3(0, 0.05, -0.05))
+			_box(act, "FeedCover", Vector3(0.068, 0.012, 0.18), Vector3.ZERO, body)
+			_post(root, "RearSight", Vector2(0.03, 0.01), 0.056, h - 0.006, 0.02, dark)
+			_post(root, "FrontPost", Vector2(0.004, 0.004), 0.03, h - 0.002, front, dark)
+		&"launcher":  # tubes / grenade launchers: big bore, pop-up leaf sight
+			front = -0.45
+			_cyl(root, "Tube", 0.042, 0.8, Vector3(0, 0.0, -0.15), body)
+			_box(root, "Grip", Vector3(0.035, 0.1, 0.045), Vector3(0, -0.08, 0.02), dark, deg_to_rad(10))
+			var mag: Node3D = _node(root, "Mag", Vector3(0, -0.05, 0.2))
+			_box(mag, "Round", Vector3(0.05, 0.05, 0.08), Vector3(0, -0.02, 0), _mat(Color(0.35, 0.38, 0.25)))
+			var act: Node3D = _node(root, "Action", Vector3(0, -0.04, -0.3))
+			_box(act, "Pump", Vector3(0.05, 0.035, 0.12), Vector3.ZERO, dark)
+			_post(root, "RearSight", Vector2(0.03, 0.01), 0.04, h - 0.006, 0.05, dark)
+			_post(root, "FrontPost", Vector2(0.004, 0.004), 0.04, h - 0.002, front, dark)
+		&"crossbow":
+			front = -0.4
+			_box(root, "Stock", Vector3(0.045, 0.06, 0.6), Vector3(0, -0.01, -0.05), wood)
+			_box(root, "Limbs", Vector3(0.5, 0.025, 0.04), Vector3(0, 0.0, -0.36), dark)
+			_box(root, "Grip", Vector3(0.035, 0.1, 0.045), Vector3(0, -0.08, 0.06), dark, deg_to_rad(15))
+			var mag: Node3D = _node(root, "Mag", Vector3(0, 0.03, -0.2))
+			_box(mag, "Bolt", Vector3(0.012, 0.012, 0.38), Vector3.ZERO, _mat(Color(0.75, 0.2, 0.12)))
+			var act: Node3D = _node(root, "Action", Vector3(0, 0.035, 0.05))
+			_box(act, "String", Vector3(0.46, 0.004, 0.004), Vector3.ZERO, _mat(Color(0.8, 0.8, 0.75)))
+			_post(root, "RearSight", Vector2(0.03, 0.01), 0.03, h - 0.006, 0.12, dark)
+			_post(root, "FrontPost", Vector2(0.004, 0.004), 0.03, h - 0.002, front, dark)
 		&"rifle_scoped":
 			front = -0.32
 			_box(root, "Receiver", Vector3(0.045, 0.055, 0.3), Vector3(0, 0, -0.05), body)
@@ -96,6 +145,14 @@ static func _muzzle_z(def: WeaponDefinition) -> float:
 			return -0.59
 		&"rifle_scoped":
 			return -0.73
+		&"rifle":
+			return -0.56
+		&"lmg":
+			return -0.69
+		&"launcher":
+			return -0.55
+		&"crossbow":
+			return -0.42
 	return -0.16
 
 

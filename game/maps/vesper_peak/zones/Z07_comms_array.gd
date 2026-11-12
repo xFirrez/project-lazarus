@@ -44,8 +44,8 @@ func build() -> void:
 	nav_areas.append(AABB(Vector3(-31.0, -9.0, -141.0), Vector3(10.8, 27.5, 54.8)))  # road ramp + landing
 	nav_areas.append(AABB(Vector3(20.2, 6.0, -114.0), Vector3(43.8, 13.0, 28.0)))  # Sky Bridge
 	mark(&"perk", "Perk_MarathonMalt", Vector3(-18, Y, -104), "Marathon Malt", true)
-	mark(&"wallbuy", "WB_Kar98k", Vector3(7.8, Y + 1.5, -106), "Kar98k wall-buy (1500)")
-	mark(&"wallbuy", "WB_IceAxe", Vector3(-19.8, Y + 1.5, -118), "Ice Axe plaque (3000)")
+	wall_buy(&"kar98k", Vector3(7.8, Y + 1.5, -106), -PI * 0.5).name = "WallBuy_Kar98k"  # VESPER_PEAK §5.1
+	wall_buy(&"ice_axe", Vector3(-19.8, Y + 1.5, -118), PI * 0.5).name = "WallBuy_IceAxe"  # VESPER_PEAK §5.1
 	mark(&"box", "Box_Z07", Vector3(-6, Y, -118), "Relic Box (antenna base)")
 	mark(&"relay", "R1_Relay", Vector3(-12, Y + 8.0, -126), "Resonance Relay #1", true)
 	mark(&"ee", "EE_RadioConsole", Vector3(14, Y, -107.5), "radio console (EE stage 1)", true)

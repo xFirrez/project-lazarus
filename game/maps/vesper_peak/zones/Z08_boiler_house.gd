@@ -39,7 +39,7 @@ func build() -> void:
 	nav_areas.clear()
 	nav_areas.append(AABB(Vector3(-50.0, -14.5, -32.0), Vector3(28.0, 8.0, 26.0)))
 	nav_areas.append(AABB(Vector3(-22.0, -14.0, -26.0), Vector3(8.4, 9.0, 4.0)))  # D07 stair (x -22..-13.6)
-	mark(&"wallbuy", "WB_GreaseGun", Vector3(-45.8, Y + 1.5, -23), "M3 Grease Gun wall-buy (1000)")
+	wall_buy(&"grease_gun", Vector3(-45.8, Y + 1.5, -23), PI * 0.5).name = "WallBuy_GreaseGun"  # VESPER_PEAK §5.1
 	mark(&"box", "Box_Z08", Vector3(-26, Y, -15), "Relic Box (boiler house)")
 	mark(&"part", "Part_Stock_A", Vector3(-40, Y + 3.5, -11.2), "Conduit Stock (option A)")
 	mark(&"hazard", "H1_FuelDrums_Z08", Vector3(-42, Y, -26), "fuel drums")

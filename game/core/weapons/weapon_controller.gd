@@ -30,6 +30,13 @@ var shots_total: int = 0
 var remote_replays: int = 0  # puppets: relayed shots replayed on this peer
 var remote_reloads: int = 0  # puppets: relayed reload starts (third-person reload layer)
 var remote_def: WeaponDefinition = null  # puppets: weapon shown in third person
+# Equipment (Step 9): Drummer Decoy (tactical) and tripmines (placeable); the melee weapon lives in
+# `inventory.melee_def` (knife, or the Ice Axe once bought). Counts come from the host loadout.
+var tactical_def: WeaponDefinition = null
+var tactical_count: int = 0
+var placeable_def: WeaponDefinition = null
+var placeable_count: int = 0
+var _equip_seq: int = 0
 
 var _shot_seq: int = 0
 var _throw_seq: int = 0
@@ -144,6 +151,21 @@ func apply_loadout(ids: Array, current_id: StringName, lethal: int) -> void:
 		inventory.lethal_count = lethal
 
 
+func apply_equipment(
+	melee_id: StringName, tactical_id: StringName, tac_n: int, place_id: StringName, place_n: int
+) -> void:
+	var melee: WeaponDefinition = WeaponCatalog.get_def(melee_id)
+	if melee != null and melee != inventory.melee_def:
+		inventory.melee_def = melee
+		WeaponAudio.ensure(melee)
+		if viewmodel != null:
+			viewmodel.melee_time = melee.melee_time
+	tactical_def = WeaponCatalog.get_def(tactical_id) if tactical_id != &"" else null
+	tactical_count = tac_n
+	placeable_def = WeaponCatalog.get_def(place_id) if place_id != &"" else null
+	placeable_count = place_n
+
+
 func set_ammo(weapon_id: StringName, mag: int, reserve: int) -> void:
 	var idx: int = inventory.slot_of(weapon_id)
 	if idx >= 0:
@@ -170,6 +192,10 @@ func physics_step(f: PlayerInputFrame, dt: float) -> void:
 	if h != null and f.reload_pressed:
 		h.start_reload()
 	_update_lethal(f, dt)
+	if f.tactical_pressed:
+		_throw_tactical()
+	if f.placeable_pressed:
+		_place_mine()
 	_since_fire += dt
 	if h != null:
 		player.motor.weapon_speed_multiplier = h.def.move_speed_multiplier
@@ -264,6 +290,40 @@ func _throw(def: WeaponDefinition, speed: float) -> void:
 	WeaponSync.submit_throw(self, def, _throw_seq, origin, vel, fuse_left)
 
 
+func _throw_tactical() -> void:
+	if tactical_def == null or tactical_count <= 0 or cooking():
+		return
+	tactical_count -= 1
+	_equip_seq += 1
+	var fwd: Vector3 = aim_forward()
+	var origin: Vector3 = eye_position() + fwd * 0.4 + Vector3.DOWN * 0.1
+	var vel: Vector3 = fwd * tactical_def.throw_speed + Vector3.UP * 2.5 + player.velocity * 0.5
+	Audio.play_event(&"frag_throw")
+	WeaponSync.submit_tactical(self, tactical_def, 1000 + _equip_seq, origin, vel)
+
+
+# Tripmine: on the floor up to 1.6 m in front of the player, facing away from them.
+func _place_mine() -> void:
+	if placeable_def == null or placeable_count <= 0:
+		return
+	var fwd: Vector3 = aim_forward()
+	fwd.y = 0.0
+	if fwd.length_squared() < 0.01:
+		return
+	fwd = fwd.normalized()
+	var space: PhysicsDirectSpaceState3D = player.get_world_3d().direct_space_state
+	var probe: Vector3 = player.global_position + fwd * 1.2 + Vector3.UP * 0.8
+	var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+		probe, probe + Vector3.DOWN * 2.0, Ballistics.WORLD_MASK
+	)
+	var hit: Dictionary = space.intersect_ray(q)
+	if hit.is_empty() or (hit["normal"] as Vector3).y < 0.7:
+		return
+	placeable_count -= 1
+	_equip_seq += 1
+	WeaponSync.submit_mine(self, _equip_seq, hit["position"], atan2(fwd.x, fwd.z))
+
+
 # --- recoil -----------------------------------------------------------------------------------
 
 
@@ -304,7 +364,7 @@ func render_update(delta: float) -> void:
 func _present_local_shot(def: WeaponDefinition, h: WeaponRuntime, result: Ballistics.ShotResult) -> void:
 	Audio.play_event(WeaponAudio.event(def, "mech"))
 	Audio.play_event(WeaponAudio.event(def, "body"))
-	Audio.play_event(WeaponAudio.event(def, "tail"))
+	Audio.play_event(WeaponAudio.tail_event(def, player.get_world_3d().direct_space_state, eye_position()))
 	var fx: WeaponFx = WeaponFx.of(self)
 	var muzzle: Vector3 = eye_position() + aim_forward() * 0.5
 	if viewmodel != null and viewmodel.gun != null:
@@ -444,8 +504,14 @@ func set_remote_weapon(def: WeaponDefinition) -> void:
 			length = 0.55
 		&"shotgun":
 			length = 0.85
-		&"rifle_scoped":
-			length = 1.05
+		&"rifle_scoped", &"rifle":
+			length = 1.0
+		&"lmg":
+			length = 1.15
+		&"launcher":
+			length = 0.95
+		&"crossbow":
+			length = 0.75
 	(mesh.mesh as BoxMesh).size = Vector3(0.06, 0.09, length)
 	mesh.position = Vector3(0, 0, -length * 0.5)
 	_tp_muzzle.position = Vector3(0, 0.02, -length)
@@ -462,7 +528,7 @@ func replay_remote_shot(
 		set_remote_weapon(def)
 	var pos: Vector3 = player.global_position + Vector3.UP * 1.4
 	Audio.play_event_3d(WeaponAudio.event(def, "body"), pos)
-	Audio.play_event_3d(WeaponAudio.event(def, "tail"), pos)
+	Audio.play_event_3d(WeaponAudio.tail_event(def, player.get_world_3d().direct_space_state, pos), pos)
 	Audio.play_event_3d(WeaponAudio.event(def, "mech"), pos)
 	var fx: WeaponFx = WeaponFx.of(self)
 	var muzzle: Vector3 = _tp_muzzle.global_position if _tp_muzzle != null else pos

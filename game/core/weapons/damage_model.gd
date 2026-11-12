@@ -39,3 +39,11 @@ static func splash_damage(centre: float, edge: float, radius: float, distance: f
 	if distance > radius:
 		return 0.0
 	return lerpf(centre, edge, clampf(distance / maxf(radius, 0.001), 0.0, 1.0))
+
+
+# Own-explosive damage to the owner (GAME_DESIGN §3.2): up to `self_damage_max` at the centre,
+# linear to 0 at the splash radius. Friendly fire is off, so only the owner is hurt.
+static func self_damage(def: WeaponDefinition, distance: float) -> float:
+	if def.splash_radius <= 0.0 or distance > def.splash_radius:
+		return 0.0
+	return def.self_damage_max * splash_damage(1.0, 0.0, def.splash_radius, distance)

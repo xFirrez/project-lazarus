@@ -68,7 +68,7 @@ func build() -> void:
 	nav_areas.append(AABB(Vector3(-19.0, -19.5, -41.0), Vector3(6.8, 5.3, 7.0)))  # D10 ramp
 	nav_areas.append(AABB(Vector3(22.0, -20.0, -21.2), Vector3(38.2, 5.8, 7.2)))  # east tunnel (+grate)
 	nav_areas.append(AABB(Vector3(22.0, -17.0, -13.0), Vector3(16.0, 10.0, 4.0)))  # D08 stairwell
-	mark(&"wallbuy", "WB_Revolver", Vector3(4.2, Y + 1.5, -20), ".357 Widow wall-buy (1000)")
+	wall_buy(&"revolver", Vector3(4.2, Y + 1.5, -20), PI * 0.5).name = "WallBuy_Revolver"  # VESPER_PEAK §5.1
 	mark(&"trap", "T2_SteamPurge", Vector3(38, Y, -19.5), "Steam Purge (20 m tunnel)", true)
 	mark(&"trap", "T2_Console", Vector3(27, Y + 1.2, -18.2), "T2 console (1000)", true)
 	mark(&"ee", "EE_MorgueDrawers", Vector3(19.3, Y + 1.3, -10.6), "drawer wall (stage 2b)")

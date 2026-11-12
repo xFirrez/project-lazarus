@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"ice_axe"
+display_name = "Ice Axe"
+weapon_class = 8
+cost = 3000
+behavior = &"melee"
+fire_mode = 0
+rpm = 171.0
+damage = 1000.0
+max_range = 4.0
+penetration = 1
+mag_size = 0
+reserve_max = 0
+melee_time = 0.35
+melee_reach = 1.3
+melee_lunge = 2.2
+melee_cone_deg = 38.0
+viewmodel_color = Color(0.55, 0.6, 0.65, 1)
+sound_body_hz = 300.0
+sound_mech_hz = 900.0
+sound_tail_s = 0.25
+sound_volume_db = -4.0

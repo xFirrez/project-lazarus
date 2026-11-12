@@ -6,7 +6,7 @@
 class_name WeaponDefinition
 extends Resource
 
-enum WeaponClass { PISTOL, SMG, AR, SHOTGUN, LMG, PRECISION, EXPLOSIVE, WONDER, MELEE, LETHAL }
+enum WeaponClass { PISTOL, SMG, AR, SHOTGUN, LMG, PRECISION, EXPLOSIVE, WONDER, MELEE, LETHAL, TACTICAL, PLACEABLE }
 enum FireMode { SEMI, AUTO, BURST }
 enum Hitzone { HEAD, NECK, TORSO, LIMB }
 
@@ -89,6 +89,23 @@ enum Hitzone { HEAD, NECK, TORSO, LIMB }
 @export var carry_start: int = 2
 @export var carry_max: int = 4
 
+@export_group("Projectile (ProjectileBehavior, Step 9)")
+# &"rocket" (explodes on contact) | &"grenade" (bounces, explodes on a zombie or at the fuse) |
+# &"bolt" (sticks to the first zombie or wall, explodes after `fuse_time`).
+# Direct-hit damage = `damage` (applied to the target struck); splash uses the group above.
+@export var projectile_kind: StringName = &"rocket"
+@export var projectile_speed: float = 40.0
+@export var projectile_gravity: float = 0.0  # m/s^2 downward
+@export var projectile_bounce: float = 0.45  # restitution for &"grenade"
+@export var projectile_radius: float = 0.06
+@export var projectile_arm_distance: float = 0.0  # rockets fly this far before exploding on contact
+
+@export_group("Equipment (Step 9)")
+@export var attract_radius: float = 0.0  # Drummer Decoy: path distance zombies are pulled from
+@export var attract_time: float = 0.0  # seconds of attraction before the explosion
+@export var trigger_radius: float = 0.0  # tripmine: a zombie this close sets it off
+@export var place_limit: int = 0  # tripmines placed per player at once
+
 @export_group("Melee")
 @export var melee_time: float = 0.45
 @export var melee_reach: float = 1.1
@@ -98,7 +115,7 @@ enum Hitzone { HEAD, NECK, TORSO, LIMB }
 @export_group("Viewmodel & presentation")
 @export var viewmodel_scene: PackedScene = null  # null -> greybox built from `viewmodel_style`
 @export var world_scene: PackedScene = null  # third-person / world model (null -> greybox box); needs Muzzle
-@export var viewmodel_style: StringName = &"pistol"  # pistol | smg | shotgun | rifle_scoped
+@export var viewmodel_style: StringName = &"pistol"  # pistol|smg|shotgun|rifle|rifle_scoped|lmg|launcher|crossbow
 @export var viewmodel_color: Color = Color(0.25, 0.25, 0.27)
 @export var viewmodel_offset: Vector3 = Vector3(0.16, -0.16, -0.32)  # hip position in camera space
 @export var sight_height: float = 0.05  # sight line above the weapon pivot (greybox)
@@ -117,6 +134,11 @@ enum Hitzone { HEAD, NECK, TORSO, LIMB }
 
 func is_melee() -> bool:
 	return weapon_class == WeaponClass.MELEE
+
+
+# Not a primary-slot weapon (knife / Ice Axe, frags, decoys, tripmines).
+func is_equipment() -> bool:
+	return weapon_class in [WeaponClass.MELEE, WeaponClass.LETHAL, WeaponClass.TACTICAL, WeaponClass.PLACEABLE]
 
 
 # Seconds between shots (or between bursts' bullets for BURST).

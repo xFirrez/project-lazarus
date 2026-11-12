@@ -1,22 +1,28 @@
-# ProjectileBehavior — STUB interface (Step 3). Launchers, the crossbow and the Ray Pistol spawn
-# host-authoritative projectiles with a predicted local visual; the full version is Step 9
-# (DEVELOPMENT_PLAN). Until then firing a projectile weapon produces no hits and logs once.
-# Authority: host spawns projectiles; the shooter shows a predicted visual.
+# ProjectileBehavior — launchers, the crossbow (and later the Ray Pistol): a trigger pull produces
+# no instant hits; it launches a Projectile (core/weapons/projectile.gd). The shooter spawns a
+# predicted local copy through WeaponSync.submit_shot; the host spawns the authoritative one when
+# it accepts the shot claim and relays `_wproj` so observers fly the same projectile.
+# Authority: host spawns authoritative projectiles; the shooter / observers show cosmetic copies.
 class_name ProjectileBehavior
 extends WeaponBehavior
 
-static var _warned: bool = false
+const MUZZLE_OFFSET: float = 0.5
 
 
 func fire(ctx: ShotContext) -> Ballistics.ShotResult:
-	if not _warned:
-		_warned = true
-		Log.warn(&"weapons", "ProjectileBehavior is a stub until Step 9 (%s)" % ctx.def.id)
 	var result: Ballistics.ShotResult = Ballistics.ShotResult.new()
 	result.origin = ctx.origin
 	return result
 
 
-# Step 9: initial velocity for a projectile fired along `dir`.
-func launch_velocity(def: WeaponDefinition, dir: Vector3) -> Vector3:
-	return dir.normalized() * def.throw_speed
+# Launch point and velocity for a projectile fired from `origin` along `dir` (deterministic: the
+# host and every peer derive the same flight from the same claim).
+static func launch_origin(origin: Vector3, dir: Vector3) -> Vector3:
+	return origin + dir.normalized() * MUZZLE_OFFSET
+
+
+static func launch_velocity(def: WeaponDefinition, dir: Vector3) -> Vector3:
+	var v: Vector3 = dir.normalized() * def.projectile_speed
+	if def.projectile_kind == &"grenade":
+		v += Vector3.UP * 1.5  # launcher lob
+	return v

@@ -1,0 +1,72 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.000, 0.650, 0, 0, 0, 0, -0.207, 0.624, 0, 0, 0, 0, 0.234, 0.598, 0, 0, 0, 0, -0.261, 0.572, 0, 0, 0, 0, 0.288, 0.546, 0, 0, 0, 0, -0.315, 0.520, 0, 0, 0, 0, 0.342, 0.494, 0, 0, 0, 0, -0.369, 0.468)
+}
+point_count = 8
+
+[resource]
+script = ExtResource("1")
+id = &"m60"
+display_name = "M60"
+weapon_class = 4
+cost = 0
+behavior = &"hitscan"
+fire_mode = 1
+rpm = 550.0
+burst_count = 3
+damage = 130.0
+pellets = 1
+pellet_spread_deg = 0.0
+max_range = 150.0
+head_multiplier = 4.0
+neck_multiplier = 2.0
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 25.0
+range_max = 60.0
+min_damage_fraction = 0.65
+penetration = 4
+penetration_loss = 0.25
+mag_size = 100
+reserve_max = 300
+reload_partial_time = 5.0
+reload_empty_time = 6.0
+ammo_in_partial = 3.8
+ammo_in_empty = 4.6
+raise_time = 0.75
+lower_time = 0.5
+ads_time = 0.4
+sprint_out_time = 0.35
+ads_fov_multiplier = 0.82
+move_speed_multiplier = 0.82
+spread_hip = 3.0
+spread_ads = 0.25
+spread_move = 2.0
+spread_per_shot = 0.2
+spread_max = 6.0
+spread_recovery = 8.0
+recoil_random = 0.18
+recoil_ads_multiplier = 0.65
+recoil_recovery = 0.6
+recoil_recovery_speed = 6.0
+view_kick = 0.55
+vm_kick_back = 0.031
+vm_kick_rot = 2.6
+viewmodel_style = &"lmg"
+viewmodel_color = Color(0.17, 0.18, 0.16, 1)
+viewmodel_offset = Vector3(0.15, -0.2, -0.32)
+sight_height = 0.075
+viewmodel_fov = 65.0
+scope_sway = 0.0
+tracer_every = 3
+shell_size = 0.013
+muzzle_flash_scale = 1.3
+sound_body_hz = 105.0
+sound_mech_hz = 1700.0
+sound_tail_s = 1.0
+sound_volume_db = -1.0
+recoil_pattern = SubResource("recoil")

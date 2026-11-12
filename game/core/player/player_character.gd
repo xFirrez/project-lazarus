@@ -212,6 +212,8 @@ func _filter_for_state(f: PlayerInputFrame) -> void:
 		f.move = Vector2.ZERO
 		f.melee_pressed = false
 		f.lethal_held = false
+		f.tactical_pressed = false
+		f.placeable_pressed = false
 		f.reload_pressed = false
 		f.interact = false
 		f.switch_slot = -1
@@ -225,6 +227,8 @@ func _filter_for_state(f: PlayerInputFrame) -> void:
 		f.crouch_pressed = false
 		f.melee_pressed = false
 		f.lethal_held = false
+		f.tactical_pressed = false
+		f.placeable_pressed = false
 		f.switch_slot = -1
 		f.switch_delta = 0
 		f.interact = false

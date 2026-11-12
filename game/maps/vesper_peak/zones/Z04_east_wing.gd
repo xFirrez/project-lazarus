@@ -82,7 +82,7 @@ func build() -> void:
 	nav_areas.append(AABB(Vector3(66.0, -3.0, -43.0), Vector3(2.2, 6.5, 6.0)))
 	mark(&"perk", "Perk_PackMule", Vector3(71.2, Y, -32), "Pack Mule Cream Soda", true)
 	mark(&"box", "Box_Z04", Vector3(71.2, Y, -28.5), "Relic Box (nurse station)")
-	mark(&"wallbuy", "WB_Model37", Vector3(73.2, Y + 1.5, -50), "Model 37 wall-buy (1500)")
+	wall_buy(&"model37", Vector3(73.2, Y + 1.5, -50), PI * 0.5).name = "WallBuy_Model37"  # VESPER_PEAK §5.1
 	mark(&"trap", "T1_ElectroTherapy", Vector3(75, Y, -45), "Electro-Therapy Corridor (15 m)", true)
 	mark(&"trap", "T1_Console", Vector3(76.8, Y + 1.2, -36), "T1 console (1000)", true)
 	mark(&"part", "Part_Lens_B", Vector3(80.5, Y, -41), "Conduit Lens (option B)")

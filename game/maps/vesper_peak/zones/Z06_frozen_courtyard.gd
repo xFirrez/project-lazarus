@@ -93,8 +93,8 @@ func build() -> void:
 	nav_areas.append(AABB(Vector3(-13.6, -9.5, -81.6), Vector3(83.6, 3.2, 61.6)))  # courtyard + climb pads
 	nav_areas.append(AABB(Vector3(4.0, -9.5, -20.0), Vector3(4.0, 8.0, 6.8)))  # cargo ramp (z -20..-13.2)
 	mark(&"perk", "Perk_Ironhide", Vector3(-8.4, Y, -32.5), "Ironhide Stout (garage)", true)
-	mark(&"wallbuy", "WB_M16", Vector3(-9.75, Y + 1.5, -44), "M16 wall-buy (1200)")
-	mark(&"wallbuy", "WB_Tripmines", Vector3(35, Y + 1.5, -20.2), "Tripmines wall-buy (1000)")
+	wall_buy(&"m16", Vector3(-9.75, Y + 1.5, -44), PI * 0.5).name = "WallBuy_M16"  # VESPER_PEAK §5.1
+	wall_buy(&"tripmines", Vector3(35, Y + 1.5, -20.2), PI).name = "WallBuy_Tripmines"  # VESPER_PEAK §5.1
 	mark(&"box", "Box_Z06", Vector3(-4, Y, -46), "Relic Box (motor pool)")
 	mark(&"hazard", "H1_FuelDrums_Z06", Vector3(-6.5, Y, -56), "fuel drums")
 	mark(&"hazard", "H2_Icicles_Terrace", Vector3(52, -1.5, -20.6), "icicles above D04")

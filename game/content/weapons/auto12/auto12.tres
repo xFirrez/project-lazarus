@@ -1,0 +1,72 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.000, 1.600, 0, 0, 0, 0, -0.276, 1.536, 0, 0, 0, 0, 0.312, 1.472, 0, 0, 0, 0, -0.348, 1.408, 0, 0, 0, 0, 0.384, 1.344, 0, 0, 0, 0, -0.420, 1.280, 0, 0, 0, 0, 0.456, 1.216, 0, 0, 0, 0, -0.492, 1.152)
+}
+point_count = 8
+
+[resource]
+script = ExtResource("1")
+id = &"auto12"
+display_name = "\"Thunderer\" Auto-12"
+weapon_class = 3
+cost = 0
+behavior = &"pellet"
+fire_mode = 0
+rpm = 250.0
+burst_count = 3
+damage = 110.0
+pellets = 8
+pellet_spread_deg = 4.2
+max_range = 40.0
+head_multiplier = 1.5
+neck_multiplier = 1.25
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 6.0
+range_max = 18.0
+min_damage_fraction = 0.3
+penetration = 1
+penetration_loss = 0.25
+mag_size = 8
+reserve_max = 64
+reload_partial_time = 2.8
+reload_empty_time = 3.4
+ammo_in_partial = 2.0
+ammo_in_empty = 2.6
+raise_time = 0.5
+lower_time = 0.35
+ads_time = 0.25
+sprint_out_time = 0.25
+ads_fov_multiplier = 0.88
+move_speed_multiplier = 0.92
+spread_hip = 1.5
+spread_ads = 0.8
+spread_move = 1.0
+spread_per_shot = 0.6
+spread_max = 3.0
+spread_recovery = 8.0
+recoil_random = 0.24
+recoil_ads_multiplier = 0.65
+recoil_recovery = 0.6
+recoil_recovery_speed = 6.0
+view_kick = 1.8
+vm_kick_back = 0.056
+vm_kick_rot = 5.1
+viewmodel_style = &"shotgun"
+viewmodel_color = Color(0.19, 0.19, 0.2, 1)
+viewmodel_offset = Vector3(0.15, -0.18, -0.32)
+sight_height = 0.06
+viewmodel_fov = 65.0
+scope_sway = 0.0
+tracer_every = 1
+shell_size = 0.01
+muzzle_flash_scale = 1.7
+sound_body_hz = 85.0
+sound_mech_hz = 1300.0
+sound_tail_s = 0.9
+sound_volume_db = 0.0
+recoil_pattern = SubResource("recoil")

@@ -27,6 +27,7 @@ var rules: MapRules = null
 var hud: MatchHud = null
 var session: MatchSession = null
 var pings: PingSystem = null
+var box: RelicBoxSystem = null
 var session_joined_at: float = -1.0  # client: Net.now() at the session welcome (join timing)
 
 
@@ -81,11 +82,17 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	zombies.targets = targets
 	add_child(zombies)
 	zombies.scan_spawners(map_root)
+	weapons.attraction = _on_attractor
 	zones = ZoneManager.new()
 	zones.players = players
 	add_child(zones)
 	zones.setup(def, map_root)
 	zones.zone_unlocked.connect(_on_zone_unlocked)
+	# Relic Box locations are interactables: create them before the interaction scan (tree order).
+	box = RelicBoxSystem.new()
+	box.match_node = self
+	box.setup(def, map_root)
+	add_child(box)
 	interaction = InteractionSystem.new()
 	interaction.players = players
 	interaction.ledger = points
@@ -129,6 +136,12 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 		rules.on_match_start()
 	Log.info(&"match", "Match started on '%s'" % def.id)
 	return OK
+
+
+# Drummer Decoys (WeaponSync, host) pull zombies through the crowd director.
+func _on_attractor(node: Node3D, def: WeaponDefinition) -> void:
+	if zombies != null and zombies.crowd != null:
+		zombies.crowd.add_attractor(node, def.attract_radius)
 
 
 func _on_zone_unlocked(z: StringName) -> void:

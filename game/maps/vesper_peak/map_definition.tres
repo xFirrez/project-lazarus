@@ -80,6 +80,7 @@ adjacent = Array[StringName]([&"Z09", &"Z11"])
 
 [resource]
 script = ExtResource("1")
+box_start = &"Box_Z03"
 id = &"vesper_peak"
 display_name = "Vesper Peak"
 scene_path = "res://maps/vesper_peak/vesper_peak.tscn"

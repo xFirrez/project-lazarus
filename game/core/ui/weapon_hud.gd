@@ -95,6 +95,12 @@ func _draw_ammo(rt: WeaponRuntime) -> void:
 			)
 	var inv: WeaponInventory = controller.inventory
 	var lethal: String = "FRAG x%d" % inv.lethal_count
+	if controller.tactical_def != null:
+		lethal = "DECOY x%d   %s" % [controller.tactical_count, lethal]
+	if controller.placeable_def != null:
+		lethal = "MINES x%d   %s" % [controller.placeable_count, lethal]
+	if inv.melee_def != null and inv.melee_def.id != WeaponController.KNIFE_ID:
+		lethal = "%s   %s" % [inv.melee_def.display_name.to_upper(), lethal]
 	if controller.cooking():
 		lethal += "  (cooking %.1f)" % controller.cook_time_left()
 	var w4: float = font.get_string_size(lethal, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
