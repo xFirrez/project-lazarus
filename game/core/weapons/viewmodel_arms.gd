@@ -1,15 +1,21 @@
-# ViewmodelArms — placeholder first-person arms built from primitives on every viewmodel gun: a
-# gripping right hand + forearm sleeve running back past the camera, and (two-handed classes) a
-# support hand under the handguard. Sleeves and skin use the player's CharacterDefinition colours
-# (AC-7.5 "first-person arms match the character"); authored arms replace this in Step 15.
+# ViewmodelArms — first-person arms in the player's character colours (AC-7.5 "first-person arms
+# match the character"). Authored viewmodels that carry their own arms (`Arms/ArmsMesh`, e.g. the
+# M1911 hero model) get their sleeve / skin surfaces re-tinted; greybox guns get placeholder arms
+# built from primitives: a gripping right hand + forearm sleeve running back past the camera, and
+# (two-handed classes) a support hand under the handguard. Final arms are Step 15.
 # Authority: local presentation.
 class_name ViewmodelArms
 extends RefCounted
 
 const NODE_NAME: String = "Arms"
+const AUTHORED_MESH: String = "ArmsMesh"
 
 
 static func attach(gun: Node3D, def: WeaponDefinition, character: CharacterDefinition, layer: int) -> Node3D:
+	var authored: MeshInstance3D = gun.find_child(AUTHORED_MESH, true, false) as MeshInstance3D
+	if authored != null:
+		tint_authored(authored, character)
+		return authored
 	var old: Node = gun.get_node_or_null(NODE_NAME)
 	if old != null:
 		old.free()
@@ -26,14 +32,36 @@ static func attach(gun: Node3D, def: WeaponDefinition, character: CharacterDefin
 	cuff.albedo_color = character.color.darkened(0.35) if character != null else Color(0.5, 0.5, 0.5)
 	var grip: Vector3 = Vector3(0.0, -0.075, 0.03)
 	_hand(root, "RightHand", grip, skin, layer)
-	_forearm(root, "RightSleeve", grip + Vector3(0.012, -0.03, 0.05), Vector3(0.16, -0.24, 0.42), sleeve, cuff, layer)
+	_forearm(root, "RightSleeve", grip + Vector3(0.01, -0.03, 0.05), Vector3(0.07, -0.13, 0.4), sleeve, cuff, layer)
 	var support: Vector3 = _support_point(def)
 	if support != Vector3.INF:
 		_hand(root, "LeftHand", support, skin, layer)
 		_forearm(
-			root, "LeftSleeve", support + Vector3(-0.015, -0.03, 0.04), Vector3(-0.26, -0.26, 0.36), sleeve, cuff, layer
+			root, "LeftSleeve", support + Vector3(-0.015, -0.03, 0.04), Vector3(-0.17, -0.12, 0.34), sleeve, cuff, layer
 		)
 	return root
+
+
+# Authored arms: surfaces whose material is a sleeve / skin get a tinted copy.
+static func tint_authored(mesh: MeshInstance3D, character: CharacterDefinition) -> void:
+	if character == null or mesh.mesh == null:
+		return
+	for i: int in mesh.mesh.get_surface_count():
+		var mat: Material = mesh.mesh.surface_get_material(i)
+		var n: String = (mat.resource_name if mat != null else "").to_lower()
+		var tint: Color = Color.TRANSPARENT
+		if n.contains("sleeve"):
+			tint = character.sleeve_color
+		elif n.contains("skin"):
+			tint = character.skin_color
+		if tint == Color.TRANSPARENT:
+			continue
+		var copy: Material = mat.duplicate()
+		if copy is ShaderMaterial:
+			(copy as ShaderMaterial).set_shader_parameter(&"albedo", tint)
+		elif copy is BaseMaterial3D:
+			(copy as BaseMaterial3D).albedo_color = tint
+		mesh.set_surface_override_material(i, copy)
 
 
 # Where the left hand holds the weapon (INF = one-handed: knife / grenade).
@@ -54,7 +82,7 @@ static func _hand(parent: Node3D, node_name: String, pos: Vector3, mat: Material
 	var m: MeshInstance3D = MeshInstance3D.new()
 	m.name = node_name
 	var b: BoxMesh = BoxMesh.new()
-	b.size = Vector3(0.05, 0.06, 0.085)
+	b.size = Vector3(0.06, 0.07, 0.095)
 	m.mesh = b
 	m.material_override = mat
 	m.position = pos

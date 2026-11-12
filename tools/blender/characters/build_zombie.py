@@ -369,4 +369,5 @@ def main() -> None:
     L.export_glb(MODEL_OUT, animations=False)
 
 
-main()
+if __name__ == "__main__":
+    main()

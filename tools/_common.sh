@@ -19,7 +19,8 @@ export GODOT GAME_DIR ROOT
 godot_log_has_errors() {
   local log="$1"
   grep -E "SCRIPT ERROR|Parse Error|^ERROR:|^USER ERROR|Failed to load script|Compile Error" "$log" \
-    | grep -v -E "audio_driver_alsa|All audio drivers failed|init_output_device" >/dev/null
+    | grep -v -E "audio_driver_alsa|All audio drivers failed|init_output_device|Texture with GL ID of [0-9]+: leaked" >/dev/null
+  # (GL exit message: menu screens' default-font glyph atlases under opengl3 / xvfb, I-013)
 }
 
 godot_import() {

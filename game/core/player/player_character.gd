@@ -273,7 +273,13 @@ func _build_visual() -> void:
 		_visual.visible = false
 	var col: Color = player_color()
 	model = null
-	if character != null and character.model_scene != "" and ResourceLoader.exists(character.model_scene):
+	# The local player never sees its own body (first person): skip the animated model there.
+	if (
+		not is_local
+		and character != null
+		and character.model_scene != ""
+		and ResourceLoader.exists(character.model_scene)
+	):
 		var packed: PackedScene = load(character.model_scene) as PackedScene
 		model = packed.instantiate() as SurvivorModel
 	if model != null:

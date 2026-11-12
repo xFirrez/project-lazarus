@@ -28,6 +28,7 @@ var recoil_enabled: bool = true
 var perfect_accuracy: bool = false
 var shots_total: int = 0
 var remote_replays: int = 0  # puppets: relayed shots replayed on this peer
+var remote_reloads: int = 0  # puppets: relayed reload starts (third-person reload layer)
 var remote_def: WeaponDefinition = null  # puppets: weapon shown in third person
 
 var _shot_seq: int = 0
@@ -389,6 +390,7 @@ func _on_runtime_dry() -> void:
 func _on_reload_started(empty: bool, rt: WeaponRuntime) -> void:
 	if viewmodel == null or rt != held():
 		return
+	WeaponSync.submit_reload_start(self)
 	if rt.def.reload_per_shell:
 		viewmodel.play(&"reload_start", rt.speed_multiplier)
 	else:
@@ -477,6 +479,11 @@ func replay_remote_shot(
 	ctx.seed = seed_value
 	var result: Ballistics.ShotResult = behavior_for(def).fire(ctx)
 	_present_impacts(def, result, muzzle, 0)
+
+
+# Third-person weapon node (SurvivorModel attaches it to the right hand).
+func tp_weapon_node() -> Node3D:
+	return _tp_weapon
 
 
 func _build_tp_weapon() -> void:

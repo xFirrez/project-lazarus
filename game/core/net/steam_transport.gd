@@ -1,6 +1,6 @@
 # SteamTransport — Steam lobbies + P2P via the GodotSteam GDExtension (D-045). The addon is not
-# vendored: `tools/install_godotsteam.sh` installs the pinned build into game/addons/godotsteam/
-# (it needs the Steam client running to do anything). Everything is called dynamically through
+# vendored: docs/NETWORKING.md §3 has the install steps (GodotSteam GDExtension build matching the
+# pinned Godot, into game/addons/godotsteam/; needs a running Steam client). Everything is called dynamically through
 # the `Steam` singleton / `SteamMultiplayerPeer` class so the project compiles and runs without
 # it; `is_available()` gates the menu's Steam button. Direct IP (EnetTransport) + UPnP + a VPN
 # guide is the always-available path.

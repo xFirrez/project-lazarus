@@ -200,6 +200,26 @@ test_reconnect() {
   report reconnect_host "$OUT/reconnect_host.json" "$OUT/reconnect_host.log"
 }
 
+test_coop4() {
+  local port netsim="${COOP_NETSIM:-150,30,0.03}"; port="$(free_port)"
+  rm -f "$OUT"/coop4_*.json
+  launch host "$OUT/coop4_host.log" -- --host="$port" --map=vesper_peak --netsim="$netsim" \
+    --autotest=res://tests/net/host_coop4.gd --autotest-out="$OUT/coop4_host.json" --profile=nethost
+  wait_for_log "$OUT/coop4_host.log" "AUTOTEST READY host" 40
+  local i
+  for i in 1 2 3; do
+    launch "c$i" "$OUT/coop4_c$i.log" -- --join="127.0.0.1:$port" --netsim="$netsim" \
+      --autotest=res://tests/net/client_coop4.gd --autotest-out="$OUT/coop4_c$i.json" --profile="netclient$i"
+    wait_for_log "$OUT/coop4_host.log" "slot $i" 30
+  done
+  wait "$PID_c1" || true; wait "$PID_c2" || true; wait "$PID_c3" || true
+  wait "$PID_host" || true
+  local fail=0
+  for i in 1 2 3; do report "coop4_c$i" "$OUT/coop4_c$i.json" "$OUT/coop4_c$i.log" || fail=1; done
+  report coop4_host "$OUT/coop4_host.json" "$OUT/coop4_host.log" || fail=1
+  return $fail
+}
+
 TESTS=("$@")
 [[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4)
 fail=0

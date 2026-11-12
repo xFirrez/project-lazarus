@@ -5,6 +5,7 @@
 #                   accepted shots replayed cosmetically by observers (tracers, flash, impacts, audio)
 #   owner -> host : `_wreload` [weapon_id, mag, reserve]   ammo-in reports (host mirrors ammo)
 #   host  -> owner: `_wammo`   [weapon_id, mag, reserve]   ammo correction / refill
+#   owner -> host : `_wrl` [] reload started ; host -> others: `_wrl_r` [peer]  (third-person anim)
 #   owner -> host : `_wswitch` [weapon_id] ; host -> all: `_wswitch_r` [peer, weapon_id]
 #   any   -> host : `_wgive`   [weapon_id] (debug) ; host -> all: `_wloadout` [peer, ids, current, lethal]
 #   owner -> host : `_wthrow`  [seq, origin xyz, velocity xyz, fuse] ; host -> all: `_wthrow_r` [peer, ...]
@@ -58,6 +59,8 @@ func _ready() -> void:
 	Net.register_message(&"_wshots", _on_msg_shots)
 	Net.register_message(&"_wreload", _on_msg_reload)
 	Net.register_message(&"_wammo", _on_msg_ammo)
+	Net.register_message(&"_wrl", _on_msg_reload_start)
+	Net.register_message(&"_wrl_r", _on_msg_reload_start_relay)
 	Net.register_message(&"_wswitch", _on_msg_switch)
 	Net.register_message(&"_wswitch_r", _on_msg_switch_relay)
 	Net.register_message(&"_wgive", _on_msg_give)
@@ -80,6 +83,8 @@ func _exit_tree() -> void:
 		&"_wshots",
 		&"_wreload",
 		&"_wammo",
+		&"_wrl",
+		&"_wrl_r",
 		&"_wswitch",
 		&"_wswitch_r",
 		&"_wgive",
@@ -127,6 +132,17 @@ static func submit_reload(c: WeaponController, def: WeaponDefinition, mag: int, 
 		ws.validator.check_reload(c.player.peer_id, def.id, mag, reserve)
 	else:
 		Net.send_reliable(1, &"_wreload", [String(def.id), mag, reserve])
+
+
+# Cosmetic: tells the other peers a reload started (third-person reload layer, SurvivorModel).
+static func submit_reload_start(c: WeaponController) -> void:
+	var ws: WeaponSync = instance(c)
+	if ws == null or not Net.is_active():
+		return
+	if Net.is_host():
+		Net.send_reliable(0, &"_wrl_r", [c.player.peer_id])
+	else:
+		Net.send_reliable(1, &"_wrl", [])
 
 
 static func submit_switch(c: WeaponController, def: WeaponDefinition) -> void:
@@ -575,6 +591,23 @@ func _on_msg_reload(sender: int, p: Array) -> void:
 	if not validator.check_reload(sender, wid, int(p[1]), int(p[2])):
 		var a: Array = validator.ammo(sender, wid)
 		Net.send_reliable(sender, &"_wammo", [String(wid), int(a[0]), int(a[1])])
+
+
+func _on_msg_reload_start(sender: int, _p: Array) -> void:
+	if not Net.is_host():
+		return
+	for id: int in Net.peer_ids():
+		if id != sender and id != Net.local_id():
+			Net.send_reliable(id, &"_wrl_r", [sender])
+	_on_msg_reload_start_relay(1, [sender])
+
+
+func _on_msg_reload_start_relay(sender: int, p: Array) -> void:
+	if sender != 1 or players == null:
+		return
+	var a: PlayerCharacter = players.avatars.get(int(p[0]), null)
+	if a != null and not a.is_local:
+		a.weapons.remote_reloads += 1
 
 
 func _on_msg_ammo(sender: int, p: Array) -> void:
