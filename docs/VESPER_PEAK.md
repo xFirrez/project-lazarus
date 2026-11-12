@@ -463,3 +463,5 @@ Datum: **y 0 = the Arrival Station floor (+28 m real)**; +X east, +Z north. All 
 7. **Climb points** (Courtyard wall, Comms cliff, Generator Hall floor grates, Morgue grate, reactor pit rifts) use the new `ZombieSpawner.Kind.CLIMB` + JUMP links; door bursts are player-clipped closets.
 8. Secret rooms S1 / S2 exist as entrance + content markers only (rooms are Step 13/14).
 9. Travel times (flow sim, sprint along the navmesh): Z01 → Z13 Lower Ring **35.7 s** (target ≤ 75 s); worst perk-to-nearest-perk **25.6 s** (Marathon Malt; target ≤ 35 s); worst zone-to-perk **15.6 s** (Z13).
+
+**Step 9 additions:** all 10 wall-buys are live `WallBuy` nodes at the Step 8 marker positions (`WallBuy_MP40` Z03 facing +Z, `WallBuy_Model37` Z04 +X, `WallBuy_M16` Z06 +X, `WallBuy_Tripmines` Z06 −Z, `WallBuy_Kar98k` Z07 −X (outside the radio room's west wall), `WallBuy_IceAxe` Z07 +X, `WallBuy_GreaseGun` Z08 +X, `WallBuy_Revolver` Z10 +X; M14 / Coachgun unchanged) drawn as stencil-on-canvas tarps with a crate. The Relic Box stands at each `Box_*` marker (start `Box_Z03`, `map_definition.tres` `box_start`); the markers' posts are hidden.

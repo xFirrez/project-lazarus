@@ -12,10 +12,10 @@
 | Field | Value |
 |---|---|
 | Current milestone | **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
-| Next step to start | **Step 9 — Arsenal, wall-buys & Relic Box** (9A first) |
+| Next step to start | **Step 10 — Vigor Tonics & power-ups** |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-12 (Step 8 session) |
-| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, M14/Coachgun wall-buys, barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-12 (Step 9 session) |
+| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -32,7 +32,7 @@
 | 6 | Core survival loop (→ M1 First Playable) | **Complete** (AC-6.8 awaiting human) | 6A + 6B | 2026-11-12 |
 | 7 | Online co-op, lobby & player characters (→ M2) | **Complete** (AC-7.6 awaiting human) | 7A + 7B | 2026-11-12 |
 | 8 | Vesper Peak full greybox (→ M3) | **Complete** (AC-8.7 / AC-8.8 awaiting human) | 8A + 8B | 2026-11-12 |
-| 9 | Arsenal, wall-buys & Relic Box | Not started | 9A / 9B | — |
+| 9 | Arsenal, wall-buys & Relic Box | **Complete (with deferrals)** (AC-9.7 awaiting human; authored weapon art deferred) | 9A + 9B | 2026-11-12 |
 | 10 | Vigor Tonics & power-ups | Not started | — | — |
 | 11 | Relays, Lazarus Forge, traps & hazards | Not started | 11A / 11B | — |
 | 12 | Wonder weapons & special enemies (→ M4) | Not started | 12A / 12B | — |
@@ -128,13 +128,13 @@
 - [x] **M3 reached** (automated criteria; AC-8.7 / AC-8.8 confirm on hardware)
 
 ### Step 9 — Arsenal & Relic Box
-- [ ] AC-9.1 All weapon stats match spec table
-- [ ] AC-9.2 Full animation/audio set per weapon; ADS alignment
-- [ ] AC-9.3 Projectile splash/self-damage/crossbow sticking
-- [ ] AC-9.4 Box roll statistics + doll/relocation rules
-- [ ] AC-9.5 Box co-op ownership + synchronized carousel + late join
-- [ ] AC-9.6 Decoy attraction
-- [ ] AC-9.7 [HUMAN] Weapon + box review
+- [x] AC-9.1 All weapon stats match spec table (`tests/unit/test_weapons_spec.gd` vs `tests/data/weapons_spec.json`: 23 weapons + 5 equipment)
+- [x] AC-9.2 Full animation/audio set per weapon; ADS alignment (`test_weapon_presentation`: all 23 < 1 px at 1080p; draw/fire/reload partial+empty or shell set/sprint clips; mech/body/tail/interior tail/reload/raise audio; world model with Muzzle). Models are the **greybox+ fallback** (see Deferrals)
+- [x] AC-9.3 Projectile splash/self-damage/crossbow sticking (`test_explosive_damage` unit + `test_projectiles` integration)
+- [x] AC-9.4 Box roll statistics + doll/relocation rules (`test_relic_box_roller`: 100k rolls, worst deviation 0.18 pp)
+- [x] AC-9.5 Box co-op ownership + synchronized carousel + late join (`net_tests.sh box`)
+- [x] AC-9.6 Decoy attraction (`test_equipment`: 3 zombies within 25 m pulled for 8 s, 0 attacks on the player, the 62.8 m-by-path zombie isn't, explosion at 8 s)
+- [H] AC-9.7 [HUMAN] Weapon + box review (steps in `docs/sessions/2026-11-12_step-9.md`)
 
 ### Step 10 — Tonics & power-ups
 - [ ] AC-10.1 Perk effects measured
@@ -207,6 +207,11 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-12 | 9 | `tools/check.sh` | Pass | 28 scripts / 151 tests (new: `test_weapons_spec` — 23 weapons + equipment vs the spec JSON, distinct sound signatures, box pool items defined; `test_relic_box_roller` — 100,000 rolls within ±1 % of the weights (worst 0.18 pp, 21 eligible items), doll 0 % on spins 1–4 and in Fire Sales, 15 → 75 % ramp, ~15 % measured on spin 5, relocation never the same location, bad-luck bonus; `test_explosive_damage` — splash falloff, self-damage ≤ 60) |
+| 2026-11-12 | 9 | `tools/run_tests.sh integration` | Pass | 16 scripts (new `test_projectiles`: LAW direct 1500 + splash, China Lake bounces then explodes, crossbow sticks to the dummy (750 on impact, splash after 1.5 s) and to the floor; `test_equipment`: decoy pull + explosion, tripmine set off by a zombie (2 carried, 4 placed max), Ice Axe replaces the knife; `test_weapon_presentation` now covers all 23 weapons) |
+| 2026-11-12 | 9 | `tools/net_tests.sh box` (AC-9.5) | Pass | vesper_peak at 100 ms ±20, 2 %: box moved to Box_Z07 before the join → client sees Box_Z07; client spin (950) → spinner = client, host's take refused, carousel samples identical on both peers and ending on the result, client takes the AK-47; doll → refund + relocation to a different location on both peers after 4 s; Fire Sale → all 7 present, cost 10 |
+| 2026-11-12 | 9 | `tools/net_tests.sh late_join reconnect traversal survival solo weapons coop4` | Pass (coop4: I-019 only) | All checks pass; `weapons` 3/3 after the I-014 burst fix (failed once before it); coop4 every check passes (12.2 KB/s per client, 32 zombies seen) but the host log has the known teardown ENet error (I-019) |
+| 2026-11-12 | 9 | `tools/run_sim.sh smoke`, `nav_validate`, `flow` | Pass | nav_validate 0 uncovered / 70 spawners; flow Z01 → Z13 35.7 s (unchanged) |
 | 2026-11-12 | 7 | `tools/check.sh` | Pass | 25 scripts / 137 tests (new: `test_lobby_state` — slots, unique characters, reservations for reconnects, ready / countdown reset, chat sanitising, round trip; `test_coop_rules` — late-join points, 4 characters + §13 colours + distinct sleeves, Steam lobby metadata, Steam absent = graceful, name-tag fade, ping kinds + cues) |
 | 2026-11-12 | 7 | `tools/run_tests.sh integration` | Pass | 13 scripts / 59 tests (new `test_survivor_model`: retargeted skeletons, 18 clips, triangle budget 9.8–10.8k, per-class holds differ ≥ 4°, crouch bends legs with the rifle hold kept, downed hips on the ground, fire/reload one-shots, placeholder + authored M1911 arms tinted) |
 | 2026-11-12 | 7 | `tools/net_tests.sh` (all 12) | Pass except pre-existing flakes | New: **lobby** (host + 2 clients + refused 3rd: unique characters, chat, countdown 3.0 s, round held until all scene-ready, starting round 2, late join off refused, game over → return to lobby), **late_join** (0.33 s), **reconnect** (fast + slow rejoin), **coop4** (30/30 hashes, 12.5 KB/s). `replication` "no_visible_snapping" fails ~3/4 and `weapons` "client_saw_host_fire_burst" intermittently **on the Step 6 commit too** in this container (I-012, I-014) |
@@ -283,20 +288,22 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | ~~I-004~~ | S4 | 3 | ~~Viewmodel/particles verified only with the Compatibility renderer~~ — **Fixed in Step 4:** container renders Forward+ via lavapipe (D-030); metallic viewmodels were black in Forward+ and now reflect a neutral sky (D-031). A GPU look check stays part of AC-3.7 | Closed |
 | I-006 | S4 | 4 | Camera snow also falls inside interiors in the look-dev scene (per-zone `CameraSnow.intensity` is not driven yet) | Step 8/13 zone volumes set the intensity (0 indoors, light under skylights) |
 | I-007 | S3 | 4 | Zombie v1 model is built from rigidly skinned primitive segments (reads as "puffy" at the torso; joints crease) — fine for Step 5 AI work, below the final art bar | Step 5B / 13: sculpted or CC0 replacement through the same BoneMap/HitboxProfile (drop-in, ART_PIPELINE §5) |
-| I-005 | S3 | 3 | Frag grenades are simulated on every peer; a client's cosmetic copy can rest in a slightly different spot than the host's authoritative one (the explosion is shown at the host's position) | Acceptable for co-op; revisit with Step 9 projectiles |
+| I-005 | S3 | 3 | Frag grenades (and Step 9 Drummer Decoys, same RigidBody path) are simulated on every peer; a client's cosmetic copy can rest in a slightly different spot than the host's authoritative one (the explosion is shown at the host's position). Launcher / crossbow projectiles are deterministic kinematic (D-057) and match closely | Acceptable for co-op; could move frags/decoys to `Projectile` (grenade kind) in Step 16 |
 | I-008 | S4 | 5 | Crowds produce a few stuck / far re-queues per minute (3–10 per 32-zombie run, 43 in the 10-min soak), mostly zombies boxed in by others at a window queue or in the 1.2 m corridor, and F3 spawns > 60 m from an F1 target. They respawn near the players (no lost zombies) | Watch on Vesper Peak (Step 8); tune STUCK_WINDOW / separation, or add a "push through" when blocked only by other zombies |
 | I-009 | S4 | 5 | Ragdolls / death animation / corpses decide locally per peer, so a corpse can lie in a slightly different pose on each peer | Cosmetic; corpses aren't targets |
 | I-010 | S4 | 6 | Vesper Peak slice: ~260 stuck/far re-queues across the 20-round 4-bot soak (≈ 11 % of spawns), mostly window queues on the gallery ledges where waiting zombies box each other in. Rounds still end correctly (re-queues return through the SpawnDirector queue) | Step 8: wider ledges / more window entrances in the full greybox; revisit I-008 tuning |
 | I-011 | S4 | 6 | HUD v1 is functional placeholder art (fallback font, drawn tallies); prompts show "[F]" regardless of rebinding / gamepad | Step 15A (final HUD, input glyphs) |
 | I-012 | S3 | 7 | `net_tests.sh replication` "no_visible_snapping" (max per-frame step of the interpolated host avatar) fails ~3 of 4 runs in this container (steps 0.3–7.7 m) — **reproduced on the Step 6 commit**, so it is environmental (frame hitches / clock) rather than a Step 7 regression; replication error itself stays < 0.13 m | Step 16 netcode polish: investigate interpolation under frame hitches (clamp per-frame catch-up), re-baseline the threshold on a desktop |
 | I-013 | S4 | 7 | Under opengl3 + xvfb, quitting after a menu screen was shown prints "Texture with GL ID … leaked" (default-font glyph atlases); `godot_log_has_errors` ignores that exit message | Re-check with Step 15's final theme/fonts |
-| I-014 | S4 | 3 | `net_tests.sh weapons` "client_saw_host_fire_burst" is intermittent (the host's single relayed fire burst is one unreliable packet at 2 % loss / single-frame trigger); also fails on the Step 6 commit | Make the test fire a short burst (Step 9 weapons work) |
+| ~~I-014~~ | S4 | 3 | ~~`net_tests.sh weapons` "client_saw_host_fire_burst" intermittent~~ — **fixed in Step 9**: the host now fires a 4-shot burst (one relayed shot was a single unreliable packet at 2 % loss); 3/3 runs pass | Closed |
 | I-015 | S4 | 7 | Placeholder first-person arms (greybox guns) sit mostly below the screen edge at the current hip framing; the M1911's authored arms are tinted instead | Step 9/15 authored arms per weapon |
 | I-016 | S3 | 8 | Full-map AI p99 is 2.7–3.2 ms in the container (budget 3.0; average 1.3–1.4 ms is within 1.5): long-path queries across 28 tiles and the large Courtyard tile. `perf_arena --map=vesper_peak` therefore fails ~1 run in 3 on p99 | Step 16: hierarchical zone routing / path caching; re-measure on desktop (AC-8.7) |
 | I-017 | S4 | 8 | The 32 / 28 decor nav islands on prop tops (desks, fountain tiers, bay roofs) are harmless but `snap()` could in theory place a zombie on one when squeezed next to it | Watch in playtests; cap islands by raising region_min_size or non-walkable prop tops in Step 13 |
 | I-018 | S4 | 8 | Greybox bullets pass through gondola cabin / lift platform (they sit on the player-clip layer so navigation ignores them) | Step 13: add a bullet-only collision layer for machine bodies |
 | I-019 | S4 | 8 | `net_tests.sh coop4`: every host check passes (10/10 rounds agree), but one ENet "Unable to send packet on channel 0, max channels: 0" error is logged at teardown just after a client leaves, so the harness reports the host as failed (seen once in 2 runs this step) | Find the system that sends to a peer in the frame it disconnects (Step 9 session or 16) |
 | I-020 | S4 | 8 | coop4 / survival logs show a few "far (≈1 km path)" re-queues on Vesper Peak: some path queries return detours many times the straight distance (Godot polygon A* on large polygons; see `edge_max_length`, D-051) | Re-queue handles it (zombie respawns near players); revisit with path post-checks / hierarchical routing (Step 16, with I-016) |
+| I-021 | S4 | 9 | A Relic Box that relocates into a zone that is still locked can be unreachable until the door is bought (classic behaviour, GAME_DESIGN §10.2 is silent) | Human review (AC-9.7); option: restrict relocation to unlocked zones |
+| I-022 | S4 | 9 | Projectile bolts stuck to a zombie that dies keep following the corpse until the fuse ends; the box display floats a greybox gun (no authored models yet) | Cosmetic |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
 Severity: **S1** crash / data loss / progress-blocking · **S2** major feature broken · **S3** minor feature issue / visual bug · **S4** polish.
@@ -323,18 +330,22 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Steam live test (lobby, overlay invites, P2P) | Human (AC-7.6) / Step 16 | GodotSteam GDExtension is not vendored and no Steam client exists in the container; `SteamTransport` is implemented against GodotSteam's API and unit-tested for its pure parts (D-045). Direct IP + UPnP + VPN is the always-available path |
 | Drink animation trigger, character quips / VO, character-coloured kill markers (optional), occluded-teammate outlines | Step 10 (drink) / Step 15 (VO, markers, outlines) | `SurvivorModel.play_action(&"drink")` exists; perks arrive in Step 10. Name tags render through walls meanwhile |
 | Host bots in the lobby roster | Not planned | Bots are test tooling (D-041); they use a slot-based character |
-| Full `ProjectileBehavior` (launchers, crossbow, Ray Pistol) | Step 9 | Plan scope: stub interface now (`core/weapons/behaviors/projectile_behavior.gd`) |
-| Authored viewmodel/arms models and animation clips | Step 9 | Step 4 delivered the M1911 hero model (viewmodel + world); the other weapons stay greybox; clips are still code-built from the definition timings (`ViewmodelAnimations`) |
+| ~~Full `ProjectileBehavior` (launchers, crossbow)~~ | — | Done in Step 9 (`Projectile`, D-057); the Ray Pistol uses it in Step 12 |
+| Authored viewmodel/world models + arms for the 22 non-M1911 weapons (Step 9 scope 2 "final art") | Step 13 (art pass) / Step 16 (known gap) | Step 9 used the plan's risk fallback **"greybox+"**: 8 class silhouettes in `GreyboxGun` (pistol, smg, rifle, shotgun, lmg, launcher, crossbow, scoped rifle) with per-weapon colour / proportions, code-built clips from per-weapon timings, all with Sight/Muzzle/Mag/Action markers so an authored GLB drops in via `viewmodel_scene` / `world_scene`. Asset strategy per weapon: scripted Blender model (`tools/blender/`, like the M1911) — none provided by a human yet |
 | Hand-authored textures (256 px/m trims) | Step 13 | Step 4 kit/props use world-space triplanar detail noise + vertex-colour grime (no UVs); unique hero textures come with the art pass |
 | Explicit LOD meshes / HLOD | Step 13 | Importer auto-LOD on every mesh now (`meshes/generate_lods`); HLOD/visibility ranges for the full map in 13D |
 | Zombie animation set beyond 12 clips (3 walks, 2 jogs, lunge, rise, vent drop, electrocuted …, ARCHITECTURE §11.3) | Step 12 / 13 | Step 5 drives all 12 clips through the AnimationTree; rise = model rising from below the floor, vent = crawl clip, drop = falling pose, stagger = stomach react. More clips extend `build_zombie.py` or import CC0/Mixamo through the BoneMap |
-| Recorded weapon audio | Step 9 / 15 | Synthesized per-weapon placeholders (`WeaponAudio`), distinct per weapon |
-| Tactical / placeable slots, Pack Mule third slot | Steps 9–10 | `WeaponInventory.slot_count` is config-driven; lethal (frag) implemented |
+| Recorded weapon audio | Step 15 | Synthesized per-weapon placeholders (`WeaponAudio`), distinct per weapon, now with interior/exterior tails (roof ray); box music-box melody / chimes / doll laugh are original synthesized placeholders (`RelicBoxAudio`) |
+| ~~Tactical / placeable slots~~, Pack Mule third slot | Step 10 | Tactical (decoy) + placeable (tripmines) + melee upgrade done in Step 9 (D-059); Pack Mule's third slot is Step 10 |
+| Wall-buy "weapon appears on the rack once bought" (VESPER_PEAK §5.1) and the wall-buy pickup animation beyond the draw clip | Step 13 / 15 | Stencil-on-canvas tarp + crate are in; the bought weapon raises with its draw clip |
+| Box Fire Sale *power-up* | Step 10 | `RelicBoxSystem.activate_all_locations(duration)` + `firesale` command are ready for the power-up |
 
 ## Proposed design changes (awaiting human decision)
 
 | Date | Proposed by (step) | Change | Rationale | Decision |
 |---|---|---|---|---|
+| 2026-11-12 | 9 | Launcher / crossbow "damage + splash X (r)" read as: direct-hit damage to the zombie struck + splash X at the centre falling linearly to 0 at r; China Lake grenades explode on zombie contact or after 2.5 s; tripmines trigger on a zombie within 2 m in front (players never trigger), 1 s arming, 0.25 s beep; Drummer Decoy pulls by path distance ≤ 25 m for 8 s (`attract_time` = fuse) | GDD §4.3 gives the numbers, not the rules | Agent decision (data in the .tres) |
+| 2026-11-12 | 9 | Tripmines and the Ice Axe are bought once (wall prompt shows "owned"); tripmines refill to 2 at each round start | §4.3 says "2 per round (refills)"; re-buying a refill makes no sense | Agent decision |
 | 2026-11-12 | 6 | GDD §5.2 says solo round 15 = 75 zombies; its formula gives 90. Data follows the formula | Formula is the spec; the example looks like a typo | Agent decision (tuning log) |
 | 2026-11-12 | 6 | Bleedout timer pauses while a teammate is reviving; purchases use a 0.35 s hold | §3.3 / §12 silent; classic behaviour, avoids accidental buys | Agent decision |
 | 2026-11-11 | 3 | Frag damage "250 + splash 1200 at centre (r = 5 m)" interpreted as linear splash from 1200 at the centre to 250 at the 5 m edge; own frag deals up to 60 to the thrower (§3.2) | The table is ambiguous; this keeps both numbers meaningful | Agent decision (reversible in `frag.tres`) |
@@ -357,6 +368,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Step 7 | **AC-7.6**: internet co-op session, 10+ rounds, host + ≥ 1 friend (steps in `docs/sessions/2026-11-12_step-7.md`, guide `docs/NETWORKING.md`); record the path used, join time, ping, issues | Open |
 | Step 7 | Optional Steam: install GodotSteam GDExtension for Godot 4.7 into `game/addons/godotsteam/` (docs/NETWORKING.md §3) and test lobby + overlay invite with a friend (App ID 480) | Open |
 | Step 7 | AC-7.5 visual review: survivors' third-person poses per weapon class (`docs/screenshots/step7/`, or watch a friend in co-op) and first-person sleeves | Open |
+| Step 9 | **AC-9.7** weapon + Relic Box review (steps in `docs/sessions/2026-11-12_step-9.md`); optionally provide/approve weapon models (or approve scripted Blender models in Step 13) | Open |
 | Step 8 | **AC-8.7** GPU FPS on Medium on the minimum spec with 32 zombies + 4 bots on the full greybox, and **AC-8.8** greybox flow playtest solo + co-op (steps in `docs/sessions/2026-11-12_step-8.md`) | Open |
 | Step 13 | Optional: LightmapGI bakes on a desktop GPU | Open |
 | Step 15 | Provide or approve music (jingles, EE song), VO approach (recorded vs. TTS), and fonts | Open |
@@ -384,4 +396,5 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 | 2026-11-11 | 5 | Zombies: ZombieArchetype, ZombieActor (sim + visual), ZombieSim brain (rise / window tear + climb / drop / vent / pursue / surround / attack / stagger / crawler / stuck + far re-queue), CrowdDirector (path budget, LOD think, separation, slots, timing), ZombieSync replication (NetIds, quantized 20 Hz snapshots, late join), WorldSync (barricades, nav doors), AnimationTree visuals with head look, gibs, ragdoll pool, placeholder audio with voice priority, nav torture map, console commands, unit/integration/net/sim/visual tests | [2026-11-11_step-5.md](sessions/2026-11-11_step-5.md) |
 | 2026-11-12 | 6 | Survival loop → M1: RoundCurve, RoundDirector, SpawnDirector (zones, fairness), ZoneManager, PointsLedger, Interactable framework (doors, wall-buys, barricade rebuild), DownedSystem (last stand, revive, bleedout, spectate, respawn, game over), HUD v1, game-over screen, round stings, M14 + Coachgun, Vesper Peak Arrival Station slice, SurvivalBots, unit/sim/net tests | [2026-11-12_step-6.md](sessions/2026-11-12_step-6.md) |
 | 2026-11-12 | 7 | Online co-op → M2: Session autoload + LobbyState (unique characters, ready, chat, host settings, countdown), main menu v1 / map select / settings, scene-ready gate, MatchSession (late join WAITING + points, reconnect by uid incl. stale-connection replacement, match flags, state-hash convergence, bandwidth), UPnP + SteamTransport (GodotSteam, dynamic) + NETWORKING.md, CharacterDefinition ×4, survivor models + 18-clip survivor animation library (bpy), SurvivorModel AnimationTree, tinted first-person arms, name tags, pings, lobby / late_join / reconnect / coop4 net tests (D-045…D-050) | [2026-11-12_step-7.md](sessions/2026-11-12_step-7.md) |
+| 2026-11-12 | 9 | Arsenal, wall-buys & Relic Box (9A + 9B): ProjectileBehavior + deterministic `Projectile` (rocket / bouncing grenade / sticky bolt), one splash path with self-damage, 17 new weapons (23 total) from a spec table + generator, greybox+ class models, interior tails, all 10 wall-buys (stencil-on-canvas), Drummer Decoy (zombie attractors), tripmines, Ice Axe, Relic Box (roller, 7 locations, carousel, doll relocation, Fire Sale API, audio set), box/firesale console commands, spec / roller / projectile / equipment / box tests (D-057…D-061) | [2026-11-12_step-9.md](sessions/2026-11-12_step-9.md) |
 | 2026-11-12 | 8 | Vesper Peak full greybox → M3: 12 zone scenes (VesperZone builders, kit materials), 14 doors (17,000), 70 spawners (windows, risers, vents, drops, climbs, bursts, pit rifts), NavTiles (28 tiles), power switch + PoweredLight cascade, gondola / freight lift (zombies ride) / laundry chute / Reactor Bridge, 108 typed markers + manifest, nav_validate + flow sims, traversal net test, minimap + map console, tile-local zombie snap (D-051…D-056) | [2026-11-12_step-8.md](sessions/2026-11-12_step-8.md) |
