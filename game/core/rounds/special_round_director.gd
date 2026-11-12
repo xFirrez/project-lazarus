@@ -131,9 +131,9 @@ func _apply_atmosphere(u: float) -> void:
 		return
 	_lights_idle = u <= 0.0
 	for e: Array in _lights:
+		if not is_instance_valid(e[0]):
+			continue  # freed (map teardown): never cast a freed object
 		var l: Light3D = e[0] as Light3D
-		if not is_instance_valid(l):
-			continue
 		var flicker: float = 1.0
 		if warning_active:
 			flicker = 0.35 if sin(_t * 23.0 + float(l.get_instance_id() % 97)) > 0.55 else 1.0

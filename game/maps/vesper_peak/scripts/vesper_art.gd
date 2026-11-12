@@ -62,6 +62,15 @@ func finish(map_root: Node3D) -> void:
 	MapMarker.set_all_visuals(map_root, false)
 
 
+# Static art caches (prop meshes, materials, decal textures, primitives) are rebuilt on the next
+# load; clearing them here keeps exit-time leak reports clean.
+func _exit_tree() -> void:
+	VesperProps.clear_cache()
+	VesperZoneArt.clear_cache()
+	MeshBatch.clear_cache()
+	AtmosFx.clear_cache()
+
+
 func on_match_setup(m: Match) -> void:
 	if m.rounds != null and not m.rounds.round_started.is_connected(_on_round_started):
 		m.rounds.round_started.connect(_on_round_started)

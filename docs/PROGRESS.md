@@ -11,11 +11,11 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | **M4 Gameplay complete** (automated criteria; Step 12: wonder weapons, Conduit buildable, Galvanic special rounds, Warden archetype in its arena; AC-12.6 GPU + AC-12.7 feel = human checks). Previous: **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
-| Next step to start | **Step 13 — Vesper Peak art & atmosphere (→ M5)** |
+| Current milestone | **M5 Visually complete map** (automated criteria; Step 13: zone dressing for all 12 zones + S1 shell, 10 + 2 vignettes, night sky / storm / searchlights / per-zone grading, reverb + ambience in every zone, static batching + viewer-local shadow budget, marker diff + nav_validate + sightlines green; AC-13.3 GPU FPS and AC-13.6 visual review = human checks). Previous: **M4 Gameplay complete** (automated criteria; Step 12: wonder weapons, Conduit buildable, Galvanic special rounds, Warden archetype in its arena; AC-12.6 GPU + AC-12.7 feel = human checks). Previous: **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
+| Next step to start | **Step 14 — Easter egg, lore & secrets** |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-12 (Step 12 session) |
-| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **7 Vigor Tonic machines** (cap 4, loss on down, Second Wind solo self-revive ×3), **6 power-ups** (drops, timers, `powerup <id>`), **Resonance Relays R1–R3 → Reactor Bridge → Lazarus Forge** (23 upgraded weapons with camo, alt-fire key B), **traps T1–T3**, **hazards** (fuel drums, icicles, lab breaker), **wonder weapons** (Mk.I Ray Pistol / Nova Mk.II, Lazarus Conduit / Lazarus Requiem with pulse; box + Forge; `give raygun` / `give conduit`), the **Conduit buildable** (3 parts + Lab Workbench), **Galvanic special rounds** (rifts, warning build-up, Max Ammo; `special_round`), the **Warden** (`spawn_warden`, test map `warden_arena`), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-12 (Step 13 session) |
+| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**art-passed** (Step 13: dressed zones, sky, storm, fog, lighting, decals, reverb / ambience; debug `atmos`, `gust`, `art_pulse`, `markers_visible`, `art_stats`) over the full greybox: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **7 Vigor Tonic machines** (cap 4, loss on down, Second Wind solo self-revive ×3), **6 power-ups** (drops, timers, `powerup <id>`), **Resonance Relays R1–R3 → Reactor Bridge → Lazarus Forge** (23 upgraded weapons with camo, alt-fire key B), **traps T1–T3**, **hazards** (fuel drums, icicles, lab breaker), **wonder weapons** (Mk.I Ray Pistol / Nova Mk.II, Lazarus Conduit / Lazarus Requiem with pulse; box + Forge; `give raygun` / `give conduit`), the **Conduit buildable** (3 parts + Lab Workbench), **Galvanic special rounds** (rifts, warning build-up, Max Ammo; `special_round`), the **Warden** (`spawn_warden`, test map `warden_arena`), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -36,7 +36,7 @@
 | 10 | Vigor Tonics & power-ups | **Complete (with deferrals)** (AC-10.5 / AC-10.6 awaiting human; authored machine models deferred) | — | 2026-11-12 |
 | 11 | Relays, Lazarus Forge, traps & hazards | **Complete (with deferrals)** (AC-11.6 awaiting human; authored Forge / relay / trap models deferred) | 11A + 11B | 2026-11-12 |
 | 12 | Wonder weapons & special enemies (→ M4) | **Complete (with deferrals)** (AC-12.6 GPU + AC-12.7 awaiting human; authored wonder-weapon / Galvanic / Warden models deferred to Step 13) | 12A + 12B | 2026-11-12 |
-| 13 | Vesper Peak art & atmosphere (→ M5) | Not started | 13A / 13B / 13C / 13D | — |
+| 13 | Vesper Peak art & atmosphere (→ M5) | **Complete (with deferrals)** (AC-13.3 GPU + AC-13.6 review awaiting human; authored character / weapon / machine models and hand-authored textures re-deferred) | 13A + 13B + 13C + 13D (one session) | 2026-11-12 |
 | 14 | Easter egg, lore & secrets | Not started | 14A / 14B | — |
 | 15 | Presentation & audio finalization (→ M6) | Not started | 15A / 15B | — |
 | 16 | Balance, optimization, QA & release (→ M7 1.0) | Not started | 16A / 16B | — |
@@ -163,14 +163,14 @@
 - [ ] **M4 reached**
 
 ### Step 13 — Art & atmosphere
-- [ ] 13A Exterior · [ ] 13B Sanatorium · [ ] 13C Underground · [ ] 13D Reactor + global pass
-- [ ] AC-13.1 Marker diff unchanged
-- [ ] AC-13.2 nav_validate after art
-- [ ] AC-13.3 [HUMAN] Full-map performance targets
-- [ ] AC-13.4 Ambience/reverb/vignettes complete
-- [ ] AC-13.5 Landmark sightlines
-- [ ] AC-13.6 [HUMAN] Visual review per checkpoint
-- [ ] **M5 reached**
+- [x] 13A Exterior · [x] 13B Sanatorium · [x] 13C Underground · [x] 13D Reactor + global pass (one session; procedural art — see deferrals)
+- [x] AC-13.1 Marker diff unchanged (`test_vesper_art`: 591 gameplay nodes vs `gameplay_baseline.json` from the Step 12 greybox, 0.01 m / 0.01 rad — 0 moved / added / missing)
+- [x] AC-13.2 nav_validate after art (0 uncovered, 70 spawners OK, 12 zones standable; `flow` Z01 → Z13 35.4 s)
+- [H] AC-13.3 [HUMAN] Full-map performance targets — automated part met: `visual_tests.sh vesper_art` 25 viewpoints × High / Medium: scenery ≤ 1500 draw calls (worst 1103, Z03 mezzanine), crowd viewpoints (32 zombies + 4 players) ≤ 2000 (worst 1529, Z01 hall), shadow-casting lights ≤ preset budget everywhere (ShadowBudget)
+- [x] AC-13.4 Ambience/reverb/vignettes complete (`test_vesper_art`: every zone has an AmbienceEmitter, a ReverbZone and a vignette; the ten §6.2 vignettes V01–V10 exist, plus S1 office, Z08 foreman, Z12 specimens)
+- [x] AC-13.5 Landmark sightlines (`test_vesper_art` rays: radar tower from the Z01 dock, 4 Courtyard spots, the Z05 dome, the Sky Bridge; reactor core from the Z12 observation glass; frames `docs/screenshots/step13/vesper_*_radar.png`, `vesper_z05_dome.png`, `vesper_z12_reactorglimpse.png`)
+- [H] AC-13.6 [HUMAN] Visual review per checkpoint (`docs/screenshots/step13/`)
+- [x] **M5 reached** (automated criteria)
 
 ### Step 14 — Easter egg & lore
 - [ ] AC-14.1 Each stage solo + 4-player
@@ -207,6 +207,11 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-12 | 13 | `tools/check.sh` | Pass | 35 unit scripts / 195 tests (`test_movement_validator` + 2: teleport ack with a lagging owner clock, ack elsewhere not free) |
+| 2026-11-12 | 13 | `tools/run_tests.sh integration` | Pass except pre-existing flake | 23 scripts; new `test_vesper_art` 7/7 (marker diff 591 nodes, ambience / reverb / vignette per zone, 10 vignettes, art never collides, atmosphere profiles, 8 sightlines, shadow budget ≤ 8). `test_zombie_pursuit` "after the door opens A is nearer by path" fails 3/3 here **and 4/5 on the Step 12 commit** (I-032); `test_weapon_presentation` object growth passed alone (+5) after one loaded-CPU failure |
+| 2026-11-12 | 13 | `tools/run_sim.sh nav_validate` / `flow` / `smoke` / `round_flow` | Pass | nav: 28 tiles, 2,285 polys, 0 uncovered, 70 spawners, 12 zones standable; flow Z01 → Z13 35.4 s, worst perk-to-perk 25.5 s; navmesh bake 222 ms |
+| 2026-11-12 | 13 | `tools/visual_tests.sh docs/screenshots/step13 vesper_art` (new) | Pass | 25 viewpoints × High / Medium (Forward+ on lavapipe): scenery draw calls ≤ 1500, crowd viewpoints (32 zombies + 4 players) ≤ 2000, shadow lights ≤ budget; CSV `docs/screenshots/step13/vesper_art_perf.csv` |
+| 2026-11-12 | 13 | `tools/net_tests.sh late_join survival traversal progression box perks wonder` | Pass | progression / box first failed: a host teleport right after a join was ignored for seconds (validator STALE with a lagging owner clock, I-031) — fixed in `MovementValidator` (+ the progression harness now waits for the teleport); then all pass |
 | 2026-11-12 | 12 | `tools/check.sh` | Pass | 35 unit scripts / 193 tests (new `test_wonder_weapons`, `test_chain_lightning`, `test_special_rounds`, `test_buildables`) |
 | 2026-11-12 | 12 | `tools/run_tests.sh integration` | Pass | 22 scripts / 85+ tests (new `test_ray_pistol`, `test_wonder_zombies`, `test_warden`; Warden r20 2p kill 256.5 s) |
 | 2026-11-12 | 12 | `tools/run_sim.sh specials` (new) | Pass | buildables flow, special round (rifts, burst, Max Ammo), warning, 50-round schedule, Warden rules |
@@ -281,6 +286,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Scene | Preset | Hardware | Avg FPS | p99 frame ms | AI ms | Notes |
 |---|---|---|---|---|---|---|---|---|
+| 2026-11-12 | 13 | vesper_peak art pass, 25 viewpoints (6 with 32 zombies + 4 players) | High / Medium | container (lavapipe, CPU) | not meaningful | — | — | Render proxies: scenery ≤ 1103 draw calls (Z03 mezzanine), crowd ≤ 1529 (Z01 hall); per-zone static batching cut the hall + crowd from 4050; shadow lights ≤ 8 / 4 per viewpoint. GPU FPS = [HUMAN] AC-13.3 |
 | 2026-11-12 | 8 | perf_arena (**vesper_peak** full greybox, all doors open, 32 zombies, 4 bots) | headless | container CPU | — | — | 1.29–1.42 avg / 2.7–3.2 p99 | 28 nav tiles / 2.26 k polys; tile-local snap (was 2.7 / 5.2 with map-wide snap) |
 | 2026-11-11 | 5 | perf_arena (nav_torture, 32 zombies, 4 bots) | headless | container CPU (4 vCPU) | — | — | 0.89 avg / 1.57 p99 | Host AI + navigation only (CrowdDirector accounting); visuals/animation not included. Desktop = [HUMAN] AC-5.5 (`ai_stats`, F3 overlay AI line) |
 | 2026-11-11 | 4 | lookdev (5 shots) | High / Medium | container (lavapipe, CPU) | ~7–8 (CPU rasterizer, not meaningful) | — | — | Render-cost proxies: ≤ 780 draw calls, ≤ 320k primitives, 5 shadow lights. GPU FPS = [HUMAN] AC-4.3 |
@@ -301,13 +307,17 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | ID | Severity (S1–S4) | Step found | Description | Owner/plan |
 |---|---|---|---|---|
+| ~~I-031~~ | S3 | 13 | ~~A host teleport (`host_teleport`, respawn) sent shortly after a client joined was ignored for seconds: the validator stamp-ordered the owner's states against the host clock while the owner's clock estimate still lagged~~ — **fixed in Step 13**: the first state acknowledging a snap is accepted at the authorized spot (`MovementValidator.ACK_RADIUS` 2 m) and re-bases the owner's timeline; `net_tests.sh progression` also waits for the teleport | Closed |
+| I-032 | S4 | 13 | `test_zombie_pursuit` "after the door opens A is nearer by path" fails most runs in this container — **also on the Step 12 commit** (4/5), so environmental (threaded re-bake / map sync timing under `--fixed-fps`) | Step 16: wait on `NavigationServer3D.map_changed` instead of frames |
+| I-033 | S3 | 13 | The art pass is procedural: props / fixtures are merged primitives (VesperProps), walls stay greybox boxes with kit materials + automatic trims; reads as "stylized greybox+" rather than final authored art in close-ups | Human review AC-13.6; authored kit meshes / hero props in a follow-up art session (bpy generators) or by an artist |
+| I-034 | S4 | 13 | Light fixtures' emissive bulbs are batched static meshes, so they glow before power is on (the lights themselves follow power) | Step 15 polish: keep powered fixtures out of the batch and dim their emission with `PoweredLight` |
 | I-028 | S3 | 12 | Galvanics / the Warden use the 0.3 m-radius zombie navmesh (the Warden's 0.55 m capsule can clip corners); the Warden's charge stops on navmesh edges | Accept for the greybox; revisit with Step 13 geometry |
 | I-029 | S4 | 12 | Conduit arcs are host-resolved: the shooter sees its own arc after one round trip (no local prediction) | Acceptable at ≤ 150 ms; predict cosmetically in Step 16 if playtests complain |
 | I-030 | S4 | 12 | The rift spawn picks spawner-adjacent navmesh points; open areas without spawners never get rifts | Fine on Vesper Peak (70 spawners); add rift markers in Step 13 if needed |
 | I-002 | S4 | 2 | Headless `--fixed-fps` integration runs sometimes log "Jolt Physics job system exceeded the maximum number of jobs … Waiting for jobs" (engine warning; physics continues). Not seen in real-time runs | Marked benign in `tests/integration/player_test_helper.gd`; re-check after engine upgrades |
 | ~~I-003~~ | S3 | 2 | **Fixed for map machines in Step 8** (D-052: host-driven deterministic gondola / lift). Test-map moving platforms (course elevator/shuttle) are simulated locally per peer, so a remote player riding one is seen on the host's copy of the platform only approximately | Step 8 makes traversal machines host-driven (D-020) |
 | ~~I-004~~ | S4 | 3 | ~~Viewmodel/particles verified only with the Compatibility renderer~~ — **Fixed in Step 4:** container renders Forward+ via lavapipe (D-030); metallic viewmodels were black in Forward+ and now reflect a neutral sky (D-031). A GPU look check stays part of AC-3.7 | Closed |
-| I-006 | S4 | 4 | Camera snow also falls inside interiors in the look-dev scene (per-zone `CameraSnow.intensity` is not driven yet) | Step 8/13 zone volumes set the intensity (0 indoors, light under skylights) |
+| ~~I-006~~ | S4 | 4 | **Fixed in Step 13** (ZoneAtmosphere drives `CameraSnow.intensity` per zone profile: 0 underground, light in Z01 / Z05). Camera snow also falls inside interiors in the look-dev scene (per-zone `CameraSnow.intensity` is not driven yet) | Step 8/13 zone volumes set the intensity (0 indoors, light under skylights) |
 | I-007 | S3 | 4 | Zombie v1 model is built from rigidly skinned primitive segments (reads as "puffy" at the torso; joints crease) — fine for Step 5 AI work, below the final art bar | Step 5B / 13: sculpted or CC0 replacement through the same BoneMap/HitboxProfile (drop-in, ART_PIPELINE §5) |
 | I-005 | S3 | 3 | Frag grenades (and Step 9 Drummer Decoys, same RigidBody path) are simulated on every peer; a client's cosmetic copy can rest in a slightly different spot than the host's authoritative one (the explosion is shown at the host's position). Launcher / crossbow projectiles are deterministic kinematic (D-057) and match closely | Acceptable for co-op; could move frags/decoys to `Projectile` (grenade kind) in Step 16 |
 | I-008 | S4 | 5 | Crowds produce a few stuck / far re-queues per minute (3–10 per 32-zombie run, 43 in the 10-min soak), mostly zombies boxed in by others at a window queue or in the 1.2 m corridor, and F3 spawns > 60 m from an F1 target. They respawn near the players (no lost zombies) | Watch on Vesper Peak (Step 8); tune STUCK_WINDOW / separation, or add a "push through" when blocked only by other zombies |
@@ -338,6 +348,11 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 
 | AC / item | Deferred to | Reason |
 |---|---|---|
+| Authored (non-procedural) models: perk machines, Relic Box, Forge / relays / traps, the 22 non-M1911 weapons + arms, Ray Pistol / Conduit, Galvanic / Warden, buildable parts / workbench; hand-authored textures; Galvanic / Warden clips; foot IK | Step 15 (presentation) / Step 16 known gap | Step 13 spent its session on the 12-zone environment pass (dressing, lighting, atmosphere, audio zones, budgets); these are character / item assets that need dedicated bpy generator sessions — the greybox+ procedural models remain |
+| S1 Director's Office walkable floor / collision / navigation, bookcase door; S2 Ice Grotto room | Step 14 | Step 13 built the S1 shell + dressing visually (VESPER_PEAK §9.1 Step 13 additions); Step 14 opens it with the secret |
+| LightmapGI bake for interiors | Human (optional) | Needs the desktop editor with a GPU (AGENT_GUIDE §8) |
+| HLOD / explicit LOD meshes | Step 16 (if profiling asks) | Per-zone static batching + gameplay mesh visibility ranges (D-077, D-079) met the automated budgets |
+| Final ambience beds / reverb tuning | Step 15 | Synthesized placeholder beds (AmbienceLibrary) on the final emitters and reverb zones |
 | ~~Owner-movement validation~~ | — | Done in Step 2 (D-016) |
 | Settings UI for sensitivity / ADS multiplier / FOV / bob / shake / hold-toggle | Step 15 (15A menus) | Settings exist in `Config` and are live-editable with the `setting` console command; the menu screens are Step 15 work |
 | ~~Downed state (last stand)~~ | — | Done in Step 6 (`DownedSystem`) |
@@ -348,9 +363,9 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | ~~Window swipe + plank rebuild~~ | — | Done in Step 6 (`BarricadeRepair`, `ZombieSim` window swipe 1.6 m) |
 | ~~Late-join policy and reconnect (GAME_DESIGN §13)~~ | — | Done in Step 7 (`MatchSession`, D-047) |
 | ~~Kit-based greybox, real zone elevations, gondola dock, door bursts~~ | — | Done in Step 8 (box greybox with kit materials, D-053); Second Wind machine = marker until Step 10 |
-| Kit *meshes* on the greybox, per-zone camera-snow intensity (I-006), occluders beyond floor/roof slabs, reverb areas | Step 13 | Step 8 uses box geometry with the kit materials (dimensions off the 2 m grid); one OccluderInstance3D per zone floor/roof + visibility ranges on small props; ambience markers only |
+| ~~Per-zone camera-snow intensity (I-006), reverb areas~~ (done Step 13); kit *meshes* on the greybox | Step 13 → see the Step 13 deferral row | Step 8 uses box geometry with the kit materials (dimensions off the 2 m grid); one OccluderInstance3D per zone floor/roof + visibility ranges on small props; ambience markers only |
 | S1 Director's Office / S2 Ice Grotto rooms | Step 13 / 14 | Entrances + content markers (L13, L14, crate, MB4) are placed; rooms come with the secrets |
-| ~~Reactor Bridge extension on relays~~ (done Step 11); Z12 reactor-view gallery framing | Step 13 | The view is an art task (VESPER_PEAK §9.1) |
+| ~~Reactor Bridge extension on relays~~ (done Step 11); ~~Z12 reactor-view gallery framing~~ (done Step 13: observation window + cavern opening) | — | The view is an art task (VESPER_PEAK §9.1) |
 | Authored Lazarus Forge / relay / trap models (Step 11 scope 2 "final model"), map-dressed relay rooms, ice-shard / steam VFX polish | Step 13 (art pass) | Step 11 uses the **greybox+** path (procedural, animated) like Steps 9 / 10 |
 | Final Forge / relay / trap / hazard sounds | Step 15 | `ProgressionAudio` placeholders under the final event names |
 | ~~Ray Pistol "Nova Mk.II" / Lazarus Conduit "Lazarus Requiem" upgrades~~ | — | Done in Step 12 (`wonder_upgrades` in `upgrades_spec.json`) |
@@ -398,6 +413,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 
 | Needed by | Task | Status |
 |---|---|---|
+| Step 13 | **AC-13.3** GPU FPS (Medium ≥ 60 on the minimum spec, High ≥ 90 on the reference spec, 5 heaviest viewpoints with 32 zombies + 4 players) and **AC-13.6** visual review per checkpoint (`docs/screenshots/step13/`) — steps in `docs/sessions/2026-11-12_step-13.md` | Open |
 | Step 12 | AC-12.6 (Conduit chain on 10 zombies + 32 alive: no frame > 25 ms on the reference GPU) and AC-12.7 feel review — steps in `docs/sessions/2026-11-12_step-12.md` | Open |
 | Step 0 | Review and approve the planning documents; confirm original naming approach (GAME_DESIGN §1.3) | Open |
 | Step 2+ | Run local playtests for [HUMAN] criteria (feel, visuals, performance on real GPU) | Recurring |
@@ -430,6 +446,7 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 
 | Date | Step | Summary | Report |
 |---|---|---|---|
+| 2026-11-12 | 13 | Vesper Peak art & atmosphere (13A–13D) → M5: VesperZoneArt dressing pass for all 12 zones (VesperProps procedural props, GLB props, decals, signage, AtmosFx, fog volumes, fixtures + animated PoweredLights, reverb zones, ambience beds, 10 + 2 vignettes, S1 shell), automatic trims, per-zone static batching (MeshBatch), VesperArt (night sky, mountain ring, cloud sea, storm gusts, searchlights, per-zone grading, energy pulse), ShadowBudget, Z12 reactor observation window, gameplay baseline diff + sightline tests, `vesper_art` visual/perf test, teleport-ack validator fix (I-031) (D-076…D-081) | [2026-11-12_step-13.md](sessions/2026-11-12_step-13.md) |
 | 2026-11-12 | 12 | Wonder weapons & special enemies (12A + 12B) → M4: Ray Pistol (plasma projectile, disintegrate) + Nova Mk.II (bounce), Lazarus Conduit (ChainLightning, electrocution stun, hold-to-pulse) + Lazarus Requiem (kill arcs), WonderFx (arcs / bursts / rings / rifts, capped), BuildableSystem (parts, shared inventory, workbench, box unlock), Galvanics (ZombieBehavior leap + burst), special-round flow (schedule, rifts, warning atmosphere, Max Ammo), Warden (plates, core, slam / charge / summon, phases, coolant, late-round rule gated), warden_arena test map, debug commands, unit / integration / sim / net tests (D-071…D-075) | [2026-11-12_step-12.md](sessions/2026-11-12_step-12.md) |
 | 2026-11-12 | 11 | Relays, Forge, traps & hazards (11A + 11B): RelaySystem / ResonanceRelay (hold, defend, zone pause, weak lure) → MapRules.on_relays_complete (bridge, Forge wake, ReactorState); ForgeSystem / LazarusForge (5000 / Free Upgrade, 5 s, 15 s owner offer); 23 generated upgrades + Skullcrusher launcher, behavior fields, vesperite camo, upgraded sound layer; StatusEffects (slow / burn / freeze); TrapSystem T1–T3; HazardSystem H1–H3; upgraded wall ammo 4500; debug commands; progression sim / net / visual tests (D-066…D-070) | [2026-11-12_step-11.md](sessions/2026-11-12_step-11.md) |
 | 2026-11-11 | 0 | Planning: architecture, roadmap, game design, map design, tracker, agent guide | (planning commit) |

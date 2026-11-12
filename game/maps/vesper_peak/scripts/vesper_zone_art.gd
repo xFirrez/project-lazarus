@@ -110,6 +110,11 @@ func ambience(pos: Vector3, preset: StringName, volume_offset: float = 0.0) -> A
 	return e
 
 
+static func clear_cache() -> void:
+	_mats.clear()
+	_decal_tex.clear()
+
+
 func _art_group(group_name: String) -> Node3D:
 	var g: Node3D = art.get_node_or_null(group_name) as Node3D
 	if g == null:

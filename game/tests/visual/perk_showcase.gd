@@ -64,7 +64,10 @@ func _run() -> void:
 			cam.global_position = pm.global_position + front * 3.2 + Vector3.UP * 1.5
 			cam.look_at(pm.global_position + Vector3.UP * 1.25, Vector3.UP)
 			var img: Image = await _shot("perk_%s_%s.png" % [pm.perk_id, "on" if on else "off"])
-			check("perk_%s_%s_renders" % [pm.perk_id, "on" if on else "off"], _variance(img) > 0.0005, _variance(img))
+			# Step 13: unpowered underground zones are meant to be near-dark (VESPER_PEAK §3 Z09), so
+			# power-off frames only have to show something.
+			var floor_v: float = 0.0005 if on else 0.00001
+			check("perk_%s_%s_renders" % [pm.perk_id, "on" if on else "off"], _variance(img) > floor_v, _variance(img))
 	var base: Vector3 = m.players.spawn_point_for(me.peer_id) + Vector3(0, 0, 4.0)
 	me.motor.teleport(base + Vector3(0, 0, 12.0))
 	var types: Array[StringName] = [&"max_ammo", &"insta_kill", &"double_points", &"nuke", &"carpenter", &"fire_sale"]

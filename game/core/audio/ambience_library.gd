@@ -33,6 +33,11 @@ static func ensure_registered() -> void:
 			Audio.register_event(event, stream(event), &"Ambience", -6.0 if event != &"amb_gust" else -10.0)
 
 
+# Releases the cached loops (Audio.shutdown; avoids exit-time leak reports).
+static func clear_cache() -> void:
+	_cache.clear()
+
+
 static func stream(event: StringName) -> AudioStreamWAV:
 	if not EVENTS.has(event):
 		event = &"amb_room_tone"

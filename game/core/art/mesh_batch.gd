@@ -16,6 +16,11 @@ var _tools: Dictionary = {}  # Material -> SurfaceTool
 var _order: Array[Material] = []
 
 
+# Drops the shared unit primitives (call when the last user leaves; avoids exit-time leak reports).
+static func clear_cache() -> void:
+	_prims.clear()
+
+
 func add(shape: Shape, size: Vector3, xf: Transform3D, material: Material) -> void:
 	var st: SurfaceTool = _tools.get(material, null)
 	if st == null:

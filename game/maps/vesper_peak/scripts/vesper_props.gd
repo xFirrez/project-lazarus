@@ -24,6 +24,11 @@ static func make(kind: StringName) -> MeshInstance3D:
 	return mi
 
 
+static func clear_cache() -> void:
+	_meshes.clear()
+	_mats.clear()
+
+
 static func has_kind(kind: StringName) -> bool:
 	return VesperProps.new().has_method("_p_%s" % kind)
 

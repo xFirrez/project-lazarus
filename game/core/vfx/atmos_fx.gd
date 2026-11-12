@@ -145,6 +145,11 @@ static func emitter(
 	return p
 
 
+static func clear_cache() -> void:
+	_dot = null
+	_mats.clear()
+
+
 # A local fog volume (Forward+ volumetric fog; ignored where volumetric fog is off).
 static func fog(
 	pos: Vector3, size: Vector3, albedo: Color, density: float = 0.6, emission: Color = Color.BLACK

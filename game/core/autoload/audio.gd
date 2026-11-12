@@ -237,3 +237,13 @@ func shutdown() -> void:
 	for p3: AudioStreamPlayer3D in _players_3d:
 		p3.stop()
 		p3.stream = null
+	# Ambience beds (map emitters) hold the cached loops: stop them, then drop the cache.
+	for e: Node in get_tree().get_nodes_in_group(&"ambience_emitter") if is_inside_tree() else []:
+		var ep: Node = (e as AmbienceEmitter).player
+		if ep is AudioStreamPlayer3D:
+			(ep as AudioStreamPlayer3D).stop()
+			(ep as AudioStreamPlayer3D).stream = null
+		elif ep is AudioStreamPlayer:
+			(ep as AudioStreamPlayer).stop()
+			(ep as AudioStreamPlayer).stream = null
+	AmbienceLibrary.clear_cache()

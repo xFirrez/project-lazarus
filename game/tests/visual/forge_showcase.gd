@@ -81,7 +81,7 @@ func _run() -> void:
 	await _frames(60)
 	_look(Vector3(28, -38, -24), core)
 	await _shot("reactor_stabilized.png")
-	_look(Vector3(52, -26, -66), Vector3(36, -33.5, -60))
+	_look(Vector3(38, -29, -71), Vector3(44, -31.5, -60))  # Step 13: from inside the cavern
 	await _shot("reactor_bridge_extended.png")
 	# Forge: forging, then the floating offer.
 	var forge: LazarusForge = m.forge.forges[0]
