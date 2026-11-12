@@ -210,6 +210,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | 2026-11-12 | 12 | `tools/check.sh` | Pass | 35 unit scripts / 193 tests (new `test_wonder_weapons`, `test_chain_lightning`, `test_special_rounds`, `test_buildables`) |
 | 2026-11-12 | 12 | `tools/run_tests.sh integration` | Pass | 22 scripts / 85+ tests (new `test_ray_pistol`, `test_wonder_zombies`, `test_warden`; Warden r20 2p kill 256.5 s) |
 | 2026-11-12 | 12 | `tools/run_sim.sh specials` (new) | Pass | buildables flow, special round (rifts, burst, Max Ammo), warning, 50-round schedule, Warden rules |
+| 2026-11-12 | 12 | Regression: `run_sim.sh smoke round_flow perks progression`, `net_tests.sh weapons zombies survival late_join box perks progression` | Pass | all green (zombies' smooth_motion check flaked once while sims ran in parallel; passes alone) |
 | 2026-11-12 | 12 | `tools/net_tests.sh wonder` (new) | Pass | client part pickup shared, client Conduit chain + ELECTROCUTED copies + arcs, client Ray Pistol burst, special round + rifts + atmosphere, Warden plates replicated |
 | 2026-11-12 | 11 | `tools/check.sh` | Pass | 31 unit scripts / 173 tests (new `test_forge_upgrades`: 7 tests over the 23 upgrades + traps) |
 | 2026-11-12 | 11 | `tools/run_sim.sh progression` (new) | Pass | 88 checks: relays (pause, 20.0 s defend), bridge / Forge / reactor, Forge 5.0 s + 15 s expiry + Free Upgrade, upgraded behaviors live, traps T2 / T3, hazards |
