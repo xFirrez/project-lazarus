@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="MapDefinition" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://core/world/map_definition.gd" id="1"]
 [ext_resource type="Script" path="res://core/world/zone_def.gd" id="2"]
@@ -9,20 +9,74 @@
 script = ExtResource("2")
 id = &"Z01"
 display_name = "Arrival Station"
-adjacent = Array[StringName]([&"Z03", &"Z06"])
+adjacent = Array[StringName]([&"Z03", &"Z06", &"Z07"])
 start_unlocked = true
 
 [sub_resource type="Resource" id="z03"]
 script = ExtResource("2")
 id = &"Z03"
 display_name = "Sanatorium Lobby"
-adjacent = Array[StringName]([&"Z01"])
+adjacent = Array[StringName]([&"Z01", &"Z04", &"Z06", &"Z10"])
+
+[sub_resource type="Resource" id="z04"]
+script = ExtResource("2")
+id = &"Z04"
+display_name = "East Wing"
+adjacent = Array[StringName]([&"Z03", &"Z05", &"Z06"])
+
+[sub_resource type="Resource" id="z05"]
+script = ExtResource("2")
+id = &"Z05"
+display_name = "Operating Theater"
+adjacent = Array[StringName]([&"Z04", &"Z07", &"Z12"])
 
 [sub_resource type="Resource" id="z06"]
 script = ExtResource("2")
 id = &"Z06"
 display_name = "Frozen Courtyard"
-adjacent = Array[StringName]([&"Z01"])
+adjacent = Array[StringName]([&"Z01", &"Z03", &"Z04", &"Z07", &"Z08", &"Z12"])
+
+[sub_resource type="Resource" id="z07"]
+script = ExtResource("2")
+id = &"Z07"
+display_name = "Communications Array"
+adjacent = Array[StringName]([&"Z01", &"Z05", &"Z06"])
+
+[sub_resource type="Resource" id="z08"]
+script = ExtResource("2")
+id = &"Z08"
+display_name = "Boiler House"
+adjacent = Array[StringName]([&"Z06", &"Z09"])
+
+[sub_resource type="Resource" id="z09"]
+script = ExtResource("2")
+id = &"Z09"
+display_name = "Generator Hall"
+adjacent = Array[StringName]([&"Z08", &"Z10", &"Z13"])
+
+[sub_resource type="Resource" id="z10"]
+script = ExtResource("2")
+id = &"Z10"
+display_name = "Morgue & South Tunnels"
+adjacent = Array[StringName]([&"Z03", &"Z09", &"Z11"])
+
+[sub_resource type="Resource" id="z11"]
+script = ExtResource("2")
+id = &"Z11"
+display_name = "Containment Labs"
+adjacent = Array[StringName]([&"Z10", &"Z12", &"Z13"])
+
+[sub_resource type="Resource" id="z12"]
+script = ExtResource("2")
+id = &"Z12"
+display_name = "Specimen Storage"
+adjacent = Array[StringName]([&"Z05", &"Z06", &"Z11"])
+
+[sub_resource type="Resource" id="z13"]
+script = ExtResource("2")
+id = &"Z13"
+display_name = "Lazarus Reactor Chamber"
+adjacent = Array[StringName]([&"Z09", &"Z11"])
 
 [resource]
 script = ExtResource("1")
@@ -35,6 +89,6 @@ starting_weapons = Array[StringName]([&"m1911"])
 starting_points = 500
 survival = true
 round_curve = ExtResource("3")
-zones = Array[ZoneDef]([SubResource("z01"), SubResource("z03"), SubResource("z06")])
+zones = Array[ZoneDef]([SubResource("z01"), SubResource("z03"), SubResource("z04"), SubResource("z05"), SubResource("z06"), SubResource("z07"), SubResource("z08"), SubResource("z09"), SubResource("z10"), SubResource("z11"), SubResource("z12"), SubResource("z13")])
 starting_zone = &"Z01"
 rules_script = ExtResource("4")

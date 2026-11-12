@@ -203,7 +203,7 @@ func _on_player_state(sender: int, bytes: PackedByteArray) -> void:
 	if pos.y < PlayerCharacter.KILL_Y and seq == v.expected_seq:
 		_host_teleport(sender, spawn_point_for(sender))
 		return
-	match v.validate(stamp, pos, seq):
+	match v.validate(stamp, pos, seq, _machine_carry(v, stamp)):
 		MovementValidator.Result.STALE:
 			return
 		MovementValidator.Result.CORRECT:
@@ -215,6 +215,18 @@ func _on_player_state(sender: int, bytes: PackedByteArray) -> void:
 	avatar.remote_flags = flags
 	avatar.remote_pitch = pitch
 	avatar.buffer.push(stamp, pos, yaw, Net.now())
+
+
+# Displacement of the traversal machine (gondola / lift) the player stood on at the last accepted
+# state, between that state and this one (machines move deterministically from the host clock).
+func _machine_carry(v: MovementValidator, stamp: float) -> Vector3:
+	if not v.has_state:
+		return Vector3.ZERO
+	for n: Node in get_tree().get_nodes_in_group(TraversalMachine.GROUP):
+		var tm: TraversalMachine = n as TraversalMachine
+		if tm.contains(v.position, v.stamp):
+			return tm.displacement(v.stamp, stamp)
+	return Vector3.ZERO
 
 
 func _on_player_snapshot(_sender: int, bytes: PackedByteArray) -> void:

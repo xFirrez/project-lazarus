@@ -65,6 +65,7 @@ func _register_builtin_commands() -> void:
 	RenderCommands.register(commands)
 	ZombieCommands.register(commands)
 	SurvivalCommands.register(commands)
+	MapCommands.register(commands)
 	Net.register_message(&"_cheat", SurvivalCommands.on_msg_cheat)
 
 

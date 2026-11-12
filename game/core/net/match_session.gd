@@ -23,6 +23,7 @@ signal join_completed(waiting: bool)  # client: the full join snapshot has arriv
 signal hash_compared(round_number: int, peer_id: int, ok: bool)  # host
 signal player_retained(uid: String, record: Dictionary)  # host
 signal player_restored(peer_id: int, uid: String)  # host
+signal flag_changed(key: String, value: Variant)  # every peer: host set / relayed / join snapshot
 
 const SCENE_READY_TIMEOUT: float = 30.0
 const BANDWIDTH_LOG_INTERVAL: float = 10.0
@@ -103,6 +104,11 @@ func host_set_flag(key: String, value: Variant) -> void:
 		return
 	flags[key] = value
 	Net.send_reliable(0, &"_flag", [key, value])
+	flag_changed.emit(key, value)
+
+
+func flag(key: String, default: Variant = null) -> Variant:
+	return flags.get(key, default)
 
 
 func has_retained(uid: String) -> bool:
@@ -318,11 +324,14 @@ func _on_msg_hash_report(sender: int, p: Array) -> void:
 func _on_msg_flag(sender: int, p: Array) -> void:
 	if sender == 1 and not Net.is_host():
 		flags[String(p[0])] = p[1]
+		flag_changed.emit(String(p[0]), p[1])
 
 
 func _on_msg_flags_full(sender: int, p: Array) -> void:
 	if sender == 1 and not Net.is_host():
 		flags = (p[0] as Dictionary).duplicate()
+		for k: Variant in flags.keys():
+			flag_changed.emit(String(k), flags[k])
 
 
 func _on_msg_join_done(sender: int, p: Array) -> void:

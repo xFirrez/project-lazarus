@@ -175,7 +175,7 @@ func _host_validate_and_run(peer_id: int, id: int) -> String:
 		return "unavailable"
 	if not it.in_range(p, RANGE_SLACK):
 		return "too far"
-	var why: String = it.host_check(peer_id, p)
+	var why: String = "Requires power" if it.requires_power and not Power.is_on() else it.host_check(peer_id, p)
 	if why != "":
 		return why
 	var c: int = it.get_cost(p)

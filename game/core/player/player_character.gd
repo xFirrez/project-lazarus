@@ -15,7 +15,7 @@ const COLORS: Array[Color] = [
 	Color(0.85, 0.32, 0.25), Color(0.25, 0.55, 0.85), Color(0.35, 0.75, 0.35), Color(0.9, 0.75, 0.25)
 ]
 const DEFAULT_TUNING: String = "res://content/player/player_tuning.tres"
-const KILL_Y: float = -30.0
+const KILL_Y: float = -90.0  # below Vesper Peak's reactor pit (datum y 0 = Arrival Station floor)
 const TAG_FULL_DISTANCE: float = 12.0  # name tags: opaque up to here ...
 const TAG_HIDE_DISTANCE: float = 40.0  # ... faded out by here
 

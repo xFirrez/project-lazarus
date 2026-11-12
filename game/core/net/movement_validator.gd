@@ -31,7 +31,9 @@ func _init(p_tuning: PlayerTuning) -> void:
 	tuning = p_tuning
 
 
-func validate(p_stamp: float, pos: Vector3, seq: int) -> Result:
+# `carry` = displacement of a traversal machine the player rode over this interval (host-computed
+# from the deterministic machine motion), which doesn't count against the budget.
+func validate(p_stamp: float, pos: Vector3, seq: int, carry: Vector3 = Vector3.ZERO) -> Result:
 	if seq != expected_seq:
 		return Result.STALE
 	if not has_state:
@@ -41,7 +43,7 @@ func validate(p_stamp: float, pos: Vector3, seq: int) -> Result:
 	if dt <= 0.0:
 		return Result.STALE
 	dt = minf(dt, MAX_GAP)
-	var d: Vector3 = pos - position
+	var d: Vector3 = pos - position - carry
 	if pos.y < kill_y:
 		return _correct("fell out of the world (y=%.1f)" % pos.y)
 	if d.length() > tuning.validation_teleport_distance + MAX_FALL_SPEED * dt:

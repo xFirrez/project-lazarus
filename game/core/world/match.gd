@@ -45,6 +45,8 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	session.match_node = self
 	session.joined_at = session_joined_at
 	add_child(session)
+	# Map nodes that listen to shared state (power, machines) hook up now that the session exists.
+	map_root.propagate_call(&"_on_match_setup", [self])
 	if def.rules_script != null:
 		rules = def.rules_script.new() as MapRules
 	if rules == null:

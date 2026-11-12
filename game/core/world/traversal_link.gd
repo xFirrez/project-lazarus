@@ -1,11 +1,11 @@
 # TraversalLink — a NavigationLink3D that zombies cross with an action instead of walking:
-# windows (tear the barricade, then climb), drop-downs, vents (crawl) and jumps. The brain finds
+# windows (tear the barricade, then climb), drop-downs, vents (crawl), jumps and lift rides. The brain finds
 # the link through the path metadata (owner id) and runs the matching traversal (ZombieSim).
 # Authority: static map data, read by the host's zombie brains.
 class_name TraversalLink
 extends NavigationLink3D
 
-enum Action { WINDOW, DROP, VENT, JUMP }
+enum Action { WINDOW, DROP, VENT, JUMP, LIFT }
 
 const NAV_LAYER_LINKS: int = 1
 
@@ -15,6 +15,10 @@ const NAV_LAYER_LINKS: int = 1
 @export var cost: float = 1.0
 
 var barricade: Barricade = null
+# LIFT links: the machine carrying zombies and the station this link boards at (TraversalMachine
+# enables the link only while docked there).
+var machine: TraversalMachine = null
+var station: int = 0
 
 
 func _ready() -> void:

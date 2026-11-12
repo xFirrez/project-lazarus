@@ -11,6 +11,7 @@ extends Node
 
 signal requeue_requested(sim: ZombieSim, reason: String)
 
+const PATH_TIME_CAP_USEC: int = 900
 const LOD_NEAR: float = 20.0
 const LOD_FAR: float = 40.0
 const THINK_RATES: PackedFloat32Array = [0.1, 0.25, 0.5]
@@ -44,6 +45,8 @@ var crawlers_created: int = 0
 var damage_dealt: float = 0.0
 
 var _map: RID = RID()
+var _tiles: NavTiles = null  # tiled maps: snap() searches only the nearby tiles
+var _tiles_checked: bool = false
 var _queue: Array[ZombieSim] = []
 var _params: NavigationPathQueryParameters3D = NavigationPathQueryParameters3D.new()
 var _result: NavigationPathQueryResult3D = NavigationPathQueryResult3D.new()
@@ -181,10 +184,29 @@ func link_for_owner(owner_id: int) -> TraversalLink:
 
 
 # Projects a moved position back onto the navmesh (zombies are navmesh-constrained).
+# On tiled maps (NavTiles) only the tiles around p are searched: the map-wide closest-point query
+# scales with every polygon of the map and dominated the AI budget on Vesper Peak (Step 8).
 func snap(p: Vector3, _from: Vector3) -> Vector3:
 	var m: RID = navigation_map()
 	if not m.is_valid():
 		return p
+	if _tiles == null and not _tiles_checked:
+		_tiles_checked = true
+		_tiles = NavTiles.find(self)
+	if _tiles != null:
+		var probe: Vector3 = p + Vector3.UP * 0.25
+		var best: Vector3 = Vector3.INF
+		var best_d: float = INF
+		for i: int in _tiles.boxes.size():
+			if not _tiles.boxes[i].grow(1.0).has_point(probe):
+				continue
+			var c: Vector3 = NavigationServer3D.region_get_closest_point(_tiles.regions[i].get_rid(), probe)
+			var d: float = c.distance_squared_to(probe)
+			if d < best_d:
+				best_d = d
+				best = c
+		if best != Vector3.INF and best_d < 4.0:
+			return best
 	var q: Vector3 = NavigationServer3D.map_get_closest_point(m, p + Vector3.UP * 0.25)
 	if q == Vector3.ZERO and p.length_squared() > 1.0:
 		return p
@@ -218,7 +240,12 @@ func _physics_process(delta: float) -> void:
 
 
 func _serve_paths() -> void:
+	# Count budget AND a time cap: on large maps (Vesper Peak) single queries cost more, so a
+	# frame stops serving once PATH_TIME_CAP_USEC is spent (always at least one query).
+	var t0: int = Time.get_ticks_usec()
 	while not _queue.is_empty() and queries_this_frame < path_budget:
+		if queries_this_frame > 0 and Time.get_ticks_usec() - t0 > PATH_TIME_CAP_USEC:
+			break
 		var sim: ZombieSim = _queue.pop_front()
 		if sim.state == ZombieSim.State.DEAD or sim.target == null:
 			sim.path_requested = false

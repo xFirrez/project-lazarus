@@ -26,6 +26,13 @@ static func ensure_events() -> void:
 	Audio.register_event(&"revive_start", _sting([330.0], 0.15), &"SFX", -8.0)
 	Audio.register_event(&"player_bledout", _sting([110.0, 73.0], 0.6), &"SFX", -2.0)
 	Audio.register_event(&"player_respawned", _sting([392.0, 523.0], 0.2), &"SFX", -6.0)
+	# Step 8 map machines (placeholders): power cascade, klaxon, gondola / lift, chute, bridge.
+	Audio.register_event(&"power_on", _sting([55.0, 73.0, 110.0, 147.0, 220.0], 0.5), &"SFX", 0.0)
+	Audio.register_event(&"power_klaxon", _sting([392.0, 330.0, 392.0, 330.0], 0.3), &"SFX", -4.0)
+	Audio.register_event(&"machine_depart", _sting([147.0, 165.0], 0.4), &"SFX", -6.0)
+	Audio.register_event(&"machine_arrive", _sting([165.0, 131.0], 0.35), &"SFX", -6.0)
+	Audio.register_event(&"chute_slide", _sting([220.0, 196.0, 175.0, 147.0], 0.25), &"SFX", -6.0)
+	Audio.register_event(&"bridge_extend", _sting([98.0, 110.0, 123.0], 0.5), &"SFX", -4.0)
 	Audio.register_event(&"points_tick", WeaponAudio._click(rng, 900.0, 0.03, 0.4), &"UI", -16.0)
 
 

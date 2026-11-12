@@ -26,6 +26,7 @@ const TARGET_HYSTERESIS: float = 3.0  # m shorter path needed to switch targets
 const RISE_TIME: float = 1.2
 const WINDOW_QUEUE_RANGE: float = 1.8  # wait this far from a busy window instead of pushing in
 const STUCK_NEAR_TARGET: float = 8.0  # crowding around a target is not "stuck"
+const LIFT_GIVE_UP: float = 20.0  # waiting this long for / on a lift -> re-queue
 
 var actor: ZombieActor = null
 var director: CrowdDirector = null
@@ -70,6 +71,9 @@ var attack_target: Node3D = null
 var stagger_time: float = 0.0
 
 var stuck_timer: float = 0.0
+var lift_phase: int = 0  # LIFT traversal: 0 boarding, 1 aboard, 2 stepping off
+var lift_wait: float = 0.0
+var lift_offset: Vector3 = Vector3.ZERO
 var stuck_ref: Vector3 = Vector3.ZERO
 var far_timer: float = 0.0
 var reached_target: bool = false  # statistics: got into attack range at least once
@@ -383,6 +387,11 @@ func _start_traverse() -> void:
 		TraversalLink.Action.JUMP:
 			a = ZombieActor.Action.DROP
 			traverse_duration = traverse_link.traverse_time(archetype.crawler_speed)
+		TraversalLink.Action.LIFT:
+			a = ZombieActor.Action.NONE
+			traverse_duration = 1.0e9
+			lift_phase = 0
+			lift_wait = 0.0
 	_enter(State.TRAVERSE)
 	actor.start_action(a)
 	actor.set_flag(ZombieActor.Flag.TRAVERSING, true)
@@ -428,6 +437,9 @@ func _window_victim() -> Node3D:
 
 
 func _move_traverse(dt: float) -> void:
+	if traverse_link != null and traverse_link.action == TraversalLink.Action.LIFT:
+		_move_lift(dt)
+		return
 	var t: float = clampf(state_time / maxf(traverse_duration, 0.05), 0.0, 1.0)
 	var p: Vector3 = traverse_from.lerp(traverse_to, t)
 	if traverse_link != null and traverse_link.action == TraversalLink.Action.DROP:
@@ -441,16 +453,73 @@ func _move_traverse(dt: float) -> void:
 		else 0.0
 	)
 	if t >= 1.0:
-		pos = director.snap(traverse_to, traverse_to)
-		actor.set_flag(ZombieActor.Flag.TRAVERSING, false)
-		actor.start_action(ZombieActor.Action.NONE)
-		if barricade != null and barricade.occupant == actor.net_id:
-			barricade.occupant = 0
-		barricade = null
-		traverse_link = null
-		stuck_ref = pos
-		stuck_timer = 0.0
-		_enter(State.PURSUE)
+		_end_traverse()
+
+
+# Rides a TraversalMachine (freight lift): walk aboard while it is docked at the link's station,
+# ride (position follows the machine), step off at the other station. Gives up (re-queue) when
+# the lift doesn't come or doesn't leave.
+func _move_lift(dt: float) -> void:
+	var m: TraversalMachine = traverse_link.machine
+	if m == null:
+		_end_traverse()
+		return
+	var now: float = Net.host_time()
+	var docked: int = m.docked_at(now)
+	match lift_phase:
+		0:
+			if docked != traverse_link.station:
+				lift_wait += dt
+				_set_speed(0.0, dt)
+			else:
+				var board: Vector3 = (
+					m.position_at(now)
+					+ Vector3(sin(float(actor.net_id) * 1.7) * 0.8, 0.0, cos(float(actor.net_id) * 1.3) * 0.8)
+				)
+				if _step_toward(board, dt):
+					lift_offset = pos - m.position_at(now)
+					lift_phase = 1
+					lift_wait = 0.0
+		1:
+			pos = m.position_at(now) + lift_offset
+			actor.speed = 0.0
+			if docked == 1 - traverse_link.station:
+				lift_phase = 2
+			elif docked == traverse_link.station:
+				lift_wait += dt
+		2:
+			if _step_toward(traverse_to, dt):
+				_end_traverse()
+				return
+	if lift_wait > LIFT_GIVE_UP:
+		requeue_reason = "lift wait"
+
+
+# Walks straight at `goal` (no navmesh: lift floors aren't on it). True when there.
+func _step_toward(goal: Vector3, dt: float) -> bool:
+	var d: Vector3 = goal - pos
+	var flat: float = Vector2(d.x, d.z).length()
+	if flat < 0.2:
+		return true
+	var step: float = minf(current_speed_cap() * dt, flat)
+	pos += Vector3(d.x, 0.0, d.z) / flat * step
+	pos.y = lerpf(pos.y, goal.y, clampf(dt * 10.0, 0.0, 1.0))
+	_face(d, dt)
+	actor.speed = step / maxf(dt, 0.001)
+	return false
+
+
+func _end_traverse() -> void:
+	pos = director.snap(traverse_to, traverse_to)
+	actor.set_flag(ZombieActor.Flag.TRAVERSING, false)
+	actor.start_action(ZombieActor.Action.NONE)
+	if barricade != null and barricade.occupant == actor.net_id:
+		barricade.occupant = 0
+	barricade = null
+	traverse_link = null
+	stuck_ref = pos
+	stuck_timer = 0.0
+	_enter(State.PURSUE)
 
 
 # --- attack / reactions -----------------------------------------------------------------------

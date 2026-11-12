@@ -1,0 +1,637 @@
+{
+ "map": "vesper_peak",
+ "doc": "docs/VESPER_PEAK.md (\u00a72-7). Checked by tests/integration/test_vesper_markers.gd (AC-8.6).",
+ "zones": [
+  "Z01",
+  "Z03",
+  "Z04",
+  "Z05",
+  "Z06",
+  "Z07",
+  "Z08",
+  "Z09",
+  "Z10",
+  "Z11",
+  "Z12",
+  "Z13"
+ ],
+ "doors": [
+  {
+   "id": "D01",
+   "cost": 750
+  },
+  {
+   "id": "D02",
+   "cost": 1000
+  },
+  {
+   "id": "D03",
+   "cost": 1000
+  },
+  {
+   "id": "D04",
+   "cost": 1250
+  },
+  {
+   "id": "D05",
+   "cost": 1250
+  },
+  {
+   "id": "D06",
+   "cost": 1250
+  },
+  {
+   "id": "D07",
+   "cost": 1000
+  },
+  {
+   "id": "D08",
+   "cost": 1250
+  },
+  {
+   "id": "D09",
+   "cost": 1000
+  },
+  {
+   "id": "D10",
+   "cost": 1000
+  },
+  {
+   "id": "D11",
+   "cost": 1500
+  },
+  {
+   "id": "D12",
+   "cost": 1250
+  },
+  {
+   "id": "D14",
+   "cost": 2000
+  },
+  {
+   "id": "D15",
+   "cost": 1500
+  }
+ ],
+ "door_total": 17000,
+ "wall_buys_live": [
+  "WallBuy_M14",
+  "WallBuy_Coachgun"
+ ],
+ "nodes": [
+  "PWR_MainSwitch",
+  "GND_Gondola",
+  "GND_Console_Z01",
+  "GND_Console_Z07",
+  "GND_CabinPanel",
+  "LFT_FreightLift",
+  "LFT_Console0",
+  "LFT_Console1",
+  "CHT_LaundryChute",
+  "CHT_Grate",
+  "CHT_GrateTarget",
+  "BRG_ReactorBridge"
+ ],
+ "markers": [
+  {
+   "id": "Perk_SecondWind",
+   "kind": "perk",
+   "zone": "Z01"
+  },
+  {
+   "id": "MB1_Luggage",
+   "kind": "music_box",
+   "zone": "Z01"
+  },
+  {
+   "id": "L01",
+   "kind": "lore",
+   "zone": "Z01"
+  },
+  {
+   "id": "Raven_1_Z01Roof",
+   "kind": "raven",
+   "zone": "Z01"
+  },
+  {
+   "id": "EE_DeparturesBoard",
+   "kind": "ee",
+   "zone": "Z01"
+  },
+  {
+   "id": "Perk_Quickdraw",
+   "kind": "perk",
+   "zone": "Z03"
+  },
+  {
+   "id": "WB_MP40",
+   "kind": "wallbuy",
+   "zone": "Z03"
+  },
+  {
+   "id": "Box_Z03",
+   "kind": "box",
+   "zone": "Z03"
+  },
+  {
+   "id": "EE_Guestbook",
+   "kind": "ee",
+   "zone": "Z03"
+  },
+  {
+   "id": "S1_Bookcase",
+   "kind": "secret",
+   "zone": "Z03"
+  },
+  {
+   "id": "L02",
+   "kind": "lore",
+   "zone": "Z03"
+  },
+  {
+   "id": "R02",
+   "kind": "reel",
+   "zone": "Z03"
+  },
+  {
+   "id": "L13",
+   "kind": "lore",
+   "zone": "Z03"
+  },
+  {
+   "id": "S1_FreeTonicCrate",
+   "kind": "ee",
+   "zone": "Z03"
+  },
+  {
+   "id": "L03",
+   "kind": "lore",
+   "zone": "Z03"
+  },
+  {
+   "id": "Perk_PackMule",
+   "kind": "perk",
+   "zone": "Z04"
+  },
+  {
+   "id": "Box_Z04",
+   "kind": "box",
+   "zone": "Z04"
+  },
+  {
+   "id": "WB_Model37",
+   "kind": "wallbuy",
+   "zone": "Z04"
+  },
+  {
+   "id": "T1_ElectroTherapy",
+   "kind": "trap",
+   "zone": "Z04"
+  },
+  {
+   "id": "T1_Console",
+   "kind": "trap",
+   "zone": "Z04"
+  },
+  {
+   "id": "Part_Lens_B",
+   "kind": "part",
+   "zone": "Z04"
+  },
+  {
+   "id": "S1_Mirror_R7",
+   "kind": "secret",
+   "zone": "Z04"
+  },
+  {
+   "id": "MB2_Room12",
+   "kind": "music_box",
+   "zone": "Z04"
+  },
+  {
+   "id": "L04",
+   "kind": "lore",
+   "zone": "Z04"
+  },
+  {
+   "id": "EE_Room3_Notation",
+   "kind": "ee",
+   "zone": "Z04"
+  },
+  {
+   "id": "R2_Relay",
+   "kind": "relay",
+   "zone": "Z05"
+  },
+  {
+   "id": "Part_Lens_A",
+   "kind": "part",
+   "zone": "Z05"
+  },
+  {
+   "id": "L05",
+   "kind": "lore",
+   "zone": "Z05"
+  },
+  {
+   "id": "R03",
+   "kind": "reel",
+   "zone": "Z05"
+  },
+  {
+   "id": "EE_VargaSeat",
+   "kind": "ee",
+   "zone": "Z05"
+  },
+  {
+   "id": "Perk_Ironhide",
+   "kind": "perk",
+   "zone": "Z06"
+  },
+  {
+   "id": "WB_M16",
+   "kind": "wallbuy",
+   "zone": "Z06"
+  },
+  {
+   "id": "WB_Tripmines",
+   "kind": "wallbuy",
+   "zone": "Z06"
+  },
+  {
+   "id": "Box_Z06",
+   "kind": "box",
+   "zone": "Z06"
+  },
+  {
+   "id": "H1_FuelDrums_Z06",
+   "kind": "hazard",
+   "zone": "Z06"
+  },
+  {
+   "id": "H2_Icicles_Terrace",
+   "kind": "hazard",
+   "zone": "Z06"
+  },
+  {
+   "id": "H2_Icicles_Arch",
+   "kind": "hazard",
+   "zone": "Z06"
+  },
+  {
+   "id": "Part_Stock_B",
+   "kind": "part",
+   "zone": "Z06"
+  },
+  {
+   "id": "L06",
+   "kind": "lore",
+   "zone": "Z06"
+  },
+  {
+   "id": "EE_FountainShard",
+   "kind": "ee",
+   "zone": "Z06"
+  },
+  {
+   "id": "S2_Waterfall",
+   "kind": "secret",
+   "zone": "Z06"
+  },
+  {
+   "id": "L14",
+   "kind": "lore",
+   "zone": "Z06"
+  },
+  {
+   "id": "MB4_Grotto",
+   "kind": "music_box",
+   "zone": "Z06"
+  },
+  {
+   "id": "Raven_2_Fountain",
+   "kind": "raven",
+   "zone": "Z06"
+  },
+  {
+   "id": "Raven_3_Greenhouse",
+   "kind": "raven",
+   "zone": "Z06"
+  },
+  {
+   "id": "EE_Coffins",
+   "kind": "ee",
+   "zone": "Z06"
+  },
+  {
+   "id": "Perk_MarathonMalt",
+   "kind": "perk",
+   "zone": "Z07"
+  },
+  {
+   "id": "WB_Kar98k",
+   "kind": "wallbuy",
+   "zone": "Z07"
+  },
+  {
+   "id": "WB_IceAxe",
+   "kind": "wallbuy",
+   "zone": "Z07"
+  },
+  {
+   "id": "Box_Z07",
+   "kind": "box",
+   "zone": "Z07"
+  },
+  {
+   "id": "R1_Relay",
+   "kind": "relay",
+   "zone": "Z07"
+  },
+  {
+   "id": "EE_RadioConsole",
+   "kind": "ee",
+   "zone": "Z07"
+  },
+  {
+   "id": "MB3_ObsLocker",
+   "kind": "music_box",
+   "zone": "Z07"
+  },
+  {
+   "id": "Part_Coil_A",
+   "kind": "part",
+   "zone": "Z07"
+  },
+  {
+   "id": "L07",
+   "kind": "lore",
+   "zone": "Z07"
+  },
+  {
+   "id": "R01",
+   "kind": "reel",
+   "zone": "Z07"
+  },
+  {
+   "id": "Raven_4_Antenna",
+   "kind": "raven",
+   "zone": "Z07"
+  },
+  {
+   "id": "Raven_5_GondolaStation",
+   "kind": "raven",
+   "zone": "Z07"
+  },
+  {
+   "id": "EE_FrozenOperator",
+   "kind": "ee",
+   "zone": "Z07"
+  },
+  {
+   "id": "WB_GreaseGun",
+   "kind": "wallbuy",
+   "zone": "Z08"
+  },
+  {
+   "id": "Box_Z08",
+   "kind": "box",
+   "zone": "Z08"
+  },
+  {
+   "id": "Part_Stock_A",
+   "kind": "part",
+   "zone": "Z08"
+  },
+  {
+   "id": "H1_FuelDrums_Z08",
+   "kind": "hazard",
+   "zone": "Z08"
+  },
+  {
+   "id": "L08",
+   "kind": "lore",
+   "zone": "Z08"
+  },
+  {
+   "id": "Perk_TwinFire",
+   "kind": "perk",
+   "zone": "Z09"
+  },
+  {
+   "id": "L09",
+   "kind": "lore",
+   "zone": "Z09"
+  },
+  {
+   "id": "R04",
+   "kind": "reel",
+   "zone": "Z09"
+  },
+  {
+   "id": "EE_TallyMarks",
+   "kind": "ee",
+   "zone": "Z09"
+  },
+  {
+   "id": "WB_Revolver",
+   "kind": "wallbuy",
+   "zone": "Z10"
+  },
+  {
+   "id": "T2_SteamPurge",
+   "kind": "trap",
+   "zone": "Z10"
+  },
+  {
+   "id": "T2_Console",
+   "kind": "trap",
+   "zone": "Z10"
+  },
+  {
+   "id": "EE_MorgueDrawers",
+   "kind": "ee",
+   "zone": "Z10"
+  },
+  {
+   "id": "EE_ChainedDrawer",
+   "kind": "ee",
+   "zone": "Z10"
+  },
+  {
+   "id": "EE_Symbol_1",
+   "kind": "ee",
+   "zone": "Z10"
+  },
+  {
+   "id": "EE_Symbol_2",
+   "kind": "ee",
+   "zone": "Z10"
+  },
+  {
+   "id": "EE_Symbol_3",
+   "kind": "ee",
+   "zone": "Z10"
+  },
+  {
+   "id": "EE_Symbol_4",
+   "kind": "ee",
+   "zone": "Z10"
+  },
+  {
+   "id": "L10",
+   "kind": "lore",
+   "zone": "Z10"
+  },
+  {
+   "id": "R05",
+   "kind": "reel",
+   "zone": "Z10"
+  },
+  {
+   "id": "R3_Relay",
+   "kind": "relay",
+   "zone": "Z11"
+  },
+  {
+   "id": "WB_LabWorkbench",
+   "kind": "workbench",
+   "zone": "Z11"
+  },
+  {
+   "id": "EE_SoulPod",
+   "kind": "ee",
+   "zone": "Z11"
+  },
+  {
+   "id": "Box_Z11",
+   "kind": "box",
+   "zone": "Z11"
+  },
+  {
+   "id": "H3_Breaker",
+   "kind": "hazard",
+   "zone": "Z11"
+  },
+  {
+   "id": "H3_Puddles",
+   "kind": "hazard",
+   "zone": "Z11"
+  },
+  {
+   "id": "L11",
+   "kind": "lore",
+   "zone": "Z11"
+  },
+  {
+   "id": "R06",
+   "kind": "reel",
+   "zone": "Z11"
+  },
+  {
+   "id": "EE_Chamber6_Claws",
+   "kind": "ee",
+   "zone": "Z11"
+  },
+  {
+   "id": "Perk_Bullseye",
+   "kind": "perk",
+   "zone": "Z12"
+  },
+  {
+   "id": "Box_Z12",
+   "kind": "box",
+   "zone": "Z12"
+  },
+  {
+   "id": "Part_Coil_B",
+   "kind": "part",
+   "zone": "Z12"
+  },
+  {
+   "id": "L12",
+   "kind": "lore",
+   "zone": "Z12"
+  },
+  {
+   "id": "R07",
+   "kind": "reel",
+   "zone": "Z12"
+  },
+  {
+   "id": "EE_ObservationGlass",
+   "kind": "ee",
+   "zone": "Z12"
+  },
+  {
+   "id": "FRG_LazarusForge",
+   "kind": "forge",
+   "zone": "Z13"
+  },
+  {
+   "id": "T3_CoolantPurge",
+   "kind": "trap",
+   "zone": "Z13"
+  },
+  {
+   "id": "T3_Console",
+   "kind": "trap",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_CoreSocket",
+   "kind": "ee",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_Node_1",
+   "kind": "ee",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_Node_2",
+   "kind": "ee",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_Node_3",
+   "kind": "ee",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_Node_4",
+   "kind": "ee",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_Pylon_1",
+   "kind": "ee",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_Pylon_2",
+   "kind": "ee",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_Pylon_3",
+   "kind": "ee",
+   "zone": "Z13"
+  },
+  {
+   "id": "R08",
+   "kind": "reel",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_HaemmerCap",
+   "kind": "ee",
+   "zone": "Z13"
+  },
+  {
+   "id": "EE_WardenRise",
+   "kind": "ee",
+   "zone": "Z13"
+  }
+ ]
+}
