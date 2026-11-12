@@ -68,10 +68,8 @@ func _ready() -> void:
 	sparks.gravity = Vector3(0, 0.6, 0)
 	sparks.initial_velocity_min = 0.05
 	sparks.initial_velocity_max = 0.2
-	sparks.scale_amount_min = 0.02
-	sparks.scale_amount_max = 0.04
 	var qm: QuadMesh = QuadMesh.new()
-	qm.size = Vector2(1, 1)
+	qm.size = Vector2(0.035, 0.035)  # sized in the mesh: scale_amount isn't applied by every renderer
 	var pm: StandardMaterial3D = StandardMaterial3D.new()
 	pm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	pm.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED

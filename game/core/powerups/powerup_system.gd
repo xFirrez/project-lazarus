@@ -262,8 +262,10 @@ func _physics_process(_delta: float) -> void:
 	var now: float = Net.host_time()
 	while not _nuke_queue.is_empty() and float(_nuke_queue[0][1]) <= now:
 		var e: Array = _nuke_queue.pop_front()
-		var a: ZombieActor = e[0]
-		if is_instance_valid(a) and a.alive:
+		if not is_instance_valid(e[0]):
+			continue  # despawned / re-queued before its turn
+		var a: ZombieActor = e[0] as ZombieActor
+		if a.alive:
 			var info: DamageInfo = DamageInfo.make(
 				a.health + 1.0, WeaponDefinition.Hitzone.TORSO, DamageInfo.Kind.NUKE, &"nuke", 0
 			)

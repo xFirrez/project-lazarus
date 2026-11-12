@@ -110,7 +110,7 @@ func _process(delta: float) -> void:
 	if not visible:
 		return
 	for i: int in _bottles.size():
-		_bottles[i].position.y = 1.18 + sin(_t * 1.6 + i * 1.3) * 0.015
+		_bottles[i].position.y = 1.0 + sin(_t * 1.6 + i * 1.3) * 0.015
 	if _spinner != null:
 		_spinner.rotation.z = sin(_t * 0.9) * 0.8 if on else 0.0
 	if on and _neon != null:
@@ -140,9 +140,9 @@ func _on_drink_started(_peer: int, pid: StringName) -> void:
 	# Only the nearest machine of that perk vends (there is one per map, but stay generic).
 	vends += 1
 	_tray_bottle.visible = true
-	_tray_bottle.position = Vector3(0.0, 1.05, 0.33)
+	_tray_bottle.position = Vector3(0.0, 0.9, 0.47)
 	var tw: Tween = create_tween()
-	tw.tween_property(_tray_bottle, "position", Vector3(0.0, 0.38, 0.36), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(
+	tw.tween_property(_tray_bottle, "position", Vector3(0.0, 0.39, 0.47), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(
 		Tween.EASE_IN
 	)
 	tw.tween_interval(PerkSystem.DRINK_TIME)
@@ -238,14 +238,15 @@ func _build_visual() -> void:
 	_sign.modulate = d.color
 	add_child(_sign)
 	# Bottle window with three bottles (idle bob) and the vending tray.
-	_box(Vector3(0, 1.2, 0.41), Vector3(0.8, 0.42, 0.02), _glass)
+	_box(Vector3(0, 1.2, 0.53), Vector3(0.8, 0.42, 0.02), _glass)
+	_box(Vector3(0, 0.98, 0.47), Vector3(0.82, 0.03, 0.14), trim)  # bottle shelf
 	for i: int in 3:
 		var b: Node3D = PerkBottle.build(d)
-		b.position = Vector3(-0.25 + 0.25 * i, 1.18, 0.33)
+		b.position = Vector3(-0.25 + 0.25 * i, 1.0, 0.46)
 		b.scale = Vector3.ONE * 0.9
 		add_child(b)
 		_bottles.append(b)
-	_box(Vector3(0, 0.36, 0.42), Vector3(0.5, 0.06, 0.14), trim)
+	_box(Vector3(0, 0.36, 0.46), Vector3(0.5, 0.06, 0.14), trim)
 	_tray_bottle = PerkBottle.build(d)
 	_tray_bottle.visible = false
 	add_child(_tray_bottle)
