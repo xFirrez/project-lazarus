@@ -11,11 +11,11 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
-| Next step to start | **Step 12 — Wonder weapons & special enemies (→ M4)** |
+| Current milestone | **M4 Gameplay complete** (automated criteria; Step 12: wonder weapons, Conduit buildable, Galvanic special rounds, Warden archetype in its arena; AC-12.6 GPU + AC-12.7 feel = human checks). Previous: **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
+| Next step to start | **Step 13 — Vesper Peak art & atmosphere (→ M5)** |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-12 (Step 11 session) |
-| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **7 Vigor Tonic machines** (cap 4, loss on down, Second Wind solo self-revive ×3), **6 power-ups** (drops, timers, `powerup <id>`), **Resonance Relays R1–R3 → Reactor Bridge → Lazarus Forge** (23 upgraded weapons with camo, alt-fire key B), **traps T1–T3**, **hazards** (fuel drums, icicles, lab breaker), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-12 (Step 12 session) |
+| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **7 Vigor Tonic machines** (cap 4, loss on down, Second Wind solo self-revive ×3), **6 power-ups** (drops, timers, `powerup <id>`), **Resonance Relays R1–R3 → Reactor Bridge → Lazarus Forge** (23 upgraded weapons with camo, alt-fire key B), **traps T1–T3**, **hazards** (fuel drums, icicles, lab breaker), **wonder weapons** (Mk.I Ray Pistol / Nova Mk.II, Lazarus Conduit / Lazarus Requiem with pulse; box + Forge; `give raygun` / `give conduit`), the **Conduit buildable** (3 parts + Lab Workbench), **Galvanic special rounds** (rifts, warning build-up, Max Ammo; `special_round`), the **Warden** (`spawn_warden`, test map `warden_arena`), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -35,7 +35,7 @@
 | 9 | Arsenal, wall-buys & Relic Box | **Complete (with deferrals)** (AC-9.7 awaiting human; authored weapon art deferred) | 9A + 9B | 2026-11-12 |
 | 10 | Vigor Tonics & power-ups | **Complete (with deferrals)** (AC-10.5 / AC-10.6 awaiting human; authored machine models deferred) | — | 2026-11-12 |
 | 11 | Relays, Lazarus Forge, traps & hazards | **Complete (with deferrals)** (AC-11.6 awaiting human; authored Forge / relay / trap models deferred) | 11A + 11B | 2026-11-12 |
-| 12 | Wonder weapons & special enemies (→ M4) | Not started | 12A / 12B | — |
+| 12 | Wonder weapons & special enemies (→ M4) | **Complete (with deferrals)** (AC-12.6 GPU + AC-12.7 awaiting human; authored wonder-weapon / Galvanic / Warden models deferred to Step 13) | 12A + 12B | 2026-11-12 |
 | 13 | Vesper Peak art & atmosphere (→ M5) | Not started | 13A / 13B / 13C / 13D | — |
 | 14 | Easter egg, lore & secrets | Not started | 14A / 14B | — |
 | 15 | Presentation & audio finalization (→ M6) | Not started | 15A / 15B | — |
@@ -153,13 +153,13 @@
 - [H] AC-11.6 [HUMAN] Forge feels rewarding (`docs/screenshots/step11/`, steps in the session report)
 
 ### Step 12 — Wonder weapons & specials
-- [ ] AC-12.1 Ray Pistol spec + upgrade bounce
-- [ ] AC-12.2 Conduit chains/stun/pulse + upgrade
-- [ ] AC-12.3 Buildable parts/workbench/box unlock
-- [ ] AC-12.4 Special round scheduling/scaling/Max Ammo
-- [ ] AC-12.5 Warden archetype in test arena
-- [ ] AC-12.6 VFX performance ([HUMAN] GPU confirm)
-- [ ] AC-12.7 [HUMAN] Wonder weapons + special rounds feel
+- [x] AC-12.1 Ray Pistol spec + upgrade bounce (`test_wonder_weapons`, `test_ray_pistol`: 55 m/s, 1000 + splash 1200→300 / 3 m, self ≤ 25, box weight 1.5, Nova bounces once)
+- [x] AC-12.2 Conduit chains/stun/pulse + upgrade (`test_chain_lightning` dummy cluster, `test_wonder_zombies`: 6 struck ≤ 6 m, ×0.75 falloff, 1.5 s stun, pulse 8 m / 3 s no damage, Requiem 11 struck / flat 4 jumps / 2.5 s / kill arcs)
+- [x] AC-12.3 Buildable parts/workbench/box unlock (`test_buildables` seeded locations; `run_sim.sh specials`; `net_tests.sh wonder` client pickup shared)
+- [x] AC-12.4 Special round scheduling/scaling/Max Ammo (`test_special_rounds` 200 seeds × 50 rounds; sim: 50 rounds through RoundDirector = schedule, 6 → 8 count, 400 HP, rifts 1.5 s, warning, Max Ammo on the last kill)
+- [x] AC-12.5 Warden archetype in test arena (`test_warden`: plates / core / slam / charge / summon / phases / coolant, telegraphs ≥ 0.6 s; 2-bot kill at round 20 in 4.28 min)
+- [H] AC-12.6 VFX performance — automated part met (arcs / bursts / lights within WonderFx caps with 10 chained + 32 alive, host chain resolve ≤ 4 ms); GPU frame spikes need the owner
+- [H] AC-12.7 Wonder weapons + special rounds feel
 - [ ] **M4 reached**
 
 ### Step 13 — Art & atmosphere
@@ -207,6 +207,10 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-12 | 12 | `tools/check.sh` | Pass | 35 unit scripts / 193 tests (new `test_wonder_weapons`, `test_chain_lightning`, `test_special_rounds`, `test_buildables`) |
+| 2026-11-12 | 12 | `tools/run_tests.sh integration` | Pass | 22 scripts / 85+ tests (new `test_ray_pistol`, `test_wonder_zombies`, `test_warden`; Warden r20 2p kill 256.5 s) |
+| 2026-11-12 | 12 | `tools/run_sim.sh specials` (new) | Pass | buildables flow, special round (rifts, burst, Max Ammo), warning, 50-round schedule, Warden rules |
+| 2026-11-12 | 12 | `tools/net_tests.sh wonder` (new) | Pass | client part pickup shared, client Conduit chain + ELECTROCUTED copies + arcs, client Ray Pistol burst, special round + rifts + atmosphere, Warden plates replicated |
 | 2026-11-12 | 11 | `tools/check.sh` | Pass | 31 unit scripts / 173 tests (new `test_forge_upgrades`: 7 tests over the 23 upgrades + traps) |
 | 2026-11-12 | 11 | `tools/run_sim.sh progression` (new) | Pass | 88 checks: relays (pause, 20.0 s defend), bridge / Forge / reactor, Forge 5.0 s + 15 s expiry + Free Upgrade, upgraded behaviors live, traps T2 / T3, hazards |
 | 2026-11-12 | 11 | `tools/net_tests.sh progression` (new) | Pass | host 25 / client 20 checks at 100 ms ±20 / 2 %: late-join relay + trap flags, client relay / Forge / trap, FROZEN + splash + drum replication |
@@ -296,6 +300,9 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | ID | Severity (S1–S4) | Step found | Description | Owner/plan |
 |---|---|---|---|---|
+| I-028 | S3 | 12 | Galvanics / the Warden use the 0.3 m-radius zombie navmesh (the Warden's 0.55 m capsule can clip corners); the Warden's charge stops on navmesh edges | Accept for the greybox; revisit with Step 13 geometry |
+| I-029 | S4 | 12 | Conduit arcs are host-resolved: the shooter sees its own arc after one round trip (no local prediction) | Acceptable at ≤ 150 ms; predict cosmetically in Step 16 if playtests complain |
+| I-030 | S4 | 12 | The rift spawn picks spawner-adjacent navmesh points; open areas without spawners never get rifts | Fine on Vesper Peak (70 spawners); add rift markers in Step 13 if needed |
 | I-002 | S4 | 2 | Headless `--fixed-fps` integration runs sometimes log "Jolt Physics job system exceeded the maximum number of jobs … Waiting for jobs" (engine warning; physics continues). Not seen in real-time runs | Marked benign in `tests/integration/player_test_helper.gd`; re-check after engine upgrades |
 | ~~I-003~~ | S3 | 2 | **Fixed for map machines in Step 8** (D-052: host-driven deterministic gondola / lift). Test-map moving platforms (course elevator/shuttle) are simulated locally per peer, so a remote player riding one is seen on the host's copy of the platform only approximately | Step 8 makes traversal machines host-driven (D-020) |
 | ~~I-004~~ | S4 | 3 | ~~Viewmodel/particles verified only with the Compatibility renderer~~ — **Fixed in Step 4:** container renders Forward+ via lavapipe (D-030); metallic viewmodels were black in Forward+ and now reflect a neutral sky (D-031). A GPU look check stays part of AC-3.7 | Closed |
@@ -345,7 +352,10 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | ~~Reactor Bridge extension on relays~~ (done Step 11); Z12 reactor-view gallery framing | Step 13 | The view is an art task (VESPER_PEAK §9.1) |
 | Authored Lazarus Forge / relay / trap models (Step 11 scope 2 "final model"), map-dressed relay rooms, ice-shard / steam VFX polish | Step 13 (art pass) | Step 11 uses the **greybox+** path (procedural, animated) like Steps 9 / 10 |
 | Final Forge / relay / trap / hazard sounds | Step 15 | `ProgressionAudio` placeholders under the final event names |
-| Ray Pistol "Nova Mk.II" / Lazarus Conduit "Lazarus Requiem" upgrades (bounce bolts) | Step 12 | Need the wonder weapons; add to `upgrades_spec.json` + `gen_upgrades.py` |
+| ~~Ray Pistol "Nova Mk.II" / Lazarus Conduit "Lazarus Requiem" upgrades~~ | — | Done in Step 12 (`wonder_upgrades` in `upgrades_spec.json`) |
+| Authored models: Ray Pistol, Lazarus Conduit, Galvanic, Warden, parts, workbench (scope 1/2/4/5 "final model") | Step 13 | Greybox+ procedural models now (GreyboxGun styles `ray_pistol` / `conduit`, electrodes / armor plates on the zombie rig, Warden = zombie rig ×1.65); authored art in the art pass |
+| Galvanic / Warden dedicated animation clips (leap, death burst, slam, charge) | Step 13 | Reuse the 12-clip zombie library (wait = telegraph, drop = leap, attack = slam, stagger = charge recovery) |
+| Special-round music / final audio | Step 15 | Synthesized placeholders (`WonderAudio`) |
 | Bots replicated to clients | Not planned | Host bots are soak-test tooling (D-041) |
 | ~~Remote-player downed / spectate animation~~ | — | Done in Step 7 (`SurvivorModel` downed_crawl / revive) |
 | Steam live test (lobby, overlay invites, P2P) | Human (AC-7.6) / Step 16 | GodotSteam GDExtension is not vendored and no Steam client exists in the container; `SteamTransport` is implemented against GodotSteam's API and unit-tested for its pure parts (D-045). Direct IP + UPnP + VPN is the always-available path |
@@ -387,6 +397,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 
 | Needed by | Task | Status |
 |---|---|---|
+| Step 12 | AC-12.6 (Conduit chain on 10 zombies + 32 alive: no frame > 25 ms on the reference GPU) and AC-12.7 feel review — steps in `docs/sessions/2026-11-12_step-12.md` | Open |
 | Step 0 | Review and approve the planning documents; confirm original naming approach (GAME_DESIGN §1.3) | Open |
 | Step 2+ | Run local playtests for [HUMAN] criteria (feel, visuals, performance on real GPU) | Recurring |
 | Step 4 | Confirm the reference hardware (min + recommended GPUs) available for testing | Open |
@@ -418,6 +429,7 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 
 | Date | Step | Summary | Report |
 |---|---|---|---|
+| 2026-11-12 | 12 | Wonder weapons & special enemies (12A + 12B) → M4: Ray Pistol (plasma projectile, disintegrate) + Nova Mk.II (bounce), Lazarus Conduit (ChainLightning, electrocution stun, hold-to-pulse) + Lazarus Requiem (kill arcs), WonderFx (arcs / bursts / rings / rifts, capped), BuildableSystem (parts, shared inventory, workbench, box unlock), Galvanics (ZombieBehavior leap + burst), special-round flow (schedule, rifts, warning atmosphere, Max Ammo), Warden (plates, core, slam / charge / summon, phases, coolant, late-round rule gated), warden_arena test map, debug commands, unit / integration / sim / net tests (D-071…D-075) | [2026-11-12_step-12.md](sessions/2026-11-12_step-12.md) |
 | 2026-11-12 | 11 | Relays, Forge, traps & hazards (11A + 11B): RelaySystem / ResonanceRelay (hold, defend, zone pause, weak lure) → MapRules.on_relays_complete (bridge, Forge wake, ReactorState); ForgeSystem / LazarusForge (5000 / Free Upgrade, 5 s, 15 s owner offer); 23 generated upgrades + Skullcrusher launcher, behavior fields, vesperite camo, upgraded sound layer; StatusEffects (slow / burn / freeze); TrapSystem T1–T3; HazardSystem H1–H3; upgraded wall ammo 4500; debug commands; progression sim / net / visual tests (D-066…D-070) | [2026-11-12_step-11.md](sessions/2026-11-12_step-11.md) |
 | 2026-11-11 | 0 | Planning: architecture, roadmap, game design, map design, tracker, agent guide | (planning commit) |
 | 2026-11-11 | 1 | Godot 4.7.2 project, autoloads, Net layer v1 (Offline/ENet, NetSim, clock sync, uid), console + overlay, sandbox with replicated capsules, tool scripts, CI | [2026-11-11_step-1.md](sessions/2026-11-11_step-1.md) |

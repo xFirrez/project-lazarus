@@ -13,7 +13,7 @@ class_name ZombieVisual
 extends Node3D
 
 # Death presentation by killing weapon / archetype (Step 12): Ray Pistol disintegration (green glow,
-# shrinks to ash), Conduit char (blackened + sparks), Galvanic electric burst.
+# sinks into ash), Conduit char (blackened + sparks), Galvanic electric burst.
 enum DeathFx { NONE, DISINTEGRATE, CHAR, BURST }
 
 const DEATH_FX_NAMES: Array[StringName] = [&"", &"disintegrate", &"char", &"burst"]
@@ -503,8 +503,9 @@ func _present_death_fx() -> void:
 	match death_fx:
 		DeathFx.DISINTEGRATE:
 			_set_overlay(overlay_material(6))
+			# Sinks into green ash (moving, not scaling: the hurtbox shapes ride the skeleton).
 			var tw: Tween = create_tween()
-			tw.tween_property(model, ^"scale", model.scale * Vector3(0.05, 0.02, 0.05), DISINTEGRATE_TIME)
+			tw.tween_property(model, ^"position:y", -RISE_DEPTH, DISINTEGRATE_TIME).set_ease(Tween.EASE_IN)
 			if wfx != null:
 				wfx.present(WonderFx.Kind.BURST, at, 1.2, WonderFx.Variant.GREEN)
 			Audio.play_event_3d(&"ray_disintegrate", actor.global_position)

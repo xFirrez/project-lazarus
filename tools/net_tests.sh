@@ -18,7 +18,7 @@
 #   coop4        host + 3 clients at 150 ms / 30 ms / 3 %: 32-zombie bandwidth phase, then 10 bot rounds
 #                with state-hash convergence at every round end (AC-7.1, AC-7.4)
 # Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies|survival|lobby|
-#        late_join|reconnect|coop4|traversal|box|perks|progression]... (default: all)
+#        late_join|reconnect|coop4|traversal|box|perks|progression|wonder]... (default: all)
 #   traversal    vesper_peak at --netsim: power on before join (late join), gondola + lift (with a
 #                zombie) riders without corrections, chute grate + slide (AC-8.4, AC-8.5)
 #   box          vesper_peak at --netsim: Relic Box late-join location, spinner-only take, identical
@@ -205,6 +205,20 @@ test_progression() {
   report progression_host "$OUT/progression_host.json" "$OUT/progression_host.log"
 }
 
+test_wonder() {
+  local port; port="$(free_port)"
+  rm -f "$OUT"/wonder_*.json
+  launch host "$OUT/wonder_host.log" -- --host="$port" --map=vesper_peak --netsim="$NETSIM" \
+    --autotest=res://tests/net/host_wonder.gd --autotest-out="$OUT/wonder_host.json" --profile=nethost
+  wait_for_log "$OUT/wonder_host.log" "AUTOTEST READY host" 30
+  launch client "$OUT/wonder_client.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_wonder.gd --autotest-out="$OUT/wonder_client.json" --profile=netclient1
+  wait "$PID_client" || true
+  wait "$PID_host" || true
+  report wonder_client "$OUT/wonder_client.json" "$OUT/wonder_client.log"
+  report wonder_host "$OUT/wonder_host.json" "$OUT/wonder_host.log"
+}
+
 test_lobby() {
   local port; port="$(free_port)"
   rm -f "$OUT"/lobby_*.json
@@ -287,7 +301,7 @@ test_coop4() {
 }
 
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4 traversal box perks progression)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4 traversal box perks progression wonder)
 fail=0
 for t in "${TESTS[@]}"; do
   "test_$t" || fail=1

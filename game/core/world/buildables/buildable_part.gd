@@ -18,10 +18,15 @@ func _ready() -> void:
 	super()
 	prompt = "pick up the %s" % def.part_name(part).to_lower()
 	hold_time = 0.4
-	use_radius = 1.8
+	use_radius = 2.0
 	ping_label = "%s part" % def.display_name
 	_build_model()
 	refresh()
+
+
+# The part floats at chest height (the host's distance check measures from the eye).
+func focus_point() -> Vector3:
+	return global_position + Vector3.UP * 0.9
 
 
 func is_here() -> bool:
