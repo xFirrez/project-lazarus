@@ -11,7 +11,7 @@ extends Node
 
 signal requeue_requested(sim: ZombieSim, reason: String)
 
-const PATH_TIME_CAP_USEC: int = 900
+const PATH_TIME_CAP_USEC: int = 400
 const LOD_NEAR: float = 20.0
 const LOD_FAR: float = 40.0
 const THINK_RATES: PackedFloat32Array = [0.1, 0.25, 0.5]

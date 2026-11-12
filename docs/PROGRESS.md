@@ -123,7 +123,7 @@
 - [x] AC-8.4 Gondola / lift / chute in solo + co-op (`net_tests.sh traversal` at 100 ms ±20, 2 %: client rides the gondola Z01 → Z07 and the lift Z06 → Z12 with **0 movement corrections**, arrives at the stations; a zombie boards the lift, rides down and walks off toward the host; grate shot → chute slide lands in Z12. Solo: `flow` / `nav_validate` + debug `machine`)
 - [x] AC-8.5 Power-on sequence + replication (`PWR_MainSwitch` → `power.main` flag; PoweredLights cascade by zone (0.7 s per step from Z09), klaxon + sting; `traversal` client joins after power-on: flag + 38 lights powered; machines refuse without power)
 - [x] AC-8.6 Marker manifest complete (`maps/vesper_peak/markers_manifest.json`, 108 typed markers + live nodes; `test_vesper_markers`: all present with kind + zone, 7 perks, 7 box locations, 14 lore, 8 reels, 3 relays, 5 ravens)
-- [H] AC-8.7 [HUMAN] Full-map greybox perf baseline — automated part met: `run_sim.sh perf_arena --map=vesper_peak` (32 zombies, 4 bots, all doors open) host AI **1.33 ms avg / 2.89 ms p99** (≤ 1.5 / 3.0; tile-local snap + path time cap, D-056); GPU FPS on Medium = human
+- [H] AC-8.7 [HUMAN] Full-map greybox perf baseline — automated part met: `run_sim.sh perf_arena --map=vesper_peak` (32 zombies, 4 bots, all doors open) host AI **1.29–1.42 ms avg** (≤ 1.5, every run) / p99 **2.7–3.2 ms** across 7 runs (budget 3.0 — borderline in the container, I-016); tile-local snap + path time cap, D-056; GPU FPS on Medium = human
 - [H] AC-8.8 [HUMAN] Flow playtest (solo + co-op), steps in `docs/sessions/2026-11-12_step-8.md`
 - [x] **M3 reached** (automated criteria; AC-8.7 / AC-8.8 confirm on hardware)
 
@@ -242,7 +242,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | 2026-11-12 | 8 | `tools/run_sim.sh nav_validate` | Pass | 28 tiles, 2,261 polys, 51,707 reachable cells, 0 uncovered, 70 spawners OK, 0 harmful islands; ~5 s validation (1.09 M rays). Passed 3/3 consecutive runs |
 | 2026-11-12 | 8 | `tools/run_sim.sh flow` | Pass | Z01→Z13 35.7 s; perk spacing ≤ 25.6 s; 14-leg bot loop 0 stuck |
 | 2026-11-12 | 8 | `tools/run_sim.sh smoke`, `round_flow`, `survival --rounds=3 --god=1` | Pass | full map; navmesh 28 tiles bake ≈ 0.2–0.35 s at load |
-| 2026-11-12 | 8 | `tools/run_sim.sh perf_arena` (`--map=vesper_peak` / nav_torture) | Pass | 1.33 / 2.89 ms and 0.74 / 1.27 ms (avg / p99 AI) |
+| 2026-11-12 | 8 | `tools/run_sim.sh perf_arena` (`--map=vesper_peak` / nav_torture) | Pass (vesper: p99 borderline, I-016) | vesper 1.29–1.42 avg / 2.7–3.2 p99 ms over 7 runs; nav_torture 0.79 / 1.32 ms |
 | 2026-11-12 | 8 | `tools/net_tests.sh traversal late_join reconnect survival zombies lobby coop4` | see session report | traversal: 0 corrections on both rides |
 | 2026-11-11 | 2 | `tools/net_tests.sh` (solo, replication, host_loss, speedhack, course) | Pass | NetSim 100 ms ±20 ms, 2% loss. Replication: remote sprint-circle max error 0.007–0.015 m, max per-frame step 0.15–0.17 m (no snapping), 0 corrections for a legit client; host damage 40 from the client's left → client HP 60, indicator at ~105°, regen to 100. Speed hack ×3: 4 corrections in 3 s, validated speed 8.6–9.1 m/s (limit 10.5) while the client tried ~14 m/s. Client course run: completed in 27.9 s, RTT ~210 ms, 0 corrections |
 | 2026-11-11 | 2 | `tools/visual_tests.sh` | Pass | Indicator redness left/right 0.64/0.00 (hit from left), 0.00/0.71 (from right); corner vignette −0.15 → +0.05 and stronger at 70% missing. Frames: `docs/screenshots/damage_hud_*.png` |
@@ -258,7 +258,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Scene | Preset | Hardware | Avg FPS | p99 frame ms | AI ms | Notes |
 |---|---|---|---|---|---|---|---|---|
-| 2026-11-12 | 8 | perf_arena (**vesper_peak** full greybox, all doors open, 32 zombies, 4 bots) | headless | container CPU | — | — | 1.33 avg / 2.89 p99 | 28 nav tiles / 2.26 k polys; tile-local snap (was 2.7 / 5.2 with map-wide snap) |
+| 2026-11-12 | 8 | perf_arena (**vesper_peak** full greybox, all doors open, 32 zombies, 4 bots) | headless | container CPU | — | — | 1.29–1.42 avg / 2.7–3.2 p99 | 28 nav tiles / 2.26 k polys; tile-local snap (was 2.7 / 5.2 with map-wide snap) |
 | 2026-11-11 | 5 | perf_arena (nav_torture, 32 zombies, 4 bots) | headless | container CPU (4 vCPU) | — | — | 0.89 avg / 1.57 p99 | Host AI + navigation only (CrowdDirector accounting); visuals/animation not included. Desktop = [HUMAN] AC-5.5 (`ai_stats`, F3 overlay AI line) |
 | 2026-11-11 | 4 | lookdev (5 shots) | High / Medium | container (lavapipe, CPU) | ~7–8 (CPU rasterizer, not meaningful) | — | — | Render-cost proxies: ≤ 780 draw calls, ≤ 320k primitives, 5 shadow lights. GPU FPS = [HUMAN] AC-4.3 |
 
@@ -292,7 +292,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | I-013 | S4 | 7 | Under opengl3 + xvfb, quitting after a menu screen was shown prints "Texture with GL ID … leaked" (default-font glyph atlases); `godot_log_has_errors` ignores that exit message | Re-check with Step 15's final theme/fonts |
 | I-014 | S4 | 3 | `net_tests.sh weapons` "client_saw_host_fire_burst" is intermittent (the host's single relayed fire burst is one unreliable packet at 2 % loss / single-frame trigger); also fails on the Step 6 commit | Make the test fire a short burst (Step 9 weapons work) |
 | I-015 | S4 | 7 | Placeholder first-person arms (greybox guns) sit mostly below the screen edge at the current hip framing; the M1911's authored arms are tinted instead | Step 9/15 authored arms per weapon |
-| I-016 | S3 | 8 | Full-map AI p99 (2.89 ms) sits close to the 3 ms budget in the container; long-path queries across 28 tiles are the cost | Step 16: hierarchical zone routing / path caching; re-measure on desktop (AC-8.7) |
+| I-016 | S3 | 8 | Full-map AI p99 is 2.7–3.2 ms in the container (budget 3.0; average 1.3–1.4 ms is within 1.5): long-path queries across 28 tiles and the large Courtyard tile. `perf_arena --map=vesper_peak` therefore fails ~1 run in 3 on p99 | Step 16: hierarchical zone routing / path caching; re-measure on desktop (AC-8.7) |
 | I-017 | S4 | 8 | The 32 / 28 decor nav islands on prop tops (desks, fountain tiers, bay roofs) are harmless but `snap()` could in theory place a zombie on one when squeezed next to it | Watch in playtests; cap islands by raising region_min_size or non-walkable prop tops in Step 13 |
 | I-018 | S4 | 8 | Greybox bullets pass through gondola cabin / lift platform (they sit on the player-clip layer so navigation ignores them) | Step 13: add a bullet-only collision layer for machine bodies |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |

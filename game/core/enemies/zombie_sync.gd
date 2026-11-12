@@ -144,7 +144,8 @@ func host_spawn_at_spawner(
 	return host_spawn(arch, tier, spawner.global_position + jitter, spawner.global_rotation.y, spawner.kind)
 
 
-# Random spawner at least SPAWN_MIN_PLAYER_DISTANCE from every player; `prefer_near` picks among
+# Random spawner at least SPAWN_MIN_PLAYER_DISTANCE from every player (in the active zones when
+# the map has a zone graph); `prefer_near` picks among
 # the 3 closest such spawners (re-queued zombies come back near the action).
 func pick_spawner(prefer_near: bool = false) -> ZombieSpawner:
 	if spawners.is_empty():
@@ -160,6 +161,14 @@ func pick_spawner(prefer_near: bool = false) -> ZombieSpawner:
 	if ok.is_empty():
 		for s: ZombieSpawner in spawners:
 			ok.append([0.0, s])
+	# Zoned maps: only spawners of the active zones (on Vesper Peak a map-wide pick lands most
+	# zombies hundreds of metres away, where they're re-queued as "far").
+	var zm: ZoneManager = Match.current.zones if Match.current != null else null
+	if zm != null:
+		var active: Array[StringName] = zm.active_zones()
+		var in_zone: Array = ok.filter(func(e: Array) -> bool: return active.has((e[1] as ZombieSpawner).zone))
+		if not in_zone.is_empty():
+			ok = in_zone
 	if prefer_near and crowd != null and crowd.is_ready() and not targets_now.is_empty():
 		# Rank by path distance (a spawner on the floor above is close in a straight line only).
 		for e: Array in ok:
