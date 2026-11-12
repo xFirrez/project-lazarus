@@ -24,13 +24,26 @@ static func ensure() -> void:
 	if _done:
 		return
 	_done = true
-	Audio.register_event(&"pu_spawn", _chime([1046.5, 1318.5, 1568.0], 0.09), &"SFX", -6.0)
-	Audio.register_event(&"pu_pickup", _chime([523.3, 659.3, 784.0, 1046.5], 0.07), &"SFX", -2.0)
-	Audio.register_event(&"pu_timer_end", _chime([784.0, 523.3], 0.12), &"UI", -6.0)
-	Audio.register_event(&"pu_nuke", _blast(), &"SFX", 0.0)
-	Audio.register_event(&"pu_carpenter", _hammer(), &"SFX", -2.0)
+	# Worker-thread synthesis (see PerkAudio.ensure): no stall at match setup.
+	Audio.track_task(WorkerThreadPool.add_task(func() -> void: _build.call_deferred(_synth())))
+
+
+static func _synth() -> Array:
+	var out: Array = [
+		[&"pu_spawn", _chime([1046.5, 1318.5, 1568.0], 0.09), &"SFX", -6.0],
+		[&"pu_pickup", _chime([523.3, 659.3, 784.0, 1046.5], 0.07), &"SFX", -2.0],
+		[&"pu_timer_end", _chime([784.0, 523.3], 0.12), &"UI", -6.0],
+		[&"pu_nuke", _blast(), &"SFX", 0.0],
+		[&"pu_carpenter", _hammer(), &"SFX", -2.0],
+	]
 	for type: StringName in SYLLABLES:
-		Audio.register_event(StringName("pu_vo_%s" % type), _voice(int(SYLLABLES[type]), type.hash()), &"VO", 0.0)
+		out.append([StringName("pu_vo_%s" % type), _voice(int(SYLLABLES[type]), type.hash()), &"VO", 0.0])
+	return out
+
+
+static func _build(events: Array) -> void:
+	for e: Array in events:
+		Audio.register_event(e[0], e[1], e[2], e[3])
 
 
 static func _chime(freqs: Array, step: float) -> AudioStreamWAV:

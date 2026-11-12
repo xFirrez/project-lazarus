@@ -1,5 +1,5 @@
 # Host side of the reconnect net test (AC-7.3) on vesper_peak at --netsim. The client gets 3210
-# points, the M14 and a (placeholder) perk; the driver SIGKILLs it; the host retains its state by
+# points, the M14 + MP40 and Pack Mule (third slot); the driver SIGKILLs it; the host retains its state by
 # player_uid; the relaunched client (same profile = same uid) gets points, weapons (with the
 # host-mirrored ammo), perk and character back, waits for the next round and respawns.
 extends "res://tests/net/autotest_base.gd"
@@ -58,7 +58,8 @@ func _run() -> void:
 	m.points.host_set(first, 3210)
 	m.points.host_add_stat(first, &"kills", 7)
 	m.weapons.host_give(first, &"m14")
-	(m.players.avatars[first] as PlayerCharacter).perks = [&"test_tonic"]
+	m.perks.host_grant(first, &"pack_mule")
+	m.weapons.host_give(first, &"mp40")  # third weapon: needs Pack Mule restored before the loadout
 	Log.info(&"autotest", "AUTOTEST GAVE client")
 	# The fast relaunch drops the stale connection on rejoin, so retain + restore can happen in one
 	# frame: observe the retention through the signal.
@@ -77,7 +78,8 @@ func _run() -> void:
 	check("stats_restored", m.points.stat(p, &"kills") == 7, m.points.stat(p, &"kills"))
 	check("old_row_dropped", not m.points.points.has(first) and m.points.summary().size() == 2)
 	check("weapons_restored", m.weapons.digest_of(p).contains("m14"), m.weapons.digest_of(p))
-	check("perks_restored", (m.players.avatars[p] as PlayerCharacter).perks == [&"test_tonic"])
+	check("perks_restored", PerkSystem._strings(m.perks.ids_of(p)) == ["pack_mule"], m.perks.ids_of(p))
+	check("third_weapon_restored", m.weapons.digest_of(p).contains("mp40"), m.weapons.digest_of(p))
 	check("character_kept", Session.character_of(p) == character, Session.character_of(p))
 	check("waits_for_next_round", m.downed.state_of(p) == DownedSystem.State.WAITING)
 	m.zombies.crowd.frozen = false

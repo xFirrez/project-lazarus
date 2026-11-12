@@ -15,14 +15,28 @@ static func ensure() -> void:
 	if _done:
 		return
 	_done = true
-	for d: PerkDefinition in PerkCatalog.all():
-		Audio.register_event(d.jingle_event(), jingle(d, 1.0, false), &"Music", -8.0)
-		Audio.register_event(d.sting_event(), jingle(d, 0.6, true), &"Music", -4.0)
-	Audio.register_event(&"perk_drink", _drink(), &"SFX", -4.0)
-	Audio.register_event(&"perk_lost", _sweep(520.0, 140.0, 0.7), &"UI", -6.0)
-	Audio.register_event(&"perk_vend", _clunk(), &"SFX", -3.0)
-	Audio.register_event(&"perk_power_on", _sweep(55.0, 110.0, 1.2), &"SFX", -10.0)
-	Audio.register_event(&"perk_vanish", _shimmer(1.4), &"SFX", -6.0)
+	# Synthesis takes ~1 s of GDScript: run it on a worker thread so match setup (and a joining
+	# client's network session) never stalls; events register on the main thread when ready.
+	var defs: Array[PerkDefinition] = PerkCatalog.all()
+	Audio.track_task(WorkerThreadPool.add_task(func() -> void: _build.call_deferred(_synth(defs))))
+
+
+static func _synth(defs: Array[PerkDefinition]) -> Array:
+	var out: Array = []
+	for d: PerkDefinition in defs:
+		out.append([d.jingle_event(), jingle(d, 1.0, false), &"Music", -8.0])
+		out.append([d.sting_event(), jingle(d, 0.6, true), &"Music", -4.0])
+	out.append([&"perk_drink", _drink(), &"SFX", -4.0])
+	out.append([&"perk_lost", _sweep(520.0, 140.0, 0.7), &"UI", -6.0])
+	out.append([&"perk_vend", _clunk(), &"SFX", -3.0])
+	out.append([&"perk_power_on", _sweep(55.0, 110.0, 1.2), &"SFX", -10.0])
+	out.append([&"perk_vanish", _shimmer(1.4), &"SFX", -6.0])
+	return out
+
+
+static func _build(events: Array) -> void:
+	for e: Array in events:
+		Audio.register_event(e[0], e[1], e[2], e[3])
 
 
 # A melody rendered note by note; `tempo` scales the beat; `sting` keeps the first 4 notes and

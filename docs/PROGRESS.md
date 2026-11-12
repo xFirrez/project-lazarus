@@ -12,10 +12,10 @@
 | Field | Value |
 |---|---|
 | Current milestone | **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
-| Next step to start | **Step 10 — Vigor Tonics & power-ups** |
+| Next step to start | **Step 11 — Power progression: Relays, Lazarus Forge, traps & hazards** |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-12 (Step 9 session) |
-| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-12 (Step 10 session) |
+| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **7 Vigor Tonic machines** (cap 4, loss on down, Second Wind solo self-revive ×3), **6 power-ups** (drops, timers, `powerup <id>`), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -33,7 +33,7 @@
 | 7 | Online co-op, lobby & player characters (→ M2) | **Complete** (AC-7.6 awaiting human) | 7A + 7B | 2026-11-12 |
 | 8 | Vesper Peak full greybox (→ M3) | **Complete** (AC-8.7 / AC-8.8 awaiting human) | 8A + 8B | 2026-11-12 |
 | 9 | Arsenal, wall-buys & Relic Box | **Complete (with deferrals)** (AC-9.7 awaiting human; authored weapon art deferred) | 9A + 9B | 2026-11-12 |
-| 10 | Vigor Tonics & power-ups | Not started | — | — |
+| 10 | Vigor Tonics & power-ups | **Complete (with deferrals)** (AC-10.5 / AC-10.6 awaiting human; authored machine models deferred) | — | 2026-11-12 |
 | 11 | Relays, Lazarus Forge, traps & hazards | Not started | 11A / 11B | — |
 | 12 | Wonder weapons & special enemies (→ M4) | Not started | 12A / 12B | — |
 | 13 | Vesper Peak art & atmosphere (→ M5) | Not started | 13A / 13B / 13C / 13D | — |
@@ -137,12 +137,12 @@
 - [H] AC-9.7 [HUMAN] Weapon + box review (steps in `docs/sessions/2026-11-12_step-9.md`)
 
 ### Step 10 — Tonics & power-ups
-- [ ] AC-10.1 Perk effects measured
-- [ ] AC-10.2 Cap, loss on down, Second Wind variants
-- [ ] AC-10.3 Drop simulation rules
-- [ ] AC-10.4 Power-ups replicate; timers agree within 100 ms
-- [ ] AC-10.5 [HUMAN] Machine visuals approved
-- [ ] AC-10.6 [HUMAN] Perks/power-ups feel impactful
+- [x] AC-10.1 Perk effects measured (`test_perks` + `run_sim.sh perks`: reload ×0.5, HP 250, fire rate ×1.33 + double hitscan damage, +7 % / 10 s sprint, hip −40 % / head +25 %, revive 2 s, third slot)
+- [x] AC-10.2 Cap, loss on down, Second Wind variants (`run_sim.sh perks`: cap 4, all perks + Pack Mule's 3rd weapon lost, 3 solo self-revives then the machine vanishes, 4th down = game over; `net_tests.sh perks`: co-op revive 2.24 s)
+- [x] AC-10.3 Drop simulation rules (`test_powerup_dropper`: rounds 1–10 avg 2.23 solo / 3.00 4p, worst round 4, no trap/Nuke drops, bag + conditions) — after the threshold tuning in *Proposed design changes*
+- [x] AC-10.4 Power-ups replicate; timers agree within 100 ms (`net_tests.sh perks`: host-time timer flag identical, client clock error median 12 ms; all 6 effects in `run_sim.sh perks`)
+- [H] AC-10.5 [HUMAN] Machine visuals approved (`docs/screenshots/step10/`, greybox+ machines)
+- [H] AC-10.6 [HUMAN] Perks/power-ups feel impactful
 
 ### Step 11 — Relays, Forge, traps, hazards
 - [ ] AC-11.1 Relay sequence + bridge + replication
@@ -207,6 +207,12 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-12 | 10 | `tools/check.sh` | Pass | 30 scripts / 166 tests (new `test_perks`: stat fold, perk data vs §8, each perk measured on the components; `test_powerup_dropper`: 30-round simulation 1p / 4p × 100 matches, trap / Nuke kills, threshold growth stop, bag, conditions, cap 4) |
+| 2026-11-12 | 10 | `tools/run_sim.sh perks` (new) | Pass | 56 checks: 7 machines on markers, power gating, Second Wind 500 without power, 3 s drink (weapon lowered), owned / cap refusals, HP 250, reload halved, 3 weapons; 3 solo self-revives (perks + 3rd weapon lost) → machine vanishes → 4th down game over; Max Ammo (mag kept), Insta-Kill one hit + 30 s timer, Double Points hit = 20, Nuke all dead in ~2 s +400 no drops, Carpenter +200 all planks, Fire Sale, bullet-kill drop at a reachable spot, none from a trap kill, expiry |
+| 2026-11-12 | 10 | `tools/net_tests.sh perks` (new) | Pass ×3 | 100 ms ±20, 2 %: co-op price 1500, client buys Quickdraw through the machine (3000 paid, drink, perk + halved reload on the client), Second Wind revive of the downed host 2.24 s, client picks Max Ammo (reserve refilled, mag kept) + Insta-Kill, identical timer flag, clock error median 12 ms, perks lost on down on both peers |
+| 2026-11-12 | 10 | `tools/net_tests.sh box reconnect late_join survival solo weapons traversal lobby` | Pass | reconnect now restores Pack Mule + the third weapon; lobby passed on re-run (teardown ENet flake like I-019) |
+| 2026-11-12 | 10 | `tools/net_tests.sh zombies` | Client FAIL (pre-existing) | `smooth_motion` max step 1.26 m — **fails identically on the Step 9 commit** (I-023) |
+| 2026-11-12 | 10 | `tools/run_tests.sh integration`, `run_sim.sh smoke round_flow` | Pass | 16 scripts / 72 tests |
 | 2026-11-12 | 9 | `tools/check.sh` | Pass | 28 scripts / 151 tests (new: `test_weapons_spec` — 23 weapons + equipment vs the spec JSON, distinct sound signatures, box pool items defined; `test_relic_box_roller` — 100,000 rolls within ±1 % of the weights (worst 0.18 pp, 21 eligible items), doll 0 % on spins 1–4 and in Fire Sales, 15 → 75 % ramp, ~15 % measured on spin 5, relocation never the same location, bad-luck bonus; `test_explosive_damage` — splash falloff, self-damage ≤ 60) |
 | 2026-11-12 | 9 | `tools/run_tests.sh integration` | Pass | 16 scripts (new `test_projectiles`: LAW direct 1500 + splash, China Lake bounces then explodes, crossbow sticks to the dummy (750 on impact, splash after 1.5 s) and to the floor; `test_equipment`: decoy pull + explosion, tripmine set off by a zombie (2 carried, 4 placed max), Ice Axe replaces the knife; `test_weapon_presentation` now covers all 23 weapons) |
 | 2026-11-12 | 9 | `tools/net_tests.sh box` (AC-9.5) | Pass | vesper_peak at 100 ms ±20, 2 %: box moved to Box_Z07 before the join → client sees Box_Z07; client spin (950) → spinner = client, host's take refused, carousel samples identical on both peers and ending on the result, client takes the AK-47; doll → refund + relocation to a different location on both peers after 4 s; Fire Sale → all 7 present, cost 10 |
@@ -304,6 +310,8 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | I-020 | S4 | 8 | coop4 / survival logs show a few "far (≈1 km path)" re-queues on Vesper Peak: some path queries return detours many times the straight distance (Godot polygon A* on large polygons; see `edge_max_length`, D-051) | Re-queue handles it (zombie respawns near players); revisit with path post-checks / hierarchical routing (Step 16, with I-016) |
 | I-021 | S4 | 9 | A Relic Box that relocates into a zone that is still locked can be unreachable until the door is bought (classic behaviour, GAME_DESIGN §10.2 is silent) | Human review (AC-9.7); option: restrict relocation to unlocked zones |
 | I-022 | S4 | 9 | Projectile bolts stuck to a zombie that dies keep following the corpse until the fuse ends; the box display floats a greybox gun (no authored models yet) | Cosmetic |
+| I-023 | S3 | 10 | `net_tests.sh zombies` client `smooth_motion` (max per-frame zombie step 1.26 m) fails on the Step 9 commit too — same environmental snapping family as I-012 | Step 16 netcode polish with I-012 |
+| I-024 | S4 | 10 | Second Wind solo self-revive: zombies ignore the downed player but don't "scatter" (GAME_DESIGN §3.3); perk machines get a collider after spawn, so zombies path through them until the next tile re-bake | Step 16 polish: a short flee goal for the crowd; bake machine footprints with the map |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
 Severity: **S1** crash / data loss / progress-blocking · **S2** major feature broken · **S3** minor feature issue / visual bug · **S4** polish.
@@ -328,7 +336,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Bots replicated to clients | Not planned | Host bots are soak-test tooling (D-041) |
 | ~~Remote-player downed / spectate animation~~ | — | Done in Step 7 (`SurvivorModel` downed_crawl / revive) |
 | Steam live test (lobby, overlay invites, P2P) | Human (AC-7.6) / Step 16 | GodotSteam GDExtension is not vendored and no Steam client exists in the container; `SteamTransport` is implemented against GodotSteam's API and unit-tested for its pure parts (D-045). Direct IP + UPnP + VPN is the always-available path |
-| Drink animation trigger, character quips / VO, character-coloured kill markers (optional), occluded-teammate outlines | Step 10 (drink) / Step 15 (VO, markers, outlines) | `SurvivorModel.play_action(&"drink")` exists; perks arrive in Step 10. Name tags render through walls meanwhile |
+| ~~Drink animation trigger~~ (done Step 10), character quips / VO, character-coloured kill markers (optional), occluded-teammate outlines | Step 10 (drink) / Step 15 (VO, markers, outlines) | `SurvivorModel.play_action(&"drink")` exists; perks arrive in Step 10. Name tags render through walls meanwhile |
 | Host bots in the lobby roster | Not planned | Bots are test tooling (D-041); they use a slot-based character |
 | ~~Full `ProjectileBehavior` (launchers, crossbow)~~ | — | Done in Step 9 (`Projectile`, D-057); the Ray Pistol uses it in Step 12 |
 | Authored viewmodel/world models + arms for the 22 non-M1911 weapons (Step 9 scope 2 "final art") | Step 13 (art pass) / Step 16 (known gap) | Step 9 used the plan's risk fallback **"greybox+"**: 8 class silhouettes in `GreyboxGun` (pistol, smg, rifle, shotgun, lmg, launcher, crossbow, scoped rifle) with per-weapon colour / proportions, code-built clips from per-weapon timings, all with Sight/Muzzle/Mag/Action markers so an authored GLB drops in via `viewmodel_scene` / `world_scene`. Asset strategy per weapon: scripted Blender model (`tools/blender/`, like the M1911) — none provided by a human yet |
@@ -336,14 +344,18 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Explicit LOD meshes / HLOD | Step 13 | Importer auto-LOD on every mesh now (`meshes/generate_lods`); HLOD/visibility ranges for the full map in 13D |
 | Zombie animation set beyond 12 clips (3 walks, 2 jogs, lunge, rise, vent drop, electrocuted …, ARCHITECTURE §11.3) | Step 12 / 13 | Step 5 drives all 12 clips through the AnimationTree; rise = model rising from below the floor, vent = crawl clip, drop = falling pose, stagger = stomach react. More clips extend `build_zombie.py` or import CC0/Mixamo through the BoneMap |
 | Recorded weapon audio | Step 15 | Synthesized per-weapon placeholders (`WeaponAudio`), distinct per weapon, now with interior/exterior tails (roof ray); box music-box melody / chimes / doll laugh are original synthesized placeholders (`RelicBoxAudio`) |
-| ~~Tactical / placeable slots~~, Pack Mule third slot | Step 10 | Tactical (decoy) + placeable (tripmines) + melee upgrade done in Step 9 (D-059); Pack Mule's third slot is Step 10 |
+| ~~Tactical / placeable slots~~, ~~Pack Mule third slot~~ | — | Tactical (decoy) + placeable (tripmines) + melee upgrade done in Step 9 (D-059); Pack Mule's third slot is Step 10 |
 | Wall-buy "weapon appears on the rack once bought" (VESPER_PEAK §5.1) and the wall-buy pickup animation beyond the draw clip | Step 13 / 15 | Stencil-on-canvas tarp + crate are in; the bought weapon raises with its draw clip |
-| Box Fire Sale *power-up* | Step 10 | `RelicBoxSystem.activate_all_locations(duration)` + `firesale` command are ready for the power-up |
+| ~~Box Fire Sale *power-up*~~ | — | Done in Step 10 (PowerUpSystem) |
+| Authored perk machine models (Step 10 scope 2 "final-quality models") and an animated first-person hand on the bottle | Step 13 (art pass) | Step 10 uses the **greybox+** path like Step 9: procedural machines (`PerkMachine._build_visual`) with a unique silhouette piece per perk (keg, bolts, double barrels, runner, cross, dial, mule), neon outline + sign + light in the perk colour, bottle window idle bob, vend drop, power-off state; the drink is a bottle tilted in the viewmodel. An authored GLB replaces `_build_visual` |
+| Final jingles / stingers / announcer VO | Step 15 | Original placeholder melodies per perk (`PerkAudio`) and a formant "voice" per power-up (`PowerUpAudio`) under the final event names |
 
 ## Proposed design changes (awaiting human decision)
 
 | Date | Proposed by (step) | Change | Rationale | Decision |
 |---|---|---|---|---|
+| 2026-11-12 | 10 | Power-up drop threshold **2000 ×1.14 → 600 ×1.06** per drop (growth still stops after round 20; max 4 / round; data in `content/powerups/powerup_rules.tres`) | The literal §11 numbers give ~1 drop per round (simulated 30 rounds, 1p and 4p) — contradicting §11's own target "about 4 drops per round early" and AC-10.3 (2–4). 600 / ×1.06 gives 2.2 (solo) / 3.0 (4p) per round in rounds 1–10 and ~2.9 later | Agent decision (tuning log; revisit in the AC-10.6 playtest) |
+| 2026-11-12 | 10 | Perk rules not in §8: perk granted when the 3 s drink ends (downed mid-drink = lost, no refund); Pack Mule loss drops the **last-acquired** weapon; Second Wind self-revive takes 5 s (§3.3) and its 3 uses are per match (the machine vanishes after the 3rd *use*); free-perk crates ignore the cap; Bullseye snap = nearest visible head within 8° / 35 m; Quickdraw also speeds ADS; Insta-Kill doesn't apply to debug kills | §8 / §11 give effects, not edge rules | Agent decision |
 | 2026-11-12 | 9 | Launcher / crossbow "damage + splash X (r)" read as: direct-hit damage to the zombie struck + splash X at the centre falling linearly to 0 at r; China Lake grenades explode on zombie contact or after 2.5 s; tripmines trigger on a zombie within 2 m in front (players never trigger), 1 s arming, 0.25 s beep; Drummer Decoy pulls by path distance ≤ 25 m for 8 s (`attract_time` = fuse) | GDD §4.3 gives the numbers, not the rules | Agent decision (data in the .tres) |
 | 2026-11-12 | 9 | Tripmines and the Ice Axe are bought once (wall prompt shows "owned"); tripmines refill to 2 at each round start | §4.3 says "2 per round (refills)"; re-buying a refill makes no sense | Agent decision |
 | 2026-11-12 | 6 | GDD §5.2 says solo round 15 = 75 zombies; its formula gives 90. Data follows the formula | Formula is the spec; the example looks like a typo | Agent decision (tuning log) |
@@ -370,6 +382,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Step 7 | AC-7.5 visual review: survivors' third-person poses per weapon class (`docs/screenshots/step7/`, or watch a friend in co-op) and first-person sleeves | Open |
 | Step 9 | **AC-9.7** weapon + Relic Box review (steps in `docs/sessions/2026-11-12_step-9.md`); optionally provide/approve weapon models (or approve scripted Blender models in Step 13) | Open |
 | Step 8 | **AC-8.7** GPU FPS on Medium on the minimum spec with 32 zombies + 4 bots on the full greybox, and **AC-8.8** greybox flow playtest solo + co-op (steps in `docs/sessions/2026-11-12_step-8.md`) | Open |
+| Step 10 | **AC-10.5** machine visual review (`docs/screenshots/step10/` or in game) and **AC-10.6** solo playtest (steps in `docs/sessions/2026-11-12_step-10.md`); decide on the drop-threshold tuning | Open |
 | Step 13 | Optional: LightmapGI bakes on a desktop GPU | Open |
 | Step 15 | Provide or approve music (jingles, EE song), VO approach (recorded vs. TTS), and fonts | Open |
 | Any | Monitor Git LFS storage/bandwidth quota | Recurring |
@@ -397,4 +410,5 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 | 2026-11-12 | 6 | Survival loop → M1: RoundCurve, RoundDirector, SpawnDirector (zones, fairness), ZoneManager, PointsLedger, Interactable framework (doors, wall-buys, barricade rebuild), DownedSystem (last stand, revive, bleedout, spectate, respawn, game over), HUD v1, game-over screen, round stings, M14 + Coachgun, Vesper Peak Arrival Station slice, SurvivalBots, unit/sim/net tests | [2026-11-12_step-6.md](sessions/2026-11-12_step-6.md) |
 | 2026-11-12 | 7 | Online co-op → M2: Session autoload + LobbyState (unique characters, ready, chat, host settings, countdown), main menu v1 / map select / settings, scene-ready gate, MatchSession (late join WAITING + points, reconnect by uid incl. stale-connection replacement, match flags, state-hash convergence, bandwidth), UPnP + SteamTransport (GodotSteam, dynamic) + NETWORKING.md, CharacterDefinition ×4, survivor models + 18-clip survivor animation library (bpy), SurvivorModel AnimationTree, tinted first-person arms, name tags, pings, lobby / late_join / reconnect / coop4 net tests (D-045…D-050) | [2026-11-12_step-7.md](sessions/2026-11-12_step-7.md) |
 | 2026-11-12 | 9 | Arsenal, wall-buys & Relic Box (9A + 9B): ProjectileBehavior + deterministic `Projectile` (rocket / bouncing grenade / sticky bolt), one splash path with self-damage, 17 new weapons (23 total) from a spec table + generator, greybox+ class models, interior tails, all 10 wall-buys (stencil-on-canvas), Drummer Decoy (zombie attractors), tripmines, Ice Axe, Relic Box (roller, 7 locations, carousel, doll relocation, Fire Sale API, audio set), box/firesale console commands, spec / roller / projectile / equipment / box tests (D-057…D-061) | [2026-11-12_step-9.md](sessions/2026-11-12_step-9.md) |
+| 2026-11-12 | 10 | Vigor Tonics & power-ups: StatModifier / PlayerStats / PerkDefinition ×7 / PerkHolder, PerkSystem (purchase → 3 s drink → grant, cap 4, power, loss on down, Second Wind solo self-revive ×3 / co-op 2 s revive, Pack Mule 3rd slot, free perk crate), greybox+ PerkMachines, first-person bottle drink, perk jingles / stingers, bottle-cap HUD; PowerUpDropper (scored threshold + bag) and PowerUpSystem (6 power-ups + Free Upgrade stub, navmesh-reachable drops, host-time timers, Nuke / Carpenter / Fire Sale / Insta-Kill / Double Points / Max Ammo), drop visuals, announcer placeholders, HUD timers + flash; perk/powerup console commands; unit / sim / net / visual tests (D-062…D-065) | [2026-11-12_step-10.md](sessions/2026-11-12_step-10.md) |
 | 2026-11-12 | 8 | Vesper Peak full greybox → M3: 12 zone scenes (VesperZone builders, kit materials), 14 doors (17,000), 70 spawners (windows, risers, vents, drops, climbs, bursts, pit rifts), NavTiles (28 tiles), power switch + PoweredLight cascade, gondola / freight lift (zombies ride) / laundry chute / Reactor Bridge, 108 typed markers + manifest, nav_validate + flow sims, traversal net test, minimap + map console, tile-local zombie snap (D-051…D-056) | [2026-11-12_step-8.md](sessions/2026-11-12_step-8.md) |

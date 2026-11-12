@@ -161,7 +161,7 @@ func _apply_power(on: bool) -> void:
 		_light.visible = on
 	if _sign != null:
 		_sign.modulate = (definition().color if definition() != null else Color.WHITE) if on else Color(0.2, 0.2, 0.2)
-	if on and is_inside_tree() and visible and Match.current != null:
+	if on and _t > 0.0 and is_inside_tree() and visible:  # not for the initial state
 		Audio.play_event_3d(&"perk_power_on", global_position)
 
 

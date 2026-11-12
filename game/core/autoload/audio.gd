@@ -12,6 +12,7 @@ const MUFFLE_CLOSED_HZ: float = 900.0
 
 var muffle_amount: float = 0.0
 
+var _tasks: Array[int] = []
 var _events: Dictionary = {}  # StringName -> {stream, bus, volume_db}
 var _warned: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
@@ -60,6 +61,18 @@ func bus_names() -> PackedStringArray:
 	for i: int in AudioServer.bus_count:
 		names.append(AudioServer.get_bus_name(i))
 	return names
+
+
+# Background synthesis jobs (WorkerThreadPool task ids, e.g. PerkAudio / PowerUpAudio) are waited
+# for at shutdown so no worker outlives the engine.
+func track_task(task_id: int) -> void:
+	_tasks.append(task_id)
+
+
+func wait_for_synthesis() -> void:
+	for t: int in _tasks:
+		WorkerThreadPool.wait_for_task_completion(t)
+	_tasks.clear()
 
 
 func register_event(event: StringName, stream: AudioStream, bus: StringName, volume_db: float = 0.0) -> void:
@@ -183,6 +196,7 @@ func _exit_tree() -> void:
 # sound was started, otherwise the mixer still holds the playback and it is reported as leaked.
 func shutdown() -> void:
 	_shut_down = true
+	wait_for_synthesis()
 	for p: AudioStreamPlayer in _players:
 		p.stop()
 		p.stream = null
