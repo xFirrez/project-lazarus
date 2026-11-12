@@ -246,7 +246,7 @@ func host_give(peer_id: int, weapon_id: StringName) -> bool:
 		return _host_give_equipment(peer_id, lo, def)
 	var ids: Array = lo["ids"]
 	if not ids.has(weapon_id):
-		if ids.size() >= PRIMARY_SLOTS:
+		if ids.size() >= slots_for(peer_id):
 			var idx: int = maxi(ids.find(lo["current"]), 0)
 			validator.take(peer_id, StringName(ids[idx]))
 			ids[idx] = weapon_id
@@ -287,6 +287,65 @@ func host_owns(peer_id: int, weapon_id: StringName) -> bool:
 		return true
 	var def: WeaponDefinition = WeaponCatalog.get_def(weapon_id)
 	return StringName(lo.get("tactical", &"")) == weapon_id and def != null and int(lo.get("tac_n", 0)) >= def.carry_max
+
+
+# Primary weapon slots of a player: 2, +1 with Pack Mule Cream Soda (PlayerStats.WEAPON_SLOTS).
+func slots_for(peer_id: int) -> int:
+	var st: PlayerStats = stats_of(peer_id)
+	return PRIMARY_SLOTS + (int(st.value(PlayerStats.WEAPON_SLOTS, 0.0)) if st != null else 0)
+
+
+func stats_of(peer_id: int) -> PlayerStats:
+	if players == null or not players.avatars.has(peer_id):
+		return null
+	return (players.avatars[peer_id] as PlayerCharacter).stats()
+
+
+# Pack Mule lost (downed, GAME_DESIGN §8): weapons beyond the slot count — the third one — go.
+# The weapon in last stand (the pistol) is kept if possible.
+func host_trim_to_slots(peer_id: int) -> void:
+	if not loadouts.has(peer_id):
+		return
+	var lo: Dictionary = loadouts[peer_id]
+	var ids: Array = lo["ids"]
+	var keep: int = slots_for(peer_id)
+	var changed: bool = false
+	while ids.size() > keep:
+		var drop: StringName = StringName(ids[ids.size() - 1])
+		ids.remove_at(ids.size() - 1)
+		validator.take(peer_id, drop)
+		changed = true
+		if StringName(lo["current"]) == drop:
+			lo["current"] = StringName(ids[0]) if not ids.is_empty() else &""
+		if StringName(lo.get("pre_down", &"")) == drop:
+			lo["pre_down"] = StringName(ids[0]) if not ids.is_empty() else &""
+	if changed:
+		_broadcast_loadout(peer_id)
+
+
+# Max Ammo power-up (GAME_DESIGN §11): every weapon's reserve to max (magazines untouched) and
+# lethals to the carry max, for downed players too. The owner keeps its magazine (mag -1).
+func host_max_ammo(peer_id: int) -> void:
+	if not loadouts.has(peer_id):
+		_loadout(peer_id)
+	var lo: Dictionary = loadouts[peer_id]
+	for wid: Variant in lo["ids"]:
+		var def: WeaponDefinition = WeaponCatalog.get_def(StringName(wid))
+		if def == null:
+			continue
+		var a: Array = validator.ammo(peer_id, def.id)
+		validator.give(peer_id, def, int(a[0]), def.reserve_max)
+		_send_to(peer_id, &"_wammo", [String(def.id), -1, def.reserve_max])
+	var frag: WeaponDefinition = WeaponCatalog.get_def(WeaponController.FRAG_ID)
+	if frag != null:
+		lo["lethal"] = frag.carry_max
+	var tac: WeaponDefinition = WeaponCatalog.get_def(StringName(lo.get("tactical", &"")))
+	if tac != null:
+		lo["tac_n"] = tac.carry_max
+	var mine: WeaponDefinition = WeaponCatalog.get_def(StringName(lo.get("placeable", &"")))
+	if mine != null:
+		lo["place_n"] = mine.carry_max
+	_broadcast_loadout(peer_id)
 
 
 func host_refill(peer_id: int) -> void:
@@ -427,7 +486,7 @@ func host_import(peer_id: int, data: Dictionary) -> void:
 	var ids: Array = []
 	for wid: Variant in data.get("ids", []):
 		var def: WeaponDefinition = WeaponCatalog.get_def(StringName(String(wid)))
-		if def == null or ids.size() >= PRIMARY_SLOTS:
+		if def == null or ids.size() >= slots_for(peer_id):
 			continue
 		ids.append(def.id)
 		var a: Array = (data.get("ammo", {}) as Dictionary).get(String(wid), [def.mag_size, def.reserve_max])
@@ -589,12 +648,27 @@ func _host_process_shot(peer_id: int, claim: Array) -> void:
 				DamageModel.bullet_damage(def, dist, zone, int(hit[3]))
 				* pow(Ballistics.PROP_PENETRATION_FACTOR, int(hit[4]))
 			)
+		amount *= perk_damage_factor(peer_id, def, zone)
 		var info: DamageInfo = DamageInfo.make(amount, zone, kind, def.id, peer_id)
 		info.distance = dist
 		info.target_index = int(hit[3])
 		targets.host_damage(t, info)
 		if not t.alive:
 			killed.append(t)
+
+
+# Perk damage (host): Twin-Fire fires every hitscan bullet twice (×2, ammo once; projectile /
+# melee weapons get the fire rate only); Bullseye adds +25 % to headshots (GAME_DESIGN §8).
+func perk_damage_factor(peer_id: int, def: WeaponDefinition, zone: int) -> float:
+	var st: PlayerStats = stats_of(peer_id)
+	if st == null or def.is_melee():
+		return 1.0
+	var f: float = 1.0
+	if def.behavior != &"projectile" and st.flag(PlayerStats.DOUBLE_TAP):
+		f *= 2.0
+	if zone == WeaponDefinition.Hitzone.HEAD:
+		f *= st.value(PlayerStats.HEADSHOT_BONUS, 1.0)
+	return f
 
 
 func _is_host_bot(peer_id: int) -> bool:

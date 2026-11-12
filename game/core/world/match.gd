@@ -1,8 +1,8 @@
 # Match — per-match root: instances the map scene and the per-match systems (ARCHITECTURE §4.1):
 # MatchSession (late join / reconnect / scene-ready gate / state hash), PlayerSync, TargetRegistry,
 # WeaponSync, WeaponFx, WorldSync, ZombieSync + CrowdDirector, ZoneManager, PointsLedger,
-# InteractionSystem, DownedSystem, RoundDirector, SpawnDirector, the map's MapRules, PingSystem
-# and the match HUD. Reachable via Match.current.
+# InteractionSystem, RelicBoxSystem, PerkSystem, DownedSystem, RoundDirector, SpawnDirector,
+# PowerUpSystem, the map's MapRules, PingSystem and the match HUD. Reachable via Match.current.
 # Authority: exists on every peer; host-only systems check Net.is_host().
 class_name Match
 extends Node
@@ -28,6 +28,8 @@ var hud: MatchHud = null
 var session: MatchSession = null
 var pings: PingSystem = null
 var box: RelicBoxSystem = null
+var perks: PerkSystem = null
+var powerups: PowerUpSystem = null
 var session_joined_at: float = -1.0  # client: Net.now() at the session welcome (join timing)
 
 
@@ -93,6 +95,11 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	box.match_node = self
 	box.setup(def, map_root)
 	add_child(box)
+	# Vigor Tonic machines stand on the perk markers (interactables too: before the scan).
+	perks = PerkSystem.new()
+	perks.match_node = self
+	perks.setup(map_root)
+	add_child(perks)
 	interaction = InteractionSystem.new()
 	interaction.players = players
 	interaction.ledger = points
@@ -103,6 +110,7 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	downed.ledger = points
 	downed.weapons = weapons
 	downed.interaction = interaction
+	downed.perks = perks
 	add_child(downed)
 	rounds = RoundDirector.new()
 	rounds.curve = def.round_curve if def.round_curve != null else RoundCurve.new()
@@ -120,6 +128,9 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 		spawns.players = players
 		spawns.curve = rounds.curve
 		add_child(spawns)
+	powerups = PowerUpSystem.new()
+	powerups.match_node = self
+	add_child(powerups)
 	pings = PingSystem.new()
 	pings.match_node = self
 	add_child(pings)

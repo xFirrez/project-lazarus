@@ -17,6 +17,8 @@ const KNIFE_ID: StringName = &"knife"
 const FRAG_ID: StringName = &"frag"
 const DEFAULT_LOADOUT: Array[StringName] = [&"m1911"]
 const LUNGE_TIME: float = 0.15
+const SNAP_CONE_DEG: float = 8.0  # Bullseye Bitters ADS head snap cone / range
+const SNAP_RANGE: float = 35.0
 
 var player: PlayerCharacter = null
 var inventory: WeaponInventory = WeaponInventory.new()
@@ -36,7 +38,18 @@ var tactical_def: WeaponDefinition = null
 var tactical_count: int = 0
 var placeable_def: WeaponDefinition = null
 var placeable_count: int = 0
+# Vigor Tonic drink (Step 10): weapon lowered, a bottle in the viewmodel, no firing for DRINK_TIME.
+var drinking_def: PerkDefinition = null
+var drink_left: float = 0.0
+var drinks: int = 0
+var aim_snaps: int = 0  # Bullseye Bitters ADS head snaps (tests)
 var _equip_seq: int = 0
+var _drink_total: float = 0.0
+var _drink_bottle: Node3D = null
+var _aim_was: bool = false
+var _snap_left: float = 0.0
+var _snap_yaw: float = 0.0
+var _snap_pitch: float = 0.0
 
 var _shot_seq: int = 0
 var _throw_seq: int = 0
@@ -169,7 +182,8 @@ func apply_equipment(
 func set_ammo(weapon_id: StringName, mag: int, reserve: int) -> void:
 	var idx: int = inventory.slot_of(weapon_id)
 	if idx >= 0:
-		inventory.slots[idx].mag = mag
+		if mag >= 0:  # -1 = keep the magazine (Max Ammo)
+			inventory.slots[idx].mag = mag
 		inventory.slots[idx].reserve = reserve
 
 
@@ -183,6 +197,12 @@ func set_infinite_ammo(on: bool) -> void:
 
 func physics_step(f: PlayerInputFrame, dt: float) -> void:
 	var h: WeaponRuntime = held()
+	apply_stats()
+	if drink_left > 0.0:
+		_update_drink(dt)
+		inventory.update()
+		return
+	_update_aim_snap(f, dt)
 	if f.switch_slot >= 0:
 		inventory.switch_to(f.switch_slot)
 	elif f.switch_delta != 0:
@@ -205,6 +225,138 @@ func physics_step(f: PlayerInputFrame, dt: float) -> void:
 			_fire_shot(h)
 	inventory.update()
 	_update_recoil_recovery(dt)
+
+
+# Perk stats (PlayerStats) onto every held runtime and the slot count (Quickdraw, Twin-Fire,
+# Bullseye, Pack Mule). Cheap: a few dictionary lookups per tick.
+func apply_stats() -> void:
+	if player == null:
+		return
+	var st: PlayerStats = player.stats()
+	var speed: float = st.value(PlayerStats.RELOAD_SPEED, 1.0)
+	var rate: float = st.value(PlayerStats.FIRE_RATE, 1.0)
+	var hip: float = st.value(PlayerStats.HIP_SPREAD, 1.0)
+	for rt: WeaponRuntime in inventory.slots:
+		rt.speed_multiplier = speed
+		rt.rate_multiplier = rate
+		rt.hip_multiplier = hip
+	inventory.slot_count = WeaponSync.PRIMARY_SLOTS + int(st.value(PlayerStats.WEAPON_SLOTS, 0.0))
+
+
+# --- Vigor Tonic drink --------------------------------------------------------------------------
+
+
+func is_drinking() -> bool:
+	return drink_left > 0.0
+
+
+# Owner (PerkSystem `_perk_drink`): lower the weapon, show the perk's bottle for `seconds`.
+func begin_drink(def: PerkDefinition, seconds: float) -> void:
+	drinking_def = def
+	drink_left = seconds
+	_drink_total = seconds
+	drinks += 1
+	_cook_time = -1.0
+	var h: WeaponRuntime = held()
+	if h != null:
+		h.holster()
+	if viewmodel != null and viewmodel.sway_root != null:
+		if _drink_bottle != null:
+			_drink_bottle.queue_free()
+		_drink_bottle = PerkBottle.build(def, Viewmodel.LAYER)
+		_drink_bottle.scale = Vector3.ONE * 1.4
+		viewmodel.sway_root.add_child(_drink_bottle)
+		_pose_bottle(0.0)
+
+
+func cancel_drink() -> void:
+	if drink_left <= 0.0:
+		return
+	drink_left = 0.0
+	_end_drink()
+
+
+func _update_drink(dt: float) -> void:
+	drink_left = maxf(drink_left - dt, 0.0)
+	_pose_bottle(1.0 - drink_left / maxf(_drink_total, 0.01))
+	if drink_left <= 0.0:
+		_end_drink()
+
+
+func _end_drink() -> void:
+	drinking_def = null
+	if _drink_bottle != null:
+		_drink_bottle.queue_free()
+		_drink_bottle = null
+	var h: WeaponRuntime = held()
+	if h != null and not player.health.is_downed:
+		h.raise()  # raise speed follows reload_speed (Quickdraw raises faster, GAME_DESIGN §8)
+
+
+# Bottle path in viewmodel space: up from below, tilt to the mouth, drink, drop away.
+func _pose_bottle(u: float) -> void:
+	if _drink_bottle == null:
+		return
+	var up: float = smoothstep(0.0, 0.2, u)
+	var tilt: float = smoothstep(0.15, 0.35, u) * (1.0 - smoothstep(0.85, 1.0, u))
+	var down: float = smoothstep(0.85, 1.0, u)
+	_drink_bottle.position = Vector3(0.06 - 0.04 * tilt, lerpf(-0.45, -0.17, up) + 0.07 * tilt - 0.4 * down, -0.32)
+	_drink_bottle.rotation = Vector3(deg_to_rad(95.0) * tilt + sin(u * 40.0) * 0.03 * tilt, 0.0, deg_to_rad(-12.0))
+
+
+# --- Bullseye Bitters: ADS snaps to the nearest zombie head in a small cone ----------------------
+
+
+func _update_aim_snap(f: PlayerInputFrame, dt: float) -> void:
+	var snap_time: float = player.stats().value(PlayerStats.AIM_SNAP, 0.0)
+	if f.aim and not _aim_was and snap_time > 0.0:
+		var head: Vector3 = snap_target()
+		if head != Vector3.INF:
+			var dir: Vector3 = (head - eye_position()).normalized()
+			_snap_yaw = atan2(-dir.x, -dir.z)
+			_snap_pitch = asin(clampf(dir.y, -1.0, 1.0))
+			_snap_left = snap_time
+			aim_snaps += 1
+	_aim_was = f.aim
+	if _snap_left <= 0.0 or not f.aim:
+		_snap_left = 0.0
+		return
+	var k: float = clampf(dt / _snap_left, 0.0, 1.0)
+	_snap_left -= dt
+	var rig: CameraRig = player.camera_rig
+	rig.yaw = lerp_angle(rig.yaw, _snap_yaw, k)
+	rig.pitch = lerpf(rig.pitch, _snap_pitch, k)
+
+
+# Nearest visible zombie head within SNAP_CONE_DEG of the view (Vector3.INF = none).
+func snap_target() -> Vector3:
+	var zs: ZombieSync = ZombieSync.instance(player)
+	if zs == null:
+		return Vector3.INF
+	var eye: Vector3 = eye_position()
+	var fwd: Vector3 = aim_forward()
+	var best: Vector3 = Vector3.INF
+	var best_angle: float = deg_to_rad(SNAP_CONE_DEG)
+	var space: PhysicsDirectSpaceState3D = player.get_world_3d().direct_space_state
+	for a: ZombieActor in zs.actors.values():
+		if not a.alive:
+			continue
+		for hb: Hurtbox in a.hurtboxes:
+			if hb.zone != WeaponDefinition.Hitzone.HEAD:
+				continue
+			var to: Vector3 = hb.global_position - eye
+			var d: float = to.length()
+			if d > SNAP_RANGE or d < 0.5:
+				continue
+			var ang: float = fwd.angle_to(to / d)
+			if ang >= best_angle:
+				continue
+			var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(eye, hb.global_position, 1)
+			if not space.intersect_ray(q).is_empty():
+				continue
+			best_angle = ang
+			best = hb.global_position
+	return best
 
 
 func _fire_shot(h: WeaponRuntime) -> void:

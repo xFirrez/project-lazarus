@@ -3,9 +3,10 @@
 # revive by holding interact for `revive_time` (the bleedout timer pauses meanwhile; the reviver
 # can't shoot); after `bleedout_time` the player bleeds out: -10 % points, weapons lost, spectates
 # a teammate and respawns at the next round start next to the nearest living teammate with the
-# starting loadout. Everyone downed or bled out = game over on all peers (solo down = game over
-# until Second Wind exists).
-#   host -> all : `_downed` [peer, bleed_left]   `_revived` [peer, reviver]   `_bledout` [peer]
+# starting loadout. Everyone downed or bled out = game over on all peers. Going down loses every
+# perk (PerkSystem); in solo, Second Wind Seltzer turns the down into a SELF_REVIVE_TIME self-revive
+# (at most 3 per match) instead of game over; in co-op it shortens its owner's revives to 2 s.
+#   host -> all : `_downed` [peer, bleed_left, self_revive]   `_revived` [peer, reviver]   `_bledout` [peer]
 #                 `_respawned` [peer]   `_waiting` [peer]   `_revive_state` [target, reviver, progress, revive_time]
 #                 `_game_over` [round, summary rows]
 #   owner -> host: `_revive_req` [target, holding]
@@ -25,12 +26,15 @@ enum State { ALIVE, DOWNED, BLED_OUT, WAITING }
 
 const GAME_OVER_SCREEN_DELAY: float = 3.0
 const REVIVE_RANGE_SLACK: float = 0.75
+const SELF_REVIVE_TIME: float = 5.0  # Second Wind solo (GAME_DESIGN §3.3)
 
 var players: PlayerSync = null
 var ledger: PointsLedger = null
 var weapons: WeaponSync = null
 var interaction: InteractionSystem = null
+var perks: PerkSystem = null
 var states: Dictionary = {}  # peer -> State
+var self_revive: Dictionary = {}  # peer -> seconds until a Second Wind self-revive (every peer)
 var bleed_left: Dictionary = {}  # host: peer -> seconds; clients: extrapolated
 var revivers: Dictionary = {}  # target peer -> reviver peer
 var revive_progress: Dictionary = {}  # target peer -> seconds held
@@ -115,8 +119,15 @@ func progress_of(target: int) -> float:
 	return float(st[0]) + (Time.get_ticks_msec() / 1000.0 - float(st[1]))
 
 
+# Seconds a revive by `reviver` takes (2.0 with Second Wind Seltzer, else the tuning's 4.0).
 func revive_time_for(reviver: int) -> float:
-	return tuning_of(reviver).revive_time
+	var base: float = tuning_of(reviver).revive_time
+	var p: PlayerCharacter = players.avatars.get(reviver, null) if players != null else null
+	return p.stats().value(PlayerStats.REVIVE_TIME, base) if p != null else base
+
+
+func is_self_reviving(peer_id: int) -> bool:
+	return self_revive.has(peer_id)
 
 
 # --- host -----------------------------------------------------------------------------------------
@@ -127,13 +138,19 @@ func _host_on_downed(peer_id: int) -> void:
 		return
 	states[peer_id] = State.DOWNED
 	bleed_left[peer_id] = tuning_of(peer_id).bleedout_time
+	var self_rev: bool = perks != null and perks.host_take_self_revive(peer_id)
+	if self_rev:
+		self_revive[peer_id] = SELF_REVIVE_TIME
+		bleed_left[peer_id] = SELF_REVIVE_TIME
 	if ledger != null:
 		ledger.host_lose_fraction(peer_id, PointsRules.DOWN_PENALTY)
 		ledger.host_add_stat(peer_id, &"downs")
+	if perks != null:
+		perks.host_on_downed(peer_id)  # before last stand: Pack Mule's third weapon goes first
 	if weapons != null:
 		weapons.host_enter_last_stand(peer_id)
-	Net.send_reliable(0, &"_downed", [peer_id, bleed_left[peer_id]])
-	_present_downed(peer_id, float(bleed_left[peer_id]))
+	Net.send_reliable(0, &"_downed", [peer_id, bleed_left[peer_id], self_rev])
+	_present_downed(peer_id, float(bleed_left[peer_id]), self_rev)
 	player_downed.emit(peer_id)
 	_host_check_game_over()
 
@@ -170,6 +187,7 @@ func host_revive(target: int, reviver: int = 0) -> void:
 	revivers.erase(target)
 	revive_progress.erase(target)
 	bleed_left.erase(target)
+	self_revive.erase(target)
 	p.health.revive(p.tuning.revive_health_fraction)
 	players.broadcast_health(target)
 	if weapons != null:
@@ -249,7 +267,7 @@ func host_force_down(peer_id: int) -> void:
 func _host_check_game_over() -> void:
 	if is_game_over or players == null or players.avatars.is_empty():
 		return
-	if alive_count() > 0:
+	if alive_count() > 0 or not self_revive.is_empty():
 		return
 	is_game_over = true
 	var round_reached: int = 1
@@ -290,6 +308,12 @@ func _physics_process(delta: float) -> void:
 		return
 	for id: int in states.keys():
 		if state_of(id) != State.DOWNED:
+			continue
+		if self_revive.has(id):
+			self_revive[id] = float(self_revive[id]) - delta
+			bleed_left[id] = maxf(float(self_revive[id]), 0.0)
+			if float(self_revive[id]) <= 0.0:
+				host_revive(id, 0)
 			continue
 		if revivers.has(id):
 			var r: int = int(revivers[id])
@@ -359,9 +383,11 @@ func _process(_delta: float) -> void:
 # --- presentation (every peer) --------------------------------------------------------------------
 
 
-func _present_downed(peer_id: int, left: float) -> void:
+func _present_downed(peer_id: int, left: float, self_rev: bool = false) -> void:
 	states[peer_id] = State.DOWNED
 	bleed_left[peer_id] = left
+	if self_rev:
+		self_revive[peer_id] = left
 	# `_downed` is sent from inside the host's damage call, before the `_player_health` event.
 	var p: PlayerCharacter = players.avatars.get(peer_id, null)
 	if p != null and not is_authority():
@@ -373,6 +399,7 @@ func _present_downed(peer_id: int, left: float) -> void:
 func _present_revived(peer_id: int, _reviver: int) -> void:
 	states[peer_id] = State.ALIVE
 	bleed_left.erase(peer_id)
+	self_revive.erase(peer_id)
 	revivers.erase(peer_id)
 	_revive_stamp.erase(peer_id)
 	_play(peer_id, &"player_revived")
@@ -430,7 +457,7 @@ func _play(peer_id: int, event: StringName) -> void:
 
 func _on_msg_downed(sender: int, p: Array) -> void:
 	if sender == 1 and not Net.is_host():
-		_present_downed(int(p[0]), float(p[1]))
+		_present_downed(int(p[0]), float(p[1]), p.size() > 2 and bool(p[2]))
 
 
 func _on_msg_revived(sender: int, p: Array) -> void:
@@ -506,6 +533,7 @@ func _on_peer_joined(peer_id: int, _info: Dictionary) -> void:
 func _on_peer_left(peer_id: int) -> void:
 	states.erase(peer_id)
 	bleed_left.erase(peer_id)
+	self_revive.erase(peer_id)
 	revivers.erase(peer_id)
 	for t: int in revivers.keys():
 		if int(revivers[t]) == peer_id:

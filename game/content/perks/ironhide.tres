@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://core/perks/perk_definition.gd" id="1"]
+[ext_resource type="Script" path="res://core/perks/stat_modifier.gd" id="2"]
+
+[sub_resource type="Resource" id="mod_0"]
+script = ExtResource("2")
+stat = &"max_health"
+op = 0
+value = 250.0
+
+[resource]
+script = ExtResource("1")
+id = &"ironhide"
+display_name = "Ironhide Stout"
+tagline = "Max HP 100 -> 250"
+cost = 2500
+cost_coop = -1
+requires_power = true
+marker_id = &"Perk_Ironhide"
+modifiers = Array[ExtResource("2")]([SubResource("mod_0")])
+sort_order = 0
+color = Color(0.95, 0.12, 0.08, 1)
+accent = Color(0.28, 0.12, 0.1, 1)
+silhouette = 0
+cap_letter = "I"
+jingle_root_hz = 110.0
+jingle_notes = PackedInt32Array(0, 0, 7, 5, 3, 0, -2, 0)
+jingle_beats = PackedFloat32Array(1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0, 3.0)
+jingle_beat_seconds = 0.24
+jingle_wave = 1

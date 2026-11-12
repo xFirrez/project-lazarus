@@ -4,7 +4,8 @@
 class_name DamageInfo
 extends RefCounted
 
-enum Kind { BULLET, MELEE, EXPLOSIVE, DEBUG }
+# TRAP: map traps (Step 11; never drop power-ups). NUKE: the Nuke power-up's kills (no points / drops).
+enum Kind { BULLET, MELEE, EXPLOSIVE, DEBUG, TRAP, NUKE }
 
 var amount: float = 0.0
 var zone: int = WeaponDefinition.Hitzone.TORSO

@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://core/perks/perk_definition.gd" id="1"]
+[ext_resource type="Script" path="res://core/perks/stat_modifier.gd" id="2"]
+
+[sub_resource type="Resource" id="mod_0"]
+script = ExtResource("2")
+stat = &"revive_time"
+op = 0
+value = 2.0
+
+[sub_resource type="Resource" id="mod_1"]
+script = ExtResource("2")
+stat = &"self_revive"
+op = 2
+value = 1.0
+
+[resource]
+script = ExtResource("1")
+id = &"second_wind"
+display_name = "Second Wind Seltzer"
+tagline = "Solo: self-revive (3 per match). Co-op: revive in 2 s"
+cost = 500
+cost_coop = 1500
+requires_power = false
+marker_id = &"Perk_SecondWind"
+modifiers = Array[ExtResource("2")]([SubResource("mod_0"), SubResource("mod_1")])
+sort_order = 4
+color = Color(0.45, 0.8, 1, 1)
+accent = Color(0.82, 0.86, 0.9, 1)
+silhouette = 4
+cap_letter = "S"
+jingle_root_hz = 392.0
+jingle_notes = PackedInt32Array(0, 7, 4, 12, 11, 7, 9, 7)
+jingle_beats = PackedFloat32Array(1.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 3.0)
+jingle_beat_seconds = 0.26
+jingle_wave = 2

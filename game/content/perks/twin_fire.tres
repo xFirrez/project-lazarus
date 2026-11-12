@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://core/perks/perk_definition.gd" id="1"]
+[ext_resource type="Script" path="res://core/perks/stat_modifier.gd" id="2"]
+
+[sub_resource type="Resource" id="mod_0"]
+script = ExtResource("2")
+stat = &"fire_rate"
+op = 1
+value = 1.33
+
+[sub_resource type="Resource" id="mod_1"]
+script = ExtResource("2")
+stat = &"double_tap"
+op = 2
+value = 1.0
+
+[resource]
+script = ExtResource("1")
+id = &"twin_fire"
+display_name = "Twin-Fire Root Beer"
+tagline = "Fire rate x1.33, hitscan bullets fire twice"
+cost = 2000
+cost_coop = -1
+requires_power = true
+marker_id = &"Perk_TwinFire"
+modifiers = Array[ExtResource("2")]([SubResource("mod_0"), SubResource("mod_1")])
+sort_order = 2
+color = Color(1, 0.6, 0.08, 1)
+accent = Color(0.3, 0.17, 0.06, 1)
+silhouette = 2
+cap_letter = "T"
+jingle_root_hz = 196.0
+jingle_notes = PackedInt32Array(0, 0, 3, 0, 0, 5, 3, 7)
+jingle_beats = PackedFloat32Array(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 3.0)
+jingle_beat_seconds = 0.18
+jingle_wave = 1

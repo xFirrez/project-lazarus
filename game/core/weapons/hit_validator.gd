@@ -27,7 +27,12 @@ class ShooterState:
 	var credit_time: Dictionary = {}  # weapon id -> host time of last credit update
 	var last_seq: int = -1
 	var infinite_ammo: bool = false
+	var rate_multiplier: float = 1.0  # perk fire rate (Twin-Fire Root Beer)
+	var rate_grace: float = 1.0  # previous higher multiplier, honoured until rate_grace_until
+	var rate_grace_until: float = -1.0
 
+
+const RATE_GRACE: float = 1.0
 
 var states: Dictionary = {}  # peer id -> ShooterState
 var accepted_shots: int = 0
@@ -70,7 +75,7 @@ func check_shot(peer_id: int, def: WeaponDefinition, seq: int, shot_time: float,
 		return _reject(Result.NOT_OWNED, "%s not owned" % def.id)
 	if seq <= s.last_seq:
 		return _reject(Result.DUPLICATE, "seq %d <= %d" % [seq, s.last_seq])
-	var interval: float = def.melee_time if def.is_melee() else def.fire_interval()
+	var interval: float = def.melee_time if def.is_melee() else def.fire_interval() / effective_rate(s, now)
 	if shot_time > now + FUTURE_SLACK:
 		return _reject(Result.RATE, "shot time %.3f ahead of host %.3f" % [shot_time, now])
 	if s.last_shot.has(def.id):
@@ -147,6 +152,20 @@ func check_reload(peer_id: int, weapon_id: StringName, mag: int, reserve: int) -
 
 # Smallest accepted spacing of two claimed shots: owners fire on 60 Hz ticks with the sub-frame
 # remainder carried, so single gaps can be one frame shorter than 60 / RPM.
+# Perk fire-rate changes (PerkSystem). A lowered rate keeps the old one for RATE_GRACE seconds so
+# shots fired before the owner heard about the change aren't rejected.
+func set_rate_multiplier(peer_id: int, m: float, now: float) -> void:
+	var s: ShooterState = state_for(peer_id)
+	if m < s.rate_multiplier:
+		s.rate_grace = s.rate_multiplier
+		s.rate_grace_until = now + RATE_GRACE
+	s.rate_multiplier = m
+
+
+static func effective_rate(s: ShooterState, now: float) -> float:
+	return maxf(s.rate_multiplier, s.rate_grace if now < s.rate_grace_until else 0.0)
+
+
 static func min_shot_gap(interval: float) -> float:
 	return interval - maxf(interval * (1.0 - RATE_TOLERANCE), MIN_GAP_SLACK)
 

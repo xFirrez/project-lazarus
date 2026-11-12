@@ -2,8 +2,10 @@
 # (red tally strokes for rounds 1-5, then numerals; pulses on round change), round banner, own and
 # teammates' points with floating gains / deductions, interaction prompts with hold progress,
 # refusal feedback, downed / bleedout / revive progress, spectating notice and teammate downed
-# markers (screen-space, clamped to the edges when off-screen). Ammo, lethals, hit markers and the
-# damage vignette are the WeaponHud / DamageHud.
+# markers (screen-space, clamped to the edges when off-screen). Step 10: Vigor Tonic bottle caps
+# in acquisition order (bottom left, above the round), the drink progress, Second Wind self-revive,
+# active power-ups with circular countdowns (bottom centre), the announcer caption and the Nuke
+# white flash. Ammo, lethals, hit markers and the damage vignette are the WeaponHud / DamageHud.
 # Authority: local presentation, reading replicated state from the Match systems.
 class_name MatchHud
 extends Control
@@ -76,6 +78,8 @@ func _draw() -> void:
 	_draw_banner()
 	if me == null:
 		return
+	_draw_perks(me)
+	_draw_powerups()
 	_draw_prompt(me)
 	_draw_downed(me)
 	_draw_teammate_markers(me)
@@ -183,6 +187,79 @@ func _draw_prompt(me: PlayerCharacter) -> void:
 		_text_centered(y + 44.0, ia.last_denied, 22, Color(0.95, 0.25, 0.2))
 
 
+# Bottle caps (coloured disc, serrated rim, letter) in acquisition order, plus the drink bar.
+func _draw_perks(me: PlayerCharacter) -> void:
+	var ids: Array[StringName] = me.perk_holder.ids
+	var base: Vector2 = Vector2(58.0, size.y - 150.0)
+	for i: int in ids.size():
+		var d: PerkDefinition = PerkCatalog.get_def(ids[i])
+		if d == null:
+			continue
+		var c: Vector2 = base + Vector2(i * 46.0, 0.0)
+		for k: int in 21:  # crimped rim
+			var a: float = TAU * k / 21.0
+			draw_circle(c + Vector2(cos(a), sin(a)) * 19.0, 3.2, d.color.darkened(0.35))
+		draw_circle(c, 19.0, d.color)
+		draw_arc(c, 13.0, 0.0, TAU, 24, d.color.lightened(0.4), 2.0)
+		var w: float = _font.get_string_size(d.cap_letter, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+		draw_string(
+			_font, c + Vector2(-w * 0.5, 7.0), d.cap_letter, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color(0.08, 0.06, 0.05)
+		)
+	if me.weapons != null and me.weapons.is_drinking() and me.weapons.drinking_def != null:
+		var dd: PerkDefinition = me.weapons.drinking_def
+		var frac: float = 1.0 - me.weapons.drink_left / PerkSystem.DRINK_TIME
+		_text_centered(size.y * 0.5 + 170.0, dd.display_name, 20, dd.color)
+		_bar(Vector2(size.x * 0.5, size.y * 0.5 + 180.0), clampf(frac, 0.0, 1.0), dd.color)
+
+
+# Active timed power-ups (icon disc + circular countdown), the announcer caption and the flash.
+func _draw_powerups() -> void:
+	var pu: PowerUpSystem = match_node.powerups
+	if pu == null:
+		return
+	var now: float = Time.get_ticks_msec() / 1000.0
+	var active: Array[StringName] = []
+	for t: StringName in PowerUpSystem.TIMED:
+		if pu.is_active(t):
+			active.append(t)
+	var x0: float = size.x * 0.5 - (active.size() - 1) * 36.0
+	for i: int in active.size():
+		var c: Vector2 = Vector2(x0 + i * 72.0, size.y - 110.0)
+		var left: float = pu.time_left(active[i])
+		var frac: float = clampf(left / pu.rules.timed_duration, 0.0, 1.0)
+		var blink: bool = left < 5.0 and fmod(left * 3.0, 1.0) < 0.4
+		var gold: Color = PowerUpDrop.GOLD if not blink else PowerUpDrop.GOLD * Color(1, 1, 1, 0.3)
+		draw_circle(c, 26.0, Color(0, 0, 0, 0.55))
+		draw_arc(c, 28.0, -PI * 0.5, -PI * 0.5 + TAU * frac, 40, PowerUpDrop.GLOW, 4.0)
+		var label: String = _short(active[i])
+		var w: float = _font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 18).x
+		draw_string(_font, c + Vector2(-w * 0.5, 6.0), label, HORIZONTAL_ALIGNMENT_LEFT, -1, 18, gold)
+		var secs: String = "%d" % ceili(left)
+		var sw: float = _font.get_string_size(secs, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+		draw_string(_font, c + Vector2(-sw * 0.5, 44.0), secs, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(1, 1, 1, 0.8))
+	var age: float = now - pu.announce_at
+	if age < 2.5 and pu.last_announce != &"":
+		var a: float = clampf(minf(age * 4.0, (2.5 - age) * 2.0), 0.0, 1.0)
+		var text: String = String(PowerUpSystem.NAMES.get(pu.last_announce, String(pu.last_announce)))
+		_text_centered(
+			size.y * 0.2, text + "!", 44, Color(PowerUpDrop.GOLD.r, PowerUpDrop.GOLD.g, PowerUpDrop.GOLD.b, a)
+		)
+	var fa: float = now - pu.flash_at
+	if fa < PowerUpSystem.FLASH_TIME:
+		draw_rect(Rect2(Vector2.ZERO, size), Color(1, 1, 1, 0.85 * (1.0 - fa / PowerUpSystem.FLASH_TIME)))
+
+
+static func _short(t: StringName) -> String:
+	match t:
+		&"insta_kill":
+			return "IK"
+		&"double_points":
+			return "x2"
+		&"fire_sale":
+			return "SALE"
+	return "?"
+
+
 func _bar(center: Vector2, frac: float, col: Color) -> void:
 	var w: float = 220.0
 	var r: Rect2 = Rect2(center.x - w * 0.5, center.y, w, 8.0)
@@ -195,7 +272,13 @@ func _draw_downed(me: PlayerCharacter) -> void:
 	if ds == null:
 		return
 	var st: DownedSystem.State = ds.state_of(me.peer_id)
-	if st == DownedSystem.State.DOWNED:
+	if st == DownedSystem.State.DOWNED and ds.is_self_reviving(me.peer_id):
+		var sl: float = float(ds.bleed_left.get(me.peer_id, 0.0))
+		_text_centered(size.y * 0.5 - 120.0, "SECOND WIND", 40, Color(0.45, 0.8, 1.0))
+		_text_centered(size.y * 0.5 - 86.0, "back on your feet in %.0f" % ceilf(sl), 22, Color(0.85, 0.95, 1.0))
+		var f: float = 1.0 - sl / DownedSystem.SELF_REVIVE_TIME
+		_bar(Vector2(size.x * 0.5, size.y * 0.5 - 70.0), clampf(f, 0.0, 1.0), Color(0.45, 0.8, 1.0))
+	elif st == DownedSystem.State.DOWNED:
 		var left: float = float(ds.bleed_left.get(me.peer_id, 0.0))
 		_text_centered(size.y * 0.5 - 120.0, "YOU ARE DOWN", 40, RED)
 		_text_centered(size.y * 0.5 - 86.0, "bleeding out %.0f" % ceilf(left), 22, Color(1, 0.8, 0.8))

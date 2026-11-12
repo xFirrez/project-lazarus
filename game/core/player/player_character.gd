@@ -31,7 +31,8 @@ var display_name: String = ""
 var slot: int = 0
 var character_id: StringName = &""
 var character: CharacterDefinition = null
-var perks: Array = []  # Vigor Tonic ids (Step 10); retained on reconnect (MatchSession)
+var perks: Array = []  # Vigor Tonic ids in acquisition order (mirror of perk_holder.ids)
+var perk_holder: PerkHolder = PerkHolder.new()  # perks + PlayerStats (Step 10, PerkSystem)
 var model: SurvivorModel = null  # third-person model (remote puppets and host bots)
 var buffer: InterpolationBuffer = InterpolationBuffer.new()
 # Optional scripted input for bots/tests: Callable(player: PlayerCharacter, delta: float) -> PlayerInputFrame
@@ -66,6 +67,7 @@ func _ready() -> void:
 	name = "Player_%d" % peer_id
 	collision.shape = (collision.shape as CapsuleShape3D).duplicate() as CapsuleShape3D
 	motor.setup(self, collision, tuning)
+	motor.stats = perk_holder.stats
 	camera_rig.setup(self, motor, tuning, camera)
 	camera_rig.yaw = rotation.y
 	health.setup(tuning)
@@ -104,6 +106,22 @@ func _ready() -> void:
 	weapons = WeaponController.new()
 	add_child(weapons)
 	weapons.setup(self)
+
+
+# Every peer (PerkSystem): the host's perk list for this player. Max health follows the stats
+# (Ironhide); current health is clamped, never raised (regeneration fills it).
+func apply_perks(ids: Array) -> void:
+	perk_holder.set_ids(ids)
+	perks = perk_holder.ids.duplicate()
+	var max_hp: float = perk_holder.stats.value(PlayerStats.MAX_HEALTH, tuning.max_health)
+	if not is_equal_approx(max_hp, health.max_health):
+		health.max_health = max_hp
+		health.health = minf(health.health, max_hp)
+		health.health_changed.emit(health.health, health.max_health)
+
+
+func stats() -> PlayerStats:
+	return perk_holder.stats
 
 
 # Identification colour (HUD points list, name tag, pings, markers).

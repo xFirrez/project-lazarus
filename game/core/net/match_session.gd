@@ -137,7 +137,8 @@ func state_digest() -> PackedStringArray:
 	for id: int in Net.peer_ids():
 		var pts: int = m.points.get_points(id) if m.points != null else 0
 		var w: String = m.weapons.mirror_digest_of(id) if m.weapons != null else "-"
-		lines.append("player.%s=%d|%s|perks:" % [_uid_of(id), pts, w])
+		var pk: String = m.perks.digest_of(id) if m.perks != null else ""
+		lines.append("player.%s=%d|%s|perks:%s" % [_uid_of(id), pts, w, pk])
 	if m.zombies != null:
 		lines.append("zombies=%d" % m.zombies.alive_count())
 	lines.sort()
@@ -226,7 +227,7 @@ func _capture(peer_id: int) -> void:
 		"points": m.points.get_points(peer_id),
 		"stats": m.points.stats_of(peer_id),
 		"loadout": m.weapons.host_export(peer_id),
-		"perks": [] if was_downed else avatar.perks.duplicate(),  # Step 10 fills perks
+		"perks": [] if was_downed or m.perks == null else PerkSystem._strings(m.perks.ids_of(peer_id)),
 		"downed": was_downed,
 	}
 	player_retained.emit(uid, retained[uid])
@@ -241,9 +242,10 @@ func _restore(peer_id: int, uid: String) -> void:
 	var rec: Dictionary = retained[uid]
 	retained.erase(uid)
 	m.points.host_transfer(int(rec["peer"]), peer_id, int(rec["points"]), rec["stats"] as Dictionary)
+	# Perks first: Pack Mule's third slot must exist before the loadout is imported.
+	if m.perks != null:
+		m.perks.host_set_perks(peer_id, rec["perks"] as Array)
 	m.weapons.host_import(peer_id, rec["loadout"] as Dictionary)
-	var avatar: PlayerCharacter = m.players.avatars[peer_id]
-	avatar.perks = (rec["perks"] as Array).duplicate()
 	Log.info(&"session", "Restored %s (uid %s) as peer %d" % [rec["name"], uid.substr(0, 8), peer_id])
 	player_restored.emit(peer_id, uid)
 

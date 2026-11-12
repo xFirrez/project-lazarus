@@ -35,6 +35,7 @@ var current_height: float = 1.8
 var last_floor_y: float = 0.0
 var wish_dir: Vector3 = Vector3.ZERO
 var weapon_speed_multiplier: float = 1.0  # held weapon's move speed (WeaponDefinition)
+var stats: PlayerStats = null  # perk modifiers (Marathon Malt: move speed, sprint duration/recharge)
 var downed: bool = false  # last stand: crawl only (PlayerCharacter filters the input)
 
 var _lunge_velocity: Vector3 = Vector3.ZERO
@@ -164,8 +165,10 @@ func _update_sprint(f: PlayerInputFrame, delta: float, on_floor: bool) -> void:
 	var want: bool = (
 		f.sprint and forward_enough and not f.aim and not f.fire and stance == Stance.STAND and not _need_sprint_release
 	)
+	var duration: float = sprint_duration()
+	stamina = minf(stamina, duration)
 	if want and not sprinting:
-		want = stamina >= tuning.sprint_duration * tuning.sprint_restart_fraction and (on_floor or _coyote > 0.0)
+		want = stamina >= duration * tuning.sprint_restart_fraction and (on_floor or _coyote > 0.0)
 	if sprinting:
 		stamina -= delta
 		if stamina <= 0.0:
@@ -180,7 +183,17 @@ func _update_sprint(f: PlayerInputFrame, delta: float, on_floor: bool) -> void:
 	elif _recharge_wait > 0.0:
 		_recharge_wait -= delta
 	else:
-		stamina = minf(stamina + tuning.sprint_duration / tuning.sprint_recharge_time * delta, tuning.sprint_duration)
+		var rate: float = duration / tuning.sprint_recharge_time * _stat(PlayerStats.SPRINT_RECHARGE, 1.0)
+		stamina = minf(stamina + rate * delta, duration)
+
+
+# Sprint seconds at full stamina (tuning, or Marathon Malt's 10 s).
+func sprint_duration() -> float:
+	return _stat(PlayerStats.SPRINT_DURATION, tuning.sprint_duration)
+
+
+func _stat(stat: StringName, base: float) -> float:
+	return stats.value(stat, base) if stats != null else base
 
 
 # --- stance -----------------------------------------------------------------------------------
@@ -269,7 +282,7 @@ func target_speed() -> float:
 		s = tuning.crouch_speed
 	elif sprinting:
 		s = tuning.sprint_speed
-	return s * speed_multiplier * weapon_speed_multiplier
+	return s * speed_multiplier * weapon_speed_multiplier * _stat(PlayerStats.MOVE_SPEED, 1.0)
 
 
 func _ground_velocity(hvel: Vector3, delta: float) -> Vector3:

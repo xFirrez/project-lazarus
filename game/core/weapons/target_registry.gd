@@ -11,6 +11,7 @@ signal target_damaged(target: HitTarget, amount: float, zone: int, kind: int, so
 signal target_killed(target: HitTarget, source_peer: int)
 
 var targets: Dictionary = {}  # id -> HitTarget
+var damage_modifier: Callable = Callable()  # host: func(target, info) edits info before it applies
 var _next_id: int = 1
 
 
@@ -58,6 +59,8 @@ func host_damage(t: HitTarget, info: DamageInfo) -> float:
 	if not Net.is_host() and Net.is_active():
 		return 0.0
 	var was_alive: bool = t.alive
+	if damage_modifier.is_valid() and was_alive and info.amount > 0.0:
+		damage_modifier.call(t, info)  # Insta-Kill (PowerUpSystem)
 	var applied: float = t.host_apply(info)
 	if info.amount <= 0.0 or not was_alive:
 		return applied

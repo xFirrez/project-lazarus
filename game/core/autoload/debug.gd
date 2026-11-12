@@ -63,6 +63,7 @@ func _register_builtin_commands() -> void:
 	PlayerCommands.register(commands)
 	WeaponCommands.register(commands)
 	BoxCommands.register(commands)
+	PerkCommands.register(commands)
 	RenderCommands.register(commands)
 	ZombieCommands.register(commands)
 	SurvivalCommands.register(commands)

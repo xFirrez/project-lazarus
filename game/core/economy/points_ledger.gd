@@ -10,6 +10,9 @@ class_name PointsLedger
 extends Node
 
 signal points_changed(peer_id: int, total: int, delta: int)
+# HOST: base points (before Double Points) a player earned from damaging a zombie; the
+# PowerUpSystem's drop counter listens (GAME_DESIGN §11).
+signal zombie_points(peer_id: int, points: int, target: HitTarget, killed: bool, kind: int)
 
 const STAT_KEYS: Array[StringName] = [
 	&"kills", &"headshots", &"downs", &"revives", &"points_earned", &"doors", &"repairs"
@@ -22,6 +25,7 @@ var targets: TargetRegistry = null
 var players: PlayerSync = null
 var spends_refused: int = 0
 var names: Dictionary = {}  # peer -> display name (kept after a player leaves, for the summary)
+var earn_multiplier: int = 1  # host: 2 while Double Points is active (PowerUpSystem)
 var _repair_round: Dictionary = {}  # peer -> points from repairs this round
 var _hit_keys: Dictionary = {}  # "peer:target" -> physics frame of the last paid hit
 
@@ -137,7 +141,7 @@ func host_repair_reward(peer_id: int) -> int:
 	_repair_round[peer_id] = earned + pts
 	host_add_stat(peer_id, &"repairs")
 	if pts > 0:
-		host_earn(peer_id, pts)
+		host_earn(peer_id, pts * earn_multiplier)
 	return pts
 
 
@@ -204,7 +208,13 @@ func _on_target_damaged(t: HitTarget, _amount: float, zone: int, kind: int, sour
 		if zone == WeaponDefinition.Hitzone.HEAD and kind == DamageInfo.Kind.BULLET:
 			host_add_stat(source_peer, &"headshots")
 	if pts > 0:
-		host_earn(source_peer, pts)
+		host_earn(source_peer, pts * earn_multiplier)
+	zombie_points.emit(source_peer, pts, t, killed, kind)
+
+
+# HOST: gameplay earnings that Double Points multiplies (Nuke / Carpenter bonuses).
+func host_earn_bonus(peer_id: int, amount: int) -> void:
+	host_earn(peer_id, amount * earn_multiplier)
 
 
 # --- replication --------------------------------------------------------------------------------

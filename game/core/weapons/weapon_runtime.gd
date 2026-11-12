@@ -45,7 +45,9 @@ var auto_reload: bool = true
 var reload_empty: bool = false
 var reload_ammo_added: bool = false
 var shell_phase: ShellPhase = ShellPhase.START
-var speed_multiplier: float = 1.0  # handling/reload speed (Quickdraw Fizz later)
+var speed_multiplier: float = 1.0  # handling/reload speed (Quickdraw Fizz: 2.0 = half the time)
+var rate_multiplier: float = 1.0  # fire rate (Twin-Fire Root Beer: 1.33)
+var hip_multiplier: float = 1.0  # hip spread (Bullseye Bitters: 0.6)
 
 var _cooldown: float = 0.0
 var _trigger_was_down: bool = false
@@ -76,6 +78,11 @@ func is_ready() -> bool:
 	return state == State.IDLE or state == State.RELOADING or state == State.SPRINT
 
 
+# Seconds between shots with perks applied.
+func fire_interval() -> float:
+	return def.fire_interval() / maxf(rate_multiplier, 0.01)
+
+
 func total_reload_time() -> float:
 	if def.reload_per_shell:
 		var shells: int = mini(def.mag_size - mag, reserve)
@@ -85,7 +92,7 @@ func total_reload_time() -> float:
 
 # Current spread cone half-angle in degrees. `move_fraction` = horizontal speed / sprint speed.
 func spread_deg(move_fraction: float, airborne: bool = false) -> float:
-	var hip: float = def.spread_hip + def.spread_move * clampf(move_fraction, 0.0, 1.0) + bloom
+	var hip: float = (def.spread_hip + def.spread_move * clampf(move_fraction, 0.0, 1.0)) * hip_multiplier + bloom
 	if airborne:
 		hip += def.spread_move
 	hip = minf(hip, def.spread_max)
@@ -200,7 +207,7 @@ func update(dt: float, trigger: bool, wants_ads: bool, sprinting: bool) -> int:
 	else:
 		_cooldown = maxf(_cooldown - dt, 0.0)
 	_update_ads(dt, wants_ads)
-	if _since_shot > maxf(def.fire_interval() * 1.6, 0.2):
+	if _since_shot > maxf(fire_interval() * 1.6, 0.2):
 		consecutive_shots = 0
 		bloom = maxf(bloom - def.spread_recovery * dt, 0.0)
 	return shots
@@ -215,7 +222,7 @@ func _update_fire(dt: float, trigger: bool, pressed: bool) -> int:
 	if was_idle_ready:
 		_cooldown = 0.0
 	var shots: int = 0
-	var interval: float = def.fire_interval()
+	var interval: float = fire_interval()
 	var wants: bool = false
 	match def.fire_mode:
 		WeaponDefinition.FireMode.AUTO:

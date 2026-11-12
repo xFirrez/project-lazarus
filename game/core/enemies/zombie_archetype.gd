@@ -10,6 +10,7 @@ enum Tier { SHAMBLE, WALK, JOG, RUN, SPRINT }
 const TIER_NAMES: PackedStringArray = ["shamble", "walk", "jog", "run", "sprint"]
 
 @export var id: StringName = &"zombie"
+@export var is_boss: bool = false  # Insta-Kill multiplies damage ×10 instead of killing (GAME_DESIGN §11)
 @export var display_name: String = "Zombie"
 @export var variants: Array[PackedScene] = []  # ZombieModel scenes (material variants)
 @export_group("Locomotion")

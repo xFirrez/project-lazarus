@@ -36,6 +36,7 @@ var bad_luck: Dictionary = {}  # host: peer -> wonder bonus weight
 var forced: StringName = &""  # host debug: next result (box_force)
 var total_spins: int = 0
 var total_dolls: int = 0
+var moves_total: int = 0  # host: relocations this match (Fire Sale power-up condition, GAME_DESIGN §11)
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _start_index: int = 0
@@ -264,6 +265,8 @@ func host_move_to(to: int, delay: float = 0.0) -> void:
 	if not is_authority() or to < 0 or to >= boxes.size():
 		return
 	var from: int = current_index()
+	if to != from:
+		moves_total += 1
 	spins_here = 0
 	session().host_set_flag(FLAG_LOCATION, String(boxes[to].location_id))
 	session().host_set_flag(FLAG_ARRIVE, now() + delay)

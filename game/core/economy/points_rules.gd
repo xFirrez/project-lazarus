@@ -21,7 +21,7 @@ const LATE_JOIN_MAX: int = 5000
 
 # Points for a damaging event on a zombie (kind = DamageInfo.Kind, zone = WeaponDefinition.Hitzone).
 static func for_damage(kind: int, zone: int, killed: bool) -> int:
-	if kind == DamageInfo.Kind.DEBUG:
+	if kind == DamageInfo.Kind.DEBUG or kind == DamageInfo.Kind.NUKE:
 		return 0
 	if not killed:
 		return HIT if kind == DamageInfo.Kind.BULLET or kind == DamageInfo.Kind.MELEE else 0
