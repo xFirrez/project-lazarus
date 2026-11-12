@@ -1,7 +1,8 @@
 # Match — per-match root: instances the map scene and the per-match systems (ARCHITECTURE §4.1):
-# PlayerSync, TargetRegistry, WeaponSync, WeaponFx, WorldSync, ZombieSync + CrowdDirector,
-# ZoneManager, PointsLedger, InteractionSystem, DownedSystem, RoundDirector, SpawnDirector, the
-# map's MapRules and the match HUD. Reachable via Match.current.
+# MatchSession (late join / reconnect / scene-ready gate / state hash), PlayerSync, TargetRegistry,
+# WeaponSync, WeaponFx, WorldSync, ZombieSync + CrowdDirector, ZoneManager, PointsLedger,
+# InteractionSystem, DownedSystem, RoundDirector, SpawnDirector, the map's MapRules, PingSystem
+# and the match HUD. Reachable via Match.current.
 # Authority: exists on every peer; host-only systems check Net.is_host().
 class_name Match
 extends Node
@@ -24,9 +25,12 @@ var rounds: RoundDirector = null
 var spawns: SpawnDirector = null
 var rules: MapRules = null
 var hud: MatchHud = null
+var session: MatchSession = null
+var pings: PingSystem = null
+var session_joined_at: float = -1.0  # client: Net.now() at the session welcome (join timing)
 
 
-func setup(def: MapDefinition) -> Error:
+func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -> Error:
 	definition = def
 	name = "Match"
 	var packed: PackedScene = load(def.scene_path) as PackedScene
@@ -36,6 +40,11 @@ func setup(def: MapDefinition) -> Error:
 	map_root = packed.instantiate()
 	add_child(map_root)
 	current = self
+	# First, so its peer_left capture runs before the other systems drop the player's state.
+	session = MatchSession.new()
+	session.match_node = self
+	session.joined_at = session_joined_at
+	add_child(session)
 	if def.rules_script != null:
 		rules = def.rules_script.new() as MapRules
 	if rules == null:
@@ -91,6 +100,8 @@ func setup(def: MapDefinition) -> Error:
 	rounds.zombies = zombies
 	rounds.players = players
 	rounds.enabled = def.survival
+	rounds.hold = from_lobby and Net.is_host()
+	rounds.first_round = first_round
 	add_child(rounds)
 	if def.survival:
 		spawns = SpawnDirector.new()
@@ -100,6 +111,9 @@ func setup(def: MapDefinition) -> Error:
 		spawns.players = players
 		spawns.curve = rounds.curve
 		add_child(spawns)
+	pings = PingSystem.new()
+	pings.match_node = self
+	add_child(pings)
 	hud = MatchHud.new()
 	hud.match_node = self
 	var layer: CanvasLayer = CanvasLayer.new()
@@ -108,6 +122,7 @@ func setup(def: MapDefinition) -> Error:
 	layer.add_to_group(&"hide_for_shots")
 	add_child(layer)
 	layer.add_child(hud)
+	session.on_match_ready(from_lobby)
 	if Net.is_host() or not Net.is_active():
 		rules.on_match_start()
 	Log.info(&"match", "Match started on '%s'" % def.id)

@@ -79,6 +79,8 @@ func _draw() -> void:
 	_draw_prompt(me)
 	_draw_downed(me)
 	_draw_teammate_markers(me)
+	_draw_pings(me)
+	_draw_session_notice()
 
 
 func _text(pos: Vector2, text: String, font_size: int, col: Color, align_right: bool = false) -> void:
@@ -140,7 +142,7 @@ func _draw_points() -> void:
 
 func _player_color(peer_id: int) -> Color:
 	var p: PlayerCharacter = match_node.players.avatars.get(peer_id, null)
-	return PlayerCharacter.COLORS[p.slot % PlayerCharacter.COLORS.size()] if p != null else Color.WHITE
+	return p.player_color() if p != null else Color.WHITE
 
 
 func _draw_banner() -> void:
@@ -194,6 +196,8 @@ func _draw_downed(me: PlayerCharacter) -> void:
 			var r: int = int(ds.revivers.get(me.peer_id, 0))
 			_text_centered(size.y * 0.5 - 60.0, "Being revived", 20, Color.WHITE)
 			_bar(Vector2(size.x * 0.5, size.y * 0.5 - 50.0), prog / maxf(ds.revive_time_for(r), 0.01), Color.WHITE)
+	elif st == DownedSystem.State.WAITING:
+		_text_centered(60.0, "SPECTATING — you join the fight at the next round", 24, Color(0.9, 0.9, 0.9))
 	elif st == DownedSystem.State.BLED_OUT or me.spectating:
 		_text_centered(60.0, "SPECTATING — you respawn next round", 24, Color(0.9, 0.9, 0.9))
 
@@ -207,19 +211,64 @@ func _draw_teammate_markers(me: PlayerCharacter) -> void:
 		if id == me.peer_id or ds.state_of(id) != DownedSystem.State.DOWNED:
 			continue
 		var o: PlayerCharacter = match_node.players.avatars[id]
-		var wp: Vector3 = o.global_position + Vector3.UP * 0.6
-		var sp: Vector2 = Vector2(size.x * 0.5, size.y - 40.0)
-		var local_z: float = (cam.global_transform.affine_inverse() * wp).z
-		if local_z < -0.05:
-			sp = cam.unproject_position(wp)
-		elif local_z > 0.05:
-			sp = size - cam.unproject_position(wp)  # behind: mirror, pinned to the bottom edge
-			sp.y = size.y - 40.0
-		sp = sp.clamp(Vector2(30, 30), size - Vector2(30, 30))
+		var sp: Vector2 = _edge_point(cam, o.global_position + Vector3.UP * 0.6)
 		var left: float = float(ds.bleed_left.get(id, 0.0)) / maxf(o.tuning.bleedout_time, 1.0)
 		draw_circle(sp, 13.0, Color(0.8, 0.1, 0.08, 0.85))
+		draw_arc(sp, 22.0, 0.0, TAU, 24, o.player_color(), 2.0)
 		draw_arc(sp, 18.0, -PI * 0.5, -PI * 0.5 + TAU * left, 24, Color(1, 1, 1, 0.9), 3.0)
 		draw_line(sp + Vector2(-6, 0), sp + Vector2(6, 0), Color.WHITE, 3.0)
 		draw_line(sp + Vector2(0, -6), sp + Vector2(0, 6), Color.WHITE, 3.0)
 		var dist: float = o.global_position.distance_to(me.global_position)
 		_text(sp + Vector2(22, 6), "%s %dm" % [o.display_name, roundi(dist)], 16, Color.WHITE)
+
+
+# Screen point of a world position, clamped to the screen edges (behind the camera: mirrored and
+# pinned to the bottom edge) — off-screen indicators for downed teammates and pings.
+func _edge_point(cam: Camera3D, wp: Vector3) -> Vector2:
+	var sp: Vector2 = Vector2(size.x * 0.5, size.y - 40.0)
+	var local_z: float = (cam.global_transform.affine_inverse() * wp).z
+	if local_z < -0.05:
+		sp = cam.unproject_position(wp)
+	elif local_z > 0.05:
+		sp = size - cam.unproject_position(wp)
+		sp.y = size.y - 40.0
+	return sp.clamp(Vector2(30, 30), size - Vector2(30, 30))
+
+
+func _on_screen(cam: Camera3D, wp: Vector3) -> bool:
+	if (cam.global_transform.affine_inverse() * wp).z >= -0.05:
+		return false
+	return Rect2(Vector2.ZERO, size).has_point(cam.unproject_position(wp))
+
+
+# Off-screen pings: a coloured diamond at the edge with the label and distance.
+func _draw_pings(me: PlayerCharacter) -> void:
+	var ps: PingSystem = match_node.pings
+	var cam: Camera3D = get_viewport().get_camera_3d()
+	if ps == null or cam == null:
+		return
+	for peer: int in ps.active:
+		var a: Dictionary = ps.active[peer]
+		var wp: Vector3 = a["pos"]
+		var who: PlayerCharacter = match_node.players.avatars.get(peer, null)
+		var col: Color = who.player_color() if who != null else Color.WHITE
+		var dist: int = roundi(wp.distance_to(me.global_position))
+		if _on_screen(cam, wp):
+			_text(cam.unproject_position(wp) + Vector2(14, 22), "%dm" % dist, 15, col)
+			continue
+		var sp: Vector2 = _edge_point(cam, wp)
+		var pts: PackedVector2Array = [
+			sp + Vector2(0, -10), sp + Vector2(10, 0), sp + Vector2(0, 10), sp + Vector2(-10, 0)
+		]
+		draw_colored_polygon(pts, col)
+		_text(
+			sp + Vector2(14, 6), "%s %dm" % [String(a["label"]) if String(a["label"]) != "" else "ping", dist], 15, col
+		)
+
+
+func _draw_session_notice() -> void:
+	var ms: MatchSession = match_node.session
+	var rd: RoundDirector = match_node.rounds
+	if ms == null or rd == null or not rd.enabled or rd.phase != RoundDirector.Phase.WAITING:
+		return
+	_text_centered(size.y * 0.3, "Waiting for all players to load ...", 28, Color(0.9, 0.9, 0.9))

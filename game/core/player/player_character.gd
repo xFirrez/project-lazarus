@@ -2,7 +2,9 @@
 # CameraRig, HealthComponent, FootstepComponent and WeaponController (Step 3). The local player reads input once per
 # physics tick into a PlayerInputFrame (or takes frames from `bot_driver`), simulates its own
 # motion and renders a first-person camera + DamageHud. Remote players are puppets: positioned
-# from the InterpolationBuffer, drawn as a third-person capsule + head, with spatial footsteps.
+# from the InterpolationBuffer, drawn as their character's third-person model (SurvivorModel; a
+# coloured capsule when the character has no model) with a name tag that fades with distance.
+# The character (CharacterDefinition, chosen in the lobby) sets the identification colour.
 # Authority: owner simulates movement; health is host-authoritative (applied via PlayerSync).
 class_name PlayerCharacter
 extends CharacterBody3D
@@ -14,6 +16,8 @@ const COLORS: Array[Color] = [
 ]
 const DEFAULT_TUNING: String = "res://content/player/player_tuning.tres"
 const KILL_Y: float = -30.0
+const TAG_FULL_DISTANCE: float = 12.0  # name tags: opaque up to here ...
+const TAG_HIDE_DISTANCE: float = 40.0  # ... faded out by here
 
 @export var tuning: PlayerTuning = null
 
@@ -25,6 +29,10 @@ var reviving: bool = false  # local: holding revive on a teammate (can't shoot)
 var notarget: bool = false  # host: zombies ignore this player (debug `notarget`)
 var display_name: String = ""
 var slot: int = 0
+var character_id: StringName = &""
+var character: CharacterDefinition = null
+var perks: Array = []  # Vigor Tonic ids (Step 10); retained on reconnect (MatchSession)
+var model: SurvivorModel = null  # third-person model (remote puppets and host bots)
 var buffer: InterpolationBuffer = InterpolationBuffer.new()
 # Optional scripted input for bots/tests: Callable(player: PlayerCharacter, delta: float) -> PlayerInputFrame
 var bot_driver: Callable = Callable()
@@ -39,6 +47,8 @@ var remote_pitch: float = 0.0
 var _hud_layer: CanvasLayer = null
 var _visual: Node3D = null
 var _body_mesh: MeshInstance3D = null
+var _body_mat: StandardMaterial3D = null
+var _tag: Label3D = null
 var _remote_grounded: bool = true
 
 @onready var motor: MotorComponent = $Motor
@@ -60,6 +70,11 @@ func _ready() -> void:
 	camera_rig.yaw = rotation.y
 	health.setup(tuning)
 	footsteps.setup(self, not is_local)
+	if character == null:
+		character = CharacterDefinition.get_def(character_id) if character_id != &"" else null
+		if character == null:
+			character = CharacterDefinition.for_slot(slot)
+		character_id = character.id if character != null else &""
 	_build_visual()
 	if is_local or is_bot:
 		collision_layer = 1 << 1  # player
@@ -89,6 +104,27 @@ func _ready() -> void:
 	weapons = WeaponController.new()
 	add_child(weapons)
 	weapons.setup(self)
+
+
+# Identification colour (HUD points list, name tag, pings, markers).
+func player_color() -> Color:
+	if character != null:
+		return character.color
+	return COLORS[slot % COLORS.size()]
+
+
+# Lobby / roster update: switch the character (colour, name tag, model, first-person sleeves).
+func set_character(def: CharacterDefinition) -> void:
+	if def == null or def == character:
+		return
+	character = def
+	character_id = def.id
+	if _visual != null:
+		_visual.queue_free()
+		_visual = null
+		_build_visual()
+	if weapons != null and weapons.viewmodel != null:
+		weapons.viewmodel.refresh_arms()
 
 
 func get_yaw() -> float:
@@ -133,6 +169,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if not is_local:
 		weapons.render_update(delta)
+		_update_tag()
+		if model != null:
+			model.update_from(self, delta)
 		return
 	if not bot_driver.is_valid():
 		camera_rig.add_look(input_source.consume_look(delta))
@@ -207,7 +246,8 @@ func _puppet(_delta: float) -> void:
 	if remote_flags & 16:
 		target_scale = 0.35  # downed: lying on the ground
 	_visual.visible = (remote_flags & 32) == 0
-	_visual.scale.y = move_toward(_visual.scale.y, target_scale, _delta * 4.0)
+	if model == null:
+		_visual.scale.y = move_toward(_visual.scale.y, target_scale, _delta * 4.0)
 	if grounded and not _remote_grounded:
 		footsteps.play(&"land")
 	_remote_grounded = grounded
@@ -229,15 +269,43 @@ func _build_visual() -> void:
 	_visual = Node3D.new()
 	_visual.name = "Visual"
 	add_child(_visual)
-	var mat: StandardMaterial3D = StandardMaterial3D.new()
-	mat.albedo_color = COLORS[slot % COLORS.size()]
+	if is_local:
+		_visual.visible = false
+	var col: Color = player_color()
+	model = null
+	if character != null and character.model_scene != "" and ResourceLoader.exists(character.model_scene):
+		var packed: PackedScene = load(character.model_scene) as PackedScene
+		model = packed.instantiate() as SurvivorModel
+	if model != null:
+		model.character = character
+		_visual.add_child(model)
+	else:
+		_build_capsule(col)
+	_tag = Label3D.new()
+	_tag.name = "NameTag"
+	_tag.text = display_name
+	_tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_tag.no_depth_test = true  # readable through walls; alpha fades with distance
+	_tag.fixed_size = false
+	_tag.position.y = tuning.stand_height + 0.3
+	_tag.font_size = 48
+	_tag.outline_size = 10
+	_tag.modulate = col
+	_tag.outline_modulate = Color(0, 0, 0, 0.8)
+	_tag.render_priority = 2
+	_visual.add_child(_tag)
+
+
+func _build_capsule(col: Color) -> void:
+	_body_mat = StandardMaterial3D.new()
+	_body_mat.albedo_color = col
 	_body_mesh = MeshInstance3D.new()
 	var cm: CapsuleMesh = CapsuleMesh.new()
 	cm.radius = tuning.capsule_radius
 	cm.height = tuning.stand_height - 0.25
 	_body_mesh.mesh = cm
 	_body_mesh.position.y = (tuning.stand_height - 0.25) * 0.5
-	_body_mesh.material_override = mat
+	_body_mesh.material_override = _body_mat
 	_visual.add_child(_body_mesh)
 	var head: MeshInstance3D = MeshInstance3D.new()
 	var sm: SphereMesh = SphereMesh.new()
@@ -245,7 +313,7 @@ func _build_visual() -> void:
 	sm.height = 0.32
 	head.mesh = sm
 	head.position = Vector3(0.0, tuning.stand_height - 0.2, 0.0)
-	head.material_override = mat
+	head.material_override = _body_mat
 	_visual.add_child(head)
 	var visor: MeshInstance3D = MeshInstance3D.new()
 	var bm: BoxMesh = BoxMesh.new()
@@ -253,9 +321,25 @@ func _build_visual() -> void:
 	visor.mesh = bm
 	visor.position = Vector3(0.0, tuning.stand_height - 0.18, -0.14)
 	_visual.add_child(visor)
-	var label: Label3D = Label3D.new()
-	label.text = display_name
-	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	label.position.y = tuning.stand_height + 0.3
-	label.font_size = 48
-	_visual.add_child(label)
+
+
+# Name tag alpha from the distance to the viewing camera (GAME_DESIGN §13 "fade with distance").
+static func tag_alpha(distance: float) -> float:
+	if distance <= TAG_FULL_DISTANCE:
+		return 1.0
+	return clampf(1.0 - (distance - TAG_FULL_DISTANCE) / (TAG_HIDE_DISTANCE - TAG_FULL_DISTANCE), 0.0, 1.0)
+
+
+func _update_tag() -> void:
+	if _tag == null:
+		return
+	var cam: Camera3D = get_viewport().get_camera_3d()
+	if cam == null or not bool(Config.get_value(&"gameplay", &"name_tags", true)):
+		_tag.visible = false
+		return
+	var a: float = tag_alpha(cam.global_position.distance_to(global_position))
+	_tag.visible = a > 0.01
+	var c: Color = player_color()
+	c.a = a
+	_tag.modulate = c
+	_tag.outline_modulate = Color(0, 0, 0, 0.8 * a)

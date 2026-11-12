@@ -120,6 +120,7 @@ func set_weapon(p_def: WeaponDefinition, p_runtime: WeaponRuntime) -> void:
 		else:
 			g = GreyboxGun.build(def)
 		anim_root.add_child(g)
+		ViewmodelArms.attach(g, def, player.character, LAYER)
 		_guns[def.id] = g
 		var lib_name: StringName = StringName(String(def.id))
 		anim.add_animation_library(lib_name, ViewmodelAnimations.build(def, g, melee_time))
@@ -134,6 +135,12 @@ func set_weapon(p_def: WeaponDefinition, p_runtime: WeaponRuntime) -> void:
 	_rk_pos_v = Vector3.ZERO
 	_rk_rot_v = Vector3.ZERO
 	_shell_phase = -1
+
+
+# The player's character changed (lobby / late roster update): re-tint the arms of every gun.
+func refresh_arms() -> void:
+	for wid: Variant in _guns:
+		ViewmodelArms.attach(_guns[wid] as Node3D, WeaponCatalog.get_def(StringName(wid)), player.character, LAYER)
 
 
 func play(clip: StringName, speed: float = 1.0) -> void:

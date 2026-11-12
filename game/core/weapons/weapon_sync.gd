@@ -33,6 +33,7 @@ var starting_weapons: Array[StringName] = [&"m1911"]
 var loadouts: Dictionary = {}  # host: peer -> {ids: Array[StringName], current: StringName, lethal: int}
 var grenades: Dictionary = {}  # key -> Grenade (local copies)
 var shots_relayed: int = 0
+var mirrored: Dictionary = {}  # every peer: peer -> [ids, current, lethal] from `_wloadout`
 
 var _outbox: Array = []
 var _standalone_controllers: Array[WeaponController] = []
@@ -277,6 +278,71 @@ func host_reset_loadout(peer_id: int) -> void:
 		var def: WeaponDefinition = WeaponCatalog.get_def(wid)
 		if def != null:
 			_send_to(peer_id, &"_wammo", [String(def.id), def.mag_size, def.reserve_max])
+
+
+# HOST (reconnect, MatchSession): the player's weapons + host-mirrored ammo as plain data. A player
+# in last stand exports the loadout from before going down (a down is not kept across rejoin).
+func host_export(peer_id: int) -> Dictionary:
+	if not loadouts.has(peer_id):
+		return {}
+	var lo: Dictionary = loadouts[peer_id]
+	var ids: Array = _id_strings(lo["ids"])
+	var current: String = String(lo["current"])
+	if bool(lo.get("last_stand", false)):
+		ids.erase(String(lo.get("last_stand_added", "")))
+		current = String(lo.get("pre_down", current))
+	var ammo: Dictionary = {}
+	for wid: String in ids:
+		ammo[wid] = (validator.ammo(peer_id, StringName(wid)) as Array).duplicate()
+	return {"ids": ids, "current": current, "lethal": int(lo["lethal"]), "ammo": ammo}
+
+
+# HOST: restores an exported loadout onto (a new peer id for) the same player.
+func host_import(peer_id: int, data: Dictionary) -> void:
+	if data.is_empty():
+		return
+	if loadouts.has(peer_id):
+		for wid: Variant in (loadouts[peer_id] as Dictionary)["ids"]:
+			validator.take(peer_id, StringName(wid))
+	var ids: Array = []
+	for wid: Variant in data.get("ids", []):
+		var def: WeaponDefinition = WeaponCatalog.get_def(StringName(String(wid)))
+		if def == null or ids.size() >= PRIMARY_SLOTS:
+			continue
+		ids.append(def.id)
+		var a: Array = (data.get("ammo", {}) as Dictionary).get(String(wid), [def.mag_size, def.reserve_max])
+		validator.give(peer_id, def, int(a[0]), int(a[1]))
+		_send_to(peer_id, &"_wammo", [String(def.id), int(a[0]), int(a[1])])
+	var knife: WeaponDefinition = WeaponCatalog.get_def(WeaponController.KNIFE_ID)
+	if knife != null:
+		validator.give(peer_id, knife)
+	var cur: StringName = StringName(String(data.get("current", "")))
+	loadouts[peer_id] = {
+		"ids": ids,
+		"current": cur if ids.has(cur) else (ids[0] if not ids.is_empty() else &""),
+		"lethal": int(data.get("lethal", 0))
+	}
+	_broadcast_loadout(peer_id)
+
+
+# Sorted weapon ids + lethal count of a player as one string (MatchSession state hash).
+func digest_of(peer_id: int) -> String:
+	if not loadouts.has(peer_id):
+		return "-"
+	var lo: Dictionary = loadouts[peer_id]
+	var ids: Array = _id_strings(lo["ids"])
+	ids.sort()
+	return "%s/%d" % [",".join(PackedStringArray(ids)), int(lo["lethal"])]
+
+
+# Same format as digest_of, from the replicated loadout mirror (clients).
+func mirror_digest_of(peer_id: int) -> String:
+	if not mirrored.has(peer_id):
+		return "-"
+	var m: Array = mirrored[peer_id]
+	var ids: Array = _id_strings(m[0])
+	ids.sort()
+	return "%s/%d" % [",".join(PackedStringArray(ids)), int(m[2])]
 
 
 func is_last_stand(peer_id: int) -> bool:
@@ -543,6 +609,7 @@ func _on_msg_loadout(sender: int, p: Array) -> void:
 
 
 func _apply_loadout(p: Array) -> void:
+	mirrored[int(p[0])] = [(p[1] as Array).duplicate(), String(p[2]), int(p[3])]
 	if players == null:
 		return
 	var peer: int = int(p[0])
@@ -640,6 +707,7 @@ func _on_peer_joined(peer_id: int, _info: Dictionary) -> void:
 
 func _on_peer_left(peer_id: int) -> void:
 	loadouts.erase(peer_id)
+	mirrored.erase(peer_id)
 	validator.remove_peer(peer_id)
 
 

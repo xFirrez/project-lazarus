@@ -14,6 +14,13 @@ static func register(reg: CommandRegistry) -> void:
 		"Add points (default self)"
 	)
 	reg.register("set_round", _cmd_set_round, [["round", TYPE_INT]], "Host: start round N now")
+	reg.register("round_pause", _cmd_round_pause, [["on", TYPE_BOOL, true]], "Host: freeze intro/intermission")
+	reg.register("state_hash", _cmd_state_hash, [], "Co-op state digest + hash (desync checks)")
+	reg.register("session", _cmd_session, [], "Late join / reconnect / hash / bandwidth status")
+	reg.register(
+		"match_flag", _cmd_match_flag, [["key", TYPE_STRING], ["value", TYPE_STRING]], "Host: set a match flag"
+	)
+	reg.register("ping", _cmd_ping, [], "Ping what is under the crosshair")
 	reg.register("skip_round", _cmd_skip_round, [], "Host: kill this round's zombies and end it")
 	reg.register("open_all_doors", _cmd_open_all, [], "Host: open every purchasable door (no cost)")
 	reg.register("down_me", _cmd_down_me, [], "Go down (last stand) now")
@@ -24,6 +31,55 @@ static func register(reg: CommandRegistry) -> void:
 	reg.register("points", _cmd_points, [], "Every player's points and stats")
 	reg.register("bots", _cmd_bots, [["count", TYPE_INT, 1]], "Host: add survival bot players (soak tests)")
 	reg.register("buy", _cmd_buy, [["name", TYPE_STRING]], "Use an interactable by node name (pays normally)")
+
+
+static func _cmd_round_pause(args: Array) -> String:
+	var m: Match = _m()
+	if m == null or not _is_host():
+		return "host only"
+	m.rounds.paused = bool(args[0])
+	return "rounds %s" % ("paused" if m.rounds.paused else "running")
+
+
+static func _cmd_state_hash(_args: Array) -> String:
+	var m: Match = _m()
+	if m == null:
+		return "no match"
+	return "%s\nhash %d" % ["\n".join(m.session.state_digest()), m.session.state_hash()]
+
+
+static func _cmd_session(_args: Array) -> String:
+	var m: Match = _m()
+	if m == null:
+		return "no match"
+	var s: MatchSession = m.session
+	return (
+		"gate_open=%s retained=%s hashes ok=%d bad=%d bw_avg=%.1f KB/s peak=%.1f KB/s join_snapshot=%.2f s"
+		% [
+			s.gate_open(),
+			str(s.retained.keys()),
+			s.hash_matches,
+			s.hash_mismatches,
+			s.bandwidth_average() / 1024.0,
+			s.bandwidth_peak / 1024.0,
+			s.join_snapshot_seconds
+		]
+	)
+
+
+static func _cmd_match_flag(args: Array) -> String:
+	var m: Match = _m()
+	if m == null or not _is_host():
+		return "host only"
+	m.session.host_set_flag(String(args[0]), String(args[1]))
+	return "flag %s = %s" % [args[0], args[1]]
+
+
+static func _cmd_ping(_args: Array) -> String:
+	var m: Match = _m()
+	if m == null:
+		return "no match"
+	return "pinged" if m.pings.ping_from_view() else "cannot ping now"
 
 
 static func _m() -> Match:

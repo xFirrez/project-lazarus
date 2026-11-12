@@ -14,6 +14,9 @@ const REPAIR_PLANK: int = 10
 const REPAIR_CAP_PER_ROUND: int = 500
 const DOWN_PENALTY: float = 0.05
 const BLEEDOUT_PENALTY: float = 0.10
+const LATE_JOIN_BASE: int = 500  # GAME_DESIGN §13: 500 + 250 x round, max 5000
+const LATE_JOIN_PER_ROUND: int = 250
+const LATE_JOIN_MAX: int = 5000
 
 
 # Points for a damaging event on a zombie (kind = DamageInfo.Kind, zone = WeaponDefinition.Hitzone).
@@ -43,3 +46,8 @@ static func penalty(points: int, fraction: float) -> int:
 # Repair points still allowed this round given what was already earned from repairs.
 static func repair_points(earned_this_round: int) -> int:
 	return clampi(REPAIR_CAP_PER_ROUND - earned_this_round, 0, REPAIR_PLANK)
+
+
+# Starting points of a player who joins a match in progress at `round_number` (GAME_DESIGN §13).
+static func late_join_points(round_number: int) -> int:
+	return mini(LATE_JOIN_BASE + LATE_JOIN_PER_ROUND * maxi(round_number, 0), LATE_JOIN_MAX)

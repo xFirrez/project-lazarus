@@ -47,6 +47,8 @@ const DEFAULTS: Dictionary = {
 		"hud_scale": 1.0,
 		"subtitles": true,
 		"colorblind_mode": "off",
+		"upnp": true,
+		"name_tags": true,
 	},
 }
 

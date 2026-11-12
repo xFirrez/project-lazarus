@@ -32,6 +32,12 @@ var clock: ClockSync = ClockSync.new()
 var local_uid: String = ""
 var local_name: String = "Survivor"
 var peers: Dictionary = {}  # peer_id -> {uid, name}
+# Host: Callable(uid: String, name: String) -> String; a non-empty reason refuses the join
+# (Session: lobby full, late join off, duplicate identity). The joiner gets `_rejected` [reason].
+var join_filter: Callable = Callable()
+var transport_status: String = ""  # e.g. UPnP result, shown in the lobby
+var refused_joins: int = 0  # host: joins refused by join_filter
+var upnp: UpnpMapper = null
 
 var bytes_out_per_sec: float = 0.0
 var bytes_in_per_sec: float = 0.0
@@ -71,6 +77,7 @@ func _ready() -> void:
 	register_message(&"_welcome", _on_msg_welcome)
 	register_message(&"_peer_joined", _on_msg_peer_joined)
 	register_message(&"_peer_left", _on_msg_peer_left)
+	register_message(&"_rejected", _on_msg_rejected)
 	register_stream(STREAM_PING, _on_stream_ping)
 	register_stream(STREAM_PONG, _on_stream_pong)
 	Log.info(&"net", "player_uid %s (%s)" % [local_uid, local_name])
@@ -83,8 +90,33 @@ func start_solo() -> Error:
 	return _start_host(OfflineTransport.new(), 0)
 
 
-func host_session(port: int = DEFAULT_PORT) -> Error:
-	return _start_host(EnetTransport.new(), port)
+func host_session(port: int = DEFAULT_PORT, try_upnp: bool = false) -> Error:
+	var err: Error = _start_host(EnetTransport.new(), port)
+	if err == OK and try_upnp:
+		upnp = UpnpMapper.new()
+		upnp.start(port)
+	return err
+
+
+# Steam (GodotSteam, D-045): the host creates a friends-only lobby; see SteamTransport.
+func host_steam() -> Error:
+	if not SteamTransport.is_available():
+		return ERR_UNAVAILABLE
+	return _start_host(SteamTransport.new(), 0)
+
+
+# Joins with an already-created client peer (Steam: after the lobby join resolved the owner).
+func join_with_transport(p_transport: NetTransport, address: String, port: int) -> Error:
+	leave_session("")
+	var peer: MultiplayerPeer = p_transport.create_client(address, port)
+	if peer == null:
+		return ERR_CANT_CONNECT
+	transport = p_transport
+	multiplayer.multiplayer_peer = peer
+	state = State.CONNECTING
+	_connect_started = now()
+	Log.info(&"net", "Joining via %s (%s) ..." % [p_transport.transport_name(), address])
+	return OK
 
 
 func join_session(address: String, port: int = DEFAULT_PORT) -> Error:
@@ -109,7 +141,13 @@ func leave_session(reason: String) -> void:
 		multiplayer.multiplayer_peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	state = State.IDLE
+	if transport != null:
+		transport.shutdown()
 	transport = null
+	if upnp != null:
+		upnp.stop()
+		upnp = null
+	transport_status = ""
 	peers.clear()
 	clock.reset()
 	sim.clear()
@@ -209,7 +247,7 @@ func send_unreliable(target: int, stream_id: int, bytes: PackedByteArray) -> voi
 func _rpc_message(type: StringName, payload: Array) -> void:
 	var sender: int = multiplayer.get_remote_sender_id()
 	_bytes_in_acc += var_to_bytes(payload).size() + String(type).length() + 8
-	if state == State.CONNECTING and type != &"_welcome":
+	if state == State.CONNECTING and type != &"_welcome" and type != &"_rejected":
 		return
 	_last_host_contact = now()
 	_dispatch_message(sender, type, payload)
@@ -276,6 +314,8 @@ func _process(delta: float) -> void:
 	if state == State.CONNECTING and now() - _connect_started > CONNECT_TIMEOUT:
 		_fail_connection("Connection timed out")
 		return
+	if upnp != null:
+		transport_status = upnp.status_text()
 	if state == State.ACTIVE and not is_host():
 		_ping_timer -= delta
 		if _ping_timer <= 0.0:
@@ -333,6 +373,8 @@ func _fail_connection(reason: String) -> void:
 		multiplayer.multiplayer_peer.close()
 	multiplayer.multiplayer_peer = OfflineMultiplayerPeer.new()
 	state = State.IDLE
+	if transport != null:
+		transport.shutdown()
 	transport = null
 	sim.clear()
 	connection_failed.emit(reason)
@@ -398,6 +440,13 @@ func _on_msg_hello(sender: int, payload: Array) -> void:
 	if not is_host() or payload.size() < 2:
 		return
 	var info: Dictionary = {"uid": String(payload[0]), "name": String(payload[1])}
+	var reason: String = String(join_filter.call(info["uid"], info["name"])) if join_filter.is_valid() else ""
+	if reason != "":
+		Log.info(&"net", "Refused peer %d (%s): %s" % [sender, info["name"], reason])
+		refused_joins += 1
+		send_reliable(sender, &"_rejected", [reason])
+		_kick_later(sender)
+		return
 	var existing: Array = []
 	for id: int in peers:
 		existing.append([id, peers[id]])
@@ -426,6 +475,33 @@ func _on_msg_welcome(_sender: int, payload: Array) -> void:
 		peers[id] = pair[1]
 		peer_joined.emit(id, pair[1])
 	peer_joined.emit(local_id(), peers[local_id()])
+
+
+# Host: disconnects a peer now and processes its departure immediately (stale connection of a
+# player who is rejoining under the same uid).
+func host_drop_peer(peer_id: int) -> void:
+	if not is_host():
+		return
+	if multiplayer.get_peers().has(peer_id):
+		multiplayer.multiplayer_peer.disconnect_peer(peer_id, true)
+	if multiplayer.get_peers().has(peer_id):
+		# A forced ENet disconnect doesn't notify SceneMultiplayer; without this it keeps the
+		# dead peer in its list and every broadcast errors with "Invalid target peer".
+		multiplayer.multiplayer_peer.peer_disconnected.emit(peer_id)
+	_on_peer_disconnected(peer_id)
+
+
+# Host: drops a refused / kicked peer after its `_rejected` message had time to leave.
+func _kick_later(peer_id: int) -> void:
+	await get_tree().create_timer(0.5 + sim.latency_ms / 1000.0).timeout
+	if is_host() and multiplayer.get_peers().has(peer_id):
+		multiplayer.multiplayer_peer.disconnect_peer(peer_id)
+
+
+func _on_msg_rejected(sender: int, payload: Array) -> void:
+	if sender != 1 or is_host():
+		return
+	_fail_connection("Join refused: %s" % String(payload[0]))
 
 
 func _on_msg_peer_joined(_sender: int, payload: Array) -> void:

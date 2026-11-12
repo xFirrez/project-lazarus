@@ -18,3 +18,8 @@ func create_client(_address: String, _port: int) -> MultiplayerPeer:
 
 func supports_clients() -> bool:
 	return false
+
+
+# Called when the session closes (Steam: leave the lobby).
+func shutdown() -> void:
+	pass

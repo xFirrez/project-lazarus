@@ -36,6 +36,7 @@ const ACTIONS: Dictionary = {
 	"weapon_slot_2": ["key:2"],
 	"weapon_slot_3": ["key:3"],
 	"scoreboard": ["key:Tab", "joy:4"],
+	"ping": ["mouse:3", "key:Z", "joy:11"],
 	"pause": ["key:Escape", "joy:6"],
 	"toggle_console": ["key:QuoteLeft"],
 	"toggle_net_overlay": ["key:F3"],

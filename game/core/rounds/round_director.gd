@@ -32,6 +32,10 @@ var round_ids: Dictionary = {}  # host: net id -> true for this round's alive zo
 var requeued: int = 0
 var promoted: bool = false
 var events: Array[String] = []  # host: ordered event log (tests, AC-6.2)
+# Host: stay in WAITING until MatchSession reports every peer's scene ready (lobby start).
+var hold: bool = false
+var first_round: int = 1  # dev lobby setting "starting round"
+var paused: bool = false  # host debug (`round_pause`): intro / intermission timers stop
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
@@ -50,8 +54,17 @@ func _ready() -> void:
 		zombies.zombie_died.connect(_on_zombie_died)
 		zombies.zombie_requeued.connect(_on_zombie_requeued)
 		archetype = zombies.archetype(&"zombie")
-	if enabled and is_authority():
-		_set_phase(Phase.INTRO, curve.intro_delay)
+	if enabled and is_authority() and not hold:
+		host_release()
+
+
+# HOST: everyone is in the map -> intro, then round `first_round`.
+func host_release() -> void:
+	hold = false
+	if not enabled or not is_authority() or phase != Phase.WAITING:
+		return
+	current_round = maxi(first_round, 1) - 1
+	_set_phase(Phase.INTRO, curve.intro_delay)
 
 
 func _exit_tree() -> void:
@@ -207,6 +220,8 @@ func _promote_last() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_authority():
 		time_left = maxf(time_left - delta, 0.0)
+		return
+	if paused:
 		return
 	match phase:
 		Phase.INTRO, Phase.INTERMISSION:

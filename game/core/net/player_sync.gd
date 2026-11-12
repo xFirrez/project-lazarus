@@ -49,6 +49,7 @@ func _ready() -> void:
 	Net.register_message(&"_player_tp", _on_msg_tp)
 	Net.peer_joined.connect(_on_peer_joined)
 	Net.peer_left.connect(_on_peer_left)
+	Session.lobby_changed.connect(_on_roster_changed)
 	for id: int in Net.peer_ids():
 		_spawn(id, Net.peers[id])
 
@@ -311,6 +312,15 @@ func broadcast_health(peer_id: int) -> void:
 # --- spawn / despawn --------------------------------------------------------------------------
 
 
+# The roster (characters) arrives after `_peer_joined` on existing clients: re-skin avatars.
+func _on_roster_changed() -> void:
+	for id: int in avatars:
+		var a: PlayerCharacter = avatars[id]
+		var c: StringName = Session.character_of(id)
+		if c != &"" and c != a.character_id:
+			a.set_character(CharacterDefinition.get_def(c))
+
+
 func _on_peer_joined(peer_id: int, info: Dictionary) -> void:
 	if not avatars.has(peer_id):
 		_spawn(peer_id, info)
@@ -335,6 +345,7 @@ func _spawn(peer_id: int, info: Dictionary, bot: bool = false) -> PlayerCharacte
 	avatar.is_bot = bot
 	avatar.display_name = String(info.get("name", "Peer %d" % peer_id))
 	avatar.slot = avatars.size()
+	avatar.character_id = Session.character_of(peer_id) if not bot else &""
 	avatar.position = spawn_point_for(peer_id)
 	avatar.rotation.y = spawn_yaw
 	avatars[peer_id] = avatar

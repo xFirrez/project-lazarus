@@ -6,7 +6,7 @@
 # starting loadout. Everyone downed or bled out = game over on all peers (solo down = game over
 # until Second Wind exists).
 #   host -> all : `_downed` [peer, bleed_left]   `_revived` [peer, reviver]   `_bledout` [peer]
-#                 `_respawned` [peer]   `_revive_state` [target, reviver, progress, revive_time]
+#                 `_respawned` [peer]   `_waiting` [peer]   `_revive_state` [target, reviver, progress, revive_time]
 #                 `_game_over` [round, summary rows]
 #   owner -> host: `_revive_req` [target, holding]
 #   host -> peer: `_downed_full` [[peer, state, bleed_left]...] on join
@@ -20,7 +20,8 @@ signal player_bled_out(peer_id: int)
 signal player_respawned(peer_id: int)
 signal game_over(round_reached: int, summary: Array)
 
-enum State { ALIVE, DOWNED, BLED_OUT }
+# WAITING: joined / reconnected mid-round; spectates and spawns at the next round start (§13).
+enum State { ALIVE, DOWNED, BLED_OUT, WAITING }
 
 const GAME_OVER_SCREEN_DELAY: float = 3.0
 const REVIVE_RANGE_SLACK: float = 0.75
@@ -51,7 +52,14 @@ func _ready() -> void:
 	name = "Downed"
 	process_priority = 200  # after PlayerCharacter so the spectate camera wins
 	for m: StringName in [
-		&"_downed", &"_revived", &"_bledout", &"_respawned", &"_revive_state", &"_game_over", &"_revive_req"
+		&"_downed",
+		&"_revived",
+		&"_bledout",
+		&"_respawned",
+		&"_revive_state",
+		&"_game_over",
+		&"_revive_req",
+		&"_waiting"
 	]:
 		Net.register_message(m, Callable(self, "_on_msg" + String(m)))
 	Net.register_message(&"_downed_full", _on_msg_full)
@@ -74,6 +82,7 @@ func _exit_tree() -> void:
 		&"_revive_state",
 		&"_game_over",
 		&"_revive_req",
+		&"_waiting",
 		&"_downed_full"
 	]:
 		Net.unregister_message(m)
@@ -191,12 +200,21 @@ func host_bleed_out(target: int) -> void:
 	_host_check_game_over()
 
 
-# HOST: round start — bled-out players come back next to the nearest living teammate.
+# HOST (MatchSession): a late joiner / reconnecting player spectates until the next round start.
+func host_set_waiting(peer_id: int) -> void:
+	if not is_authority() or not players.avatars.has(peer_id):
+		return
+	states[peer_id] = State.WAITING
+	Net.send_reliable(0, &"_waiting", [peer_id])
+	_present_waiting(peer_id)
+
+
+# HOST: round start — bled-out and waiting players come back next to the nearest living teammate.
 func host_respawn_bled_out() -> void:
 	if not is_authority() or is_game_over:
 		return
 	for id: int in players.player_ids():
-		if state_of(id) != State.BLED_OUT:
+		if state_of(id) != State.BLED_OUT and state_of(id) != State.WAITING:
 			continue
 		var p: PlayerCharacter = players.avatars[id]
 		var pos: Vector3 = players.spawn_point_for(id)
@@ -371,6 +389,13 @@ func _present_bled_out(peer_id: int) -> void:
 	_play(peer_id, &"player_bledout")
 
 
+func _present_waiting(peer_id: int) -> void:
+	states[peer_id] = State.WAITING
+	var p: PlayerCharacter = players.avatars.get(peer_id, null)
+	if p != null:
+		p.spectating = true
+
+
 func _present_respawned(peer_id: int) -> void:
 	states[peer_id] = State.ALIVE
 	var p: PlayerCharacter = players.avatars.get(peer_id, null)
@@ -418,6 +443,11 @@ func _on_msg_bledout(sender: int, p: Array) -> void:
 		_present_bled_out(int(p[0]))
 
 
+func _on_msg_waiting(sender: int, p: Array) -> void:
+	if sender == 1 and not Net.is_host():
+		_present_waiting(int(p[0]))
+
+
 func _on_msg_respawned(sender: int, p: Array) -> void:
 	if sender == 1 and not Net.is_host():
 		_present_respawned(int(p[0]))
@@ -459,6 +489,8 @@ func _on_msg_full(sender: int, p: Array) -> void:
 			_present_downed(id, float(row[2]))
 		elif st == State.BLED_OUT:
 			_present_bled_out(id)
+		elif st == State.WAITING:
+			_present_waiting(id)
 
 
 func _on_peer_joined(peer_id: int, _info: Dictionary) -> void:

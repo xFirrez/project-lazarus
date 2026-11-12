@@ -61,6 +61,17 @@ func scan(root: Node) -> void:
 			doors.append(node as NavDoor)
 
 
+# Door states and barricade planks as digest lines (MatchSession state hash).
+func digest() -> PackedStringArray:
+	var bp: PackedStringArray = []
+	for b: Barricade in barricades:
+		bp.append(str(b.planks))
+	var dp: PackedStringArray = []
+	for d: NavDoor in doors:
+		dp.append("1" if d.is_open else "0")
+	return PackedStringArray(["barricades=" + ",".join(bp), "doors=" + "".join(dp)])
+
+
 func _on_msg_barricade(sender: int, p: Array) -> void:
 	if sender != 1 or Net.is_host():
 		return

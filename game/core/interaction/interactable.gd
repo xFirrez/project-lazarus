@@ -15,6 +15,9 @@ extends Node3D
 @export var continuous: bool = false
 @export var repeat_interval: float = 0.5
 @export var requires_power: bool = false
+# What a teammate ping on this calls it (PingSystem): &"item" (wall-buys, doors) or &"machine".
+@export var ping_kind: StringName = &"item"
+@export var ping_label: String = ""  # "" = derived from the prompt
 
 var interact_id: int = -1
 

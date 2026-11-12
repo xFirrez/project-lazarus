@@ -10,7 +10,15 @@
 #                moving zombies accepted >= 98%, barricade replication (AC-5.3, AC-5.6)
 #   survival     vesper_peak at --netsim: late-join door, purchase race without double-spend,
 #                revive / bleedout / spectate / respawn / game over on both peers (AC-6.4..6.6)
-# Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies|survival]... (default: all)
+#   lobby        --host --lobby + 2 clients: unique characters, chat, ready, countdown, scene-ready gate,
+#                starting round, late join off refuses a 3rd client, game over -> return to lobby (Step 7)
+#   late_join    a client joins mid-round 3: full state < 2 s, spectates, spawns next round with
+#                500 + 250 x 3 points, correct doors / barricades; pings (AC-7.2)
+#   reconnect    a client is SIGKILLed and relaunched: points, weapons, perks restored by uid (AC-7.3)
+#   coop4        host + 3 clients at 150 ms / 30 ms / 3 %: 32-zombie bandwidth phase, then 10 bot rounds
+#                with state-hash convergence at every round end (AC-7.1, AC-7.4)
+# Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies|survival|lobby|
+#        late_join|reconnect|coop4]... (default: all)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
@@ -131,8 +139,69 @@ test_survival() {
   report survival_host "$OUT/survival_host.json" "$OUT/survival_host.log"
 }
 
+test_lobby() {
+  local port; port="$(free_port)"
+  rm -f "$OUT"/lobby_*.json
+  launch host "$OUT/lobby_host.log" -- --host="$port" --lobby --map=vesper_peak --netsim="$NETSIM" \
+    --autotest=res://tests/net/host_lobby.gd --autotest-out="$OUT/lobby_host.json" --profile=nethost
+  wait_for_log "$OUT/lobby_host.log" "AUTOTEST READY host" 20
+  launch c1 "$OUT/lobby_c1.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_lobby.gd --autotest-out="$OUT/lobby_c1.json" --profile=netclient1
+  wait_for_log "$OUT/lobby_host.log" "slot 1" 20
+  launch c2 "$OUT/lobby_c2.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_lobby.gd --autotest-out="$OUT/lobby_c2.json" --profile=netclient2
+  wait_for_log "$OUT/lobby_host.log" "AUTOTEST READY match" 60
+  launch c3 "$OUT/lobby_c3.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_lobby.gd --autotest-out="$OUT/lobby_c3.json" --profile=netclient3
+  wait "$PID_c3" || true
+  wait "$PID_c1" || true
+  wait "$PID_c2" || true
+  wait "$PID_host" || true
+  local fail=0
+  report lobby_c1 "$OUT/lobby_c1.json" "$OUT/lobby_c1.log" || fail=1
+  report lobby_c2 "$OUT/lobby_c2.json" "$OUT/lobby_c2.log" || fail=1
+  report lobby_c3_refused "$OUT/lobby_c3.json" "$OUT/lobby_c3.log" || fail=1
+  report lobby_host "$OUT/lobby_host.json" "$OUT/lobby_host.log" || fail=1
+  return $fail
+}
+
+test_late_join() {
+  local port; port="$(free_port)"
+  rm -f "$OUT"/late_join_*.json
+  launch host "$OUT/late_join_host.log" -- --host="$port" --map=vesper_peak --netsim="$NETSIM" \
+    --autotest=res://tests/net/host_late_join.gd --autotest-out="$OUT/late_join_host.json" --profile=nethost
+  wait_for_log "$OUT/late_join_host.log" "AUTOTEST READY host" 40
+  launch client "$OUT/late_join_client.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_late_join.gd --autotest-out="$OUT/late_join_client.json" --profile=netclient1
+  wait "$PID_client" || true
+  wait "$PID_host" || true
+  report late_join_client "$OUT/late_join_client.json" "$OUT/late_join_client.log"
+  report late_join_host "$OUT/late_join_host.json" "$OUT/late_join_host.log"
+}
+
+test_reconnect() {
+  local port; port="$(free_port)"
+  rm -f "$OUT"/reconnect_*.json
+  launch host "$OUT/reconnect_host.log" -- --host="$port" --map=vesper_peak --netsim="$NETSIM" \
+    --autotest=res://tests/net/host_reconnect.gd --autotest-out="$OUT/reconnect_host.json" --profile=nethost
+  wait_for_log "$OUT/reconnect_host.log" "AUTOTEST READY host" 40
+  launch client "$OUT/reconnect_client_a.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_reconnect.gd --reconnect-phase=a --profile=netclient1
+  wait_for_log "$OUT/reconnect_client_a.log" "AUTOTEST READY client-a" 40
+  kill -9 "$PID_client"
+  wait "$PID_client" 2>/dev/null || true
+  sleep "${RECONNECT_DELAY:-1}"  # 1 s: rejoin before the host's timeout; 6 s: after it
+  launch client "$OUT/reconnect_client_b.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_reconnect.gd --reconnect-phase=b \
+    --autotest-out="$OUT/reconnect_client.json" --profile=netclient1
+  wait "$PID_client" || true
+  wait "$PID_host" || true
+  report reconnect_client "$OUT/reconnect_client.json" "$OUT/reconnect_client_b.log"
+  report reconnect_host "$OUT/reconnect_host.json" "$OUT/reconnect_host.log"
+}
+
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4)
 fail=0
 for t in "${TESTS[@]}"; do
   "test_$t" || fail=1

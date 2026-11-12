@@ -21,6 +21,7 @@ var starting_points: int = 500
 var targets: TargetRegistry = null
 var players: PlayerSync = null
 var spends_refused: int = 0
+var names: Dictionary = {}  # peer -> display name (kept after a player leaves, for the summary)
 var _repair_round: Dictionary = {}  # peer -> points from repairs this round
 var _hit_keys: Dictionary = {}  # "peer:target" -> physics frame of the last paid hit
 
@@ -34,18 +35,24 @@ func _ready() -> void:
 	Net.register_message(&"_points", _on_msg_points)
 	Net.register_message(&"_stat", _on_msg_stat)
 	Net.register_message(&"_points_full", _on_msg_full)
+	Net.register_message(&"_points_forget", _on_msg_forget)
 	Net.peer_joined.connect(_on_peer_joined)
 	if targets != null:
 		targets.target_damaged.connect(_on_target_damaged)
 	if players != null:
-		players.avatar_spawned.connect(func(id: int, _a: PlayerCharacter) -> void: ensure_player(id))
+		players.avatar_spawned.connect(_on_avatar_spawned)
 		for id: int in players.avatars:
-			ensure_player(id)
+			_on_avatar_spawned(id, players.avatars[id])
 
 
 func _exit_tree() -> void:
-	for m: StringName in [&"_points", &"_stat", &"_points_full"]:
+	for m: StringName in [&"_points", &"_stat", &"_points_full", &"_points_forget"]:
 		Net.unregister_message(m)
+
+
+func _on_avatar_spawned(peer_id: int, a: PlayerCharacter) -> void:
+	names[peer_id] = a.display_name
+	ensure_player(peer_id)
 
 
 func ensure_player(peer_id: int) -> void:
@@ -134,6 +141,25 @@ func host_repair_reward(peer_id: int) -> int:
 	return pts
 
 
+# HOST (reconnect): moves a retained player's points + stats from their old peer id to the new one
+# and drops the old row everywhere (so the game-over table has one row per player).
+func host_transfer(old_peer: int, new_peer: int, total: int, stat_values: Dictionary) -> void:
+	if not is_authority():
+		return
+	ensure_player(new_peer)
+	for k: Variant in stat_values:
+		host_add_stat(new_peer, StringName(k), int(stat_values[k]) - stat(new_peer, StringName(k)))
+	host_set(new_peer, total)
+	if old_peer != new_peer and points.has(old_peer):
+		points.erase(old_peer)
+		stats.erase(old_peer)
+		Net.send_reliable(0, &"_points_forget", [old_peer])
+
+
+func stats_of(peer_id: int) -> Dictionary:
+	return (stats.get(peer_id, {}) as Dictionary).duplicate()
+
+
 func host_new_round() -> void:
 	_repair_round.clear()
 
@@ -141,10 +167,13 @@ func host_new_round() -> void:
 func summary() -> Array:
 	var out: Array = []
 	for id: int in points:
-		var name_text: String = "Player %d" % id
+		var name_text: String = String(names.get(id, "Player %d" % id))
+		var char_id: String = String(Session.character_of(id))
 		if players != null and players.avatars.has(id):
-			name_text = (players.avatars[id] as PlayerCharacter).display_name
-		var row: Dictionary = {"peer": id, "name": name_text, "points": get_points(id)}
+			var pc: PlayerCharacter = players.avatars[id]
+			name_text = pc.display_name
+			char_id = String(pc.character_id)
+		var row: Dictionary = {"peer": id, "name": name_text, "points": get_points(id), "character": char_id}
 		for k: StringName in STAT_KEYS:
 			row[String(k)] = stat(id, k)
 		out.append(row)
@@ -214,6 +243,12 @@ func _on_msg_full(sender: int, p: Array) -> void:
 		for k: Variant in s:
 			(stats[id] as Dictionary)[StringName(k)] = int(s[k])
 		points_changed.emit(id, int(row[1]), 0)
+
+
+func _on_msg_forget(sender: int, p: Array) -> void:
+	if sender == 1 and not Net.is_host():
+		points.erase(int(p[0]))
+		stats.erase(int(p[0]))
 
 
 func _on_peer_joined(peer_id: int, _info: Dictionary) -> void:

@@ -1,11 +1,17 @@
 # Game — top-level state machine: Boot -> MainMenu -> Lobby -> Loading -> InMatch -> GameOver.
-# Owns the current Match and the placeholder screens. Command-line entry points:
-#   --solo | --host[=port] | --join=ip[:port]   start a session directly
+# Owns the current Match and the screens (main menu, map select, settings, lobby, game over).
+# Menu flow: Solo -> map select -> match; Host -> map select -> lobby (Session) -> countdown ->
+# every peer loads -> scene-ready gate (MatchSession) -> round 1; Join (IP / Steam) -> lobby.
+# Command-line entry points:
+#   --solo | --host[=port] | --join=ip[:port]   start a session directly (--host skips the lobby
+#                                                unless --lobby is given; dev / tests)
+#   --upnp                                       try a UPnP port mapping when hosting
 #   --map=<map_id>                               map to play (default: first non-test map)
 #   --exec="cmd; cmd"                            console commands once in a match/menu
 #   --autotest=res://path.gd                     attach a scripted test driver node
 #   --screenshot=<map_id> --screenshot-out=<dir> capture the map's shot cameras and quit
-# Authority: the host chooses the map and tells joining peers (reliable `_match_start`).
+# Authority: the host chooses the map and tells peers (reliable `_match_start` [map, from_lobby,
+# first_round]; late joiners get it on join).
 extends Node
 
 enum State { BOOT, MAIN_MENU, LOBBY, LOADING, IN_MATCH, GAME_OVER }
@@ -21,6 +27,8 @@ var _screen_layer: CanvasLayer = null
 var _screen: Control = null
 var _world: Node = null
 var _pending_exec: String = ""
+var _quick_start: bool = false  # host: skip the lobby (solo, CLI --host)
+var _session_joined_at: float = -1.0
 
 
 func _ready() -> void:
@@ -38,6 +46,9 @@ func _ready() -> void:
 	Net.connection_failed.connect(_on_connection_failed)
 	Net.peer_joined.connect(_on_peer_joined)
 	Net.register_message(&"_match_start", _on_msg_match_start)
+	Session.lobby_changed.connect(_on_lobby_changed)
+	Session.countdown_finished.connect(_on_countdown_finished)
+	Session.return_to_lobby_requested.connect(return_to_lobby)
 	Debug.commands.register("host", _cmd_host, [["port", TYPE_INT, Net.DEFAULT_PORT]], "Host a co-op session")
 	Debug.commands.register("join", _cmd_join, [["address", TYPE_STRING]], "Join ip[:port]")
 	Debug.commands.register("solo", _cmd_solo, [], "Start a solo session")
@@ -72,7 +83,11 @@ func boot() -> void:
 		start_solo()
 	elif CommandLine.has_flag("host"):
 		var port_str: String = CommandLine.get_value("host", "")
-		host_game(port_str.to_int() if port_str.is_valid_int() else Net.DEFAULT_PORT)
+		host_game(
+			port_str.to_int() if port_str.is_valid_int() else Net.DEFAULT_PORT,
+			CommandLine.has_flag("lobby"),
+			CommandLine.has_flag("upnp")
+		)
 	elif CommandLine.has_flag("join"):
 		join_game(CommandLine.get_value("join", "127.0.0.1"))
 	else:
@@ -92,13 +107,66 @@ func default_map_id() -> StringName:
 
 
 func start_solo() -> void:
+	_quick_start = true
 	if Net.start_solo() != OK:
 		go_to_main_menu("Could not start solo session")
 
 
-func host_game(port: int) -> void:
-	if Net.host_session(port) != OK:
+# use_lobby = false: dev quick host (CLI): the match starts immediately, peers join late.
+func host_game(port: int, use_lobby: bool = true, try_upnp: bool = false) -> void:
+	_quick_start = not use_lobby
+	if Net.host_session(port, try_upnp) != OK:
 		go_to_main_menu("Could not host on port %d" % port)
+
+
+func host_steam_game() -> void:
+	_quick_start = false
+	if Net.host_steam() != OK:
+		go_to_main_menu("Steam is not available (GodotSteam + a running Steam client are needed)")
+
+
+# Map select (menu): Solo / Host pick the map first.
+func show_map_select(for_host: bool) -> void:
+	var screen: MapSelectScreen = MapSelectScreen.new()
+	screen.selected = selected_map
+	screen.confirm_text = "Host lobby" if for_host else "Start solo"
+	screen.map_chosen.connect(
+		func(map_id: StringName) -> void:
+			selected_map = map_id
+			if for_host:
+				host_game(Net.DEFAULT_PORT, true, bool(Config.get_value(&"gameplay", &"upnp", true)))
+			else:
+				start_solo()
+	)
+	screen.back_pressed.connect(func() -> void: go_to_main_menu(""))
+	_set_screen(screen)
+
+
+func show_settings() -> void:
+	var screen: SettingsScreen = SettingsScreen.new()
+	screen.back_pressed.connect(func() -> void: go_to_main_menu(""))
+	_set_screen(screen)
+
+
+func show_lobby() -> void:
+	_set_state(State.LOBBY)
+	if _screen is LobbyScreen:
+		return
+	var screen: LobbyScreen = LobbyScreen.new()
+	screen.leave_pressed.connect(func() -> void: leave_game(""))
+	_set_screen(screen)
+
+
+# Everyone back to the lobby after a game over (host: Session.host_return_to_lobby).
+func return_to_lobby() -> void:
+	_end_match("return to lobby")
+	if not Net.is_active():
+		go_to_main_menu("")
+		return
+	if Net.transport != null and not Net.transport.supports_clients():
+		start_solo()  # solo "play again"
+		return
+	show_lobby()
 
 
 func join_game(address: String) -> void:
@@ -125,9 +193,11 @@ func go_to_main_menu(message: String) -> void:
 	menu_message = message
 	_set_state(State.MAIN_MENU)
 	var menu: MainMenu = MainMenu.new()
-	menu.solo_requested.connect(start_solo)
-	menu.host_requested.connect(func() -> void: host_game(Net.DEFAULT_PORT))
+	menu.solo_requested.connect(func() -> void: show_map_select(false))
+	menu.host_requested.connect(func() -> void: show_map_select(true))
 	menu.join_requested.connect(join_game)
+	menu.steam_requested.connect(host_steam_game)
+	menu.settings_requested.connect(show_settings)
 	menu.quit_requested.connect(func() -> void: get_tree().quit())
 	_set_screen(menu)
 	menu.set_status(message)
@@ -146,15 +216,23 @@ func show_game_over(reason: String) -> void:
 	_set_screen(screen)
 
 
-# Game over v1 (GAME_DESIGN §15): rounds survived + per-player stats, then back to the menu.
-func show_match_summary(round_reached: int, rows: Array) -> void:
+# Game over v1 (GAME_DESIGN §15): rounds survived + per-player stats; the host can take the session
+# back to the lobby (solo: play again), anyone can leave to the main menu.
+func show_match_summary(round_reached: int, rows: Array, subtitle: String = "") -> void:
 	_end_match("game over")
 	_set_state(State.GAME_OVER)
 	var screen: GameOverScreen = GameOverScreen.new()
 	screen.round_reached = round_reached
 	screen.rows = rows
+	screen.subtitle = subtitle
 	screen.local_peer = Net.local_id() if Net.is_active() else 1
+	screen.show_lobby_button = Net.is_host()
+	if Net.transport != null and not Net.transport.supports_clients():
+		screen.lobby_button_text = "Play again"
+	elif not Net.is_host() and Net.is_active() and subtitle == "":
+		screen.subtitle = "Waiting for the host to return to the lobby ..."
 	screen.menu_pressed.connect(func() -> void: leave_game(""))
+	screen.lobby_pressed.connect(Session.host_return_to_lobby)
 	_set_screen(screen)
 	Log.info(&"game", "Game over screen: round %d, %d players" % [round_reached, rows.size()])
 
@@ -166,7 +244,7 @@ func state_name() -> String:
 # --- Match lifecycle ---------------------------------------------------------------------
 
 
-func _start_match(map_id: StringName) -> void:
+func _start_match(map_id: StringName, from_lobby: bool = false, first_round: int = 1) -> void:
 	_end_match("")
 	var def: MapDefinition = Content.get_map(map_id)
 	if def == null:
@@ -177,7 +255,8 @@ func _start_match(map_id: StringName) -> void:
 	_show_message("Loading %s ..." % def.display_name)
 	current_match = Match.new()
 	_world.add_child(current_match)
-	if current_match.setup(def) != OK:
+	current_match.session_joined_at = _session_joined_at
+	if current_match.setup(def, from_lobby, first_round) != OK:
 		leave_game("Failed to load map '%s'" % map_id)
 		return
 	_set_screen(null)
@@ -232,15 +311,50 @@ func _show_message(text: String) -> void:
 
 
 func _on_session_started(is_host: bool) -> void:
+	_session_joined_at = Net.now()
 	if is_host:
-		_set_state(State.LOBBY)  # Step 7 adds a real lobby; for now start immediately.
-		_start_match(selected_map)
+		Session.lobby.map_id = selected_map
+		if _quick_start:
+			_set_state(State.LOBBY)
+			_launch_match(false)
+		else:
+			Session.lobby_changed.emit()
+			show_lobby()
 	else:
 		_set_state(State.LOBBY)
 		_show_message("Connected. Waiting for host ...")
 
 
+# Host: start the match on every peer (from the lobby countdown or a quick start).
+func _launch_match(from_lobby: bool) -> void:
+	var first: int = Session.lobby.starting_round if Session.starting_round_allowed else 1
+	if Session.lobby.map_id == &"":
+		Session.lobby.map_id = selected_map
+	Session.host_match_started()
+	Net.send_reliable(0, &"_match_start", [String(Session.lobby.map_id), from_lobby, first])
+	_start_match(Session.lobby.map_id, from_lobby, first)
+
+
+func _on_countdown_finished() -> void:
+	if Net.is_host() and state == State.LOBBY and current_match == null:
+		_launch_match(true)
+
+
+func _on_lobby_changed() -> void:
+	if Net.is_active() and not Net.is_host() and state == State.LOBBY and current_match == null:
+		show_lobby()
+
+
+# Host leaves / crashes: clients in a match see the summary with a clear message (no migration).
 func _on_session_ended(reason: String) -> void:
+	var survival: bool = current_match != null and current_match.rounds != null and current_match.rounds.enabled
+	if survival and state == State.IN_MATCH and current_match.points != null:
+		var rows: Array = current_match.points.summary()
+		var r: int = maxi(current_match.rounds.current_round, 1) if current_match.rounds != null else 1
+		var text: String = "The host left the game — match over" if reason == "Host disconnected" else reason
+		Log.info(&"game", "Session ended in match: %s" % reason)
+		show_match_summary(r, rows, text)
+		return
 	go_to_main_menu(reason)
 
 
@@ -250,13 +364,15 @@ func _on_connection_failed(reason: String) -> void:
 
 func _on_peer_joined(peer_id: int, _info: Dictionary) -> void:
 	if Net.is_host() and peer_id != Net.local_id() and current_match != null:
-		Net.send_reliable(peer_id, &"_match_start", [current_match.definition.id])
+		Net.send_reliable(peer_id, &"_match_start", [String(current_match.definition.id), false, 1])
 
 
 func _on_msg_match_start(_sender: int, payload: Array) -> void:
 	if Net.is_host():
 		return
-	_start_match(StringName(payload[0]))
+	var from_lobby: bool = payload.size() > 1 and bool(payload[1])
+	var first: int = int(payload[2]) if payload.size() > 2 else 1
+	_start_match(StringName(payload[0]), from_lobby, first)
 
 
 # --- Console commands --------------------------------------------------------------------
