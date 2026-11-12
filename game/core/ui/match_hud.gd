@@ -140,6 +140,13 @@ func _draw_points() -> void:
 		ty -= 26.0
 
 
+# "Name (Character)" for prompts, e.g. "Hold [F] to revive Ann (Brandt)" (GAME_DESIGN §15).
+static func _who(p: PlayerCharacter) -> String:
+	if p.character != null and p.character.display_name != p.display_name:
+		return "%s (%s)" % [p.display_name, p.character.display_name]
+	return p.display_name
+
+
 func _player_color(peer_id: int) -> Color:
 	var p: PlayerCharacter = match_node.players.avatars.get(peer_id, null)
 	return p.player_color() if p != null else Color.WHITE
@@ -160,10 +167,11 @@ func _draw_prompt(me: PlayerCharacter) -> void:
 	var progress: float = 0.0
 	if ds != null and ds.revive_candidate != null and not me.health.is_downed:
 		var target: int = ds.revive_candidate.peer_id
-		text = "Hold [F] to revive %s" % ds.revive_candidate.display_name
+		var who: String = _who(ds.revive_candidate)
+		text = "Hold [F] to revive %s" % who
 		if me.reviving:
 			progress = ds.progress_of(target) / maxf(ds.revive_time_for(me.peer_id), 0.01)
-			text = "Reviving %s" % ds.revive_candidate.display_name
+			text = "Reviving %s" % who
 	elif ia != null and ia.focus_text != "":
 		text = ia.focus_text
 		progress = ia.hold_progress if ia.focus != null and ia.focus.hold_time > 0.3 else 0.0

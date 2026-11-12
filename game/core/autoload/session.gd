@@ -182,7 +182,15 @@ func _broadcast() -> void:
 	if not Net.is_host():
 		return
 	Net.send_reliable(0, &"_lobby", [lobby.to_array()])
+	update_steam_metadata()
 	lobby_changed.emit()
+
+
+# Steam lobby browser / invite info (map, players, round); no-op on other transports.
+func update_steam_metadata() -> void:
+	if Net.is_host() and Net.transport is SteamTransport:
+		var r: int = Match.current.rounds.current_round if Match.current != null and Match.current.rounds != null else 0
+		(Net.transport as SteamTransport).update_metadata(lobby.map_id, lobby.slots.size(), r)
 
 
 func _filter_join(uid: String, _player_name: String) -> String:

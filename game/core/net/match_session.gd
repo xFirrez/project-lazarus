@@ -148,6 +148,8 @@ func _uid_of(peer_id: int) -> String:
 
 
 func _on_phase_changed(phase: int) -> void:
+	if phase == RoundDirector.Phase.ACTIVE:
+		Session.update_steam_metadata()
 	if phase != RoundDirector.Phase.INTERMISSION or not Net.is_active():
 		return
 	var r: int = match_node.rounds.current_round

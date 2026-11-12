@@ -19,6 +19,7 @@
 | `kits/build_kit.py` | `game/content/kits/vesper/*.glb` + `kit_manifest.json` (16 pieces) | `build_kit.sh [piece…]` |
 | `props/build_props.py` | `game/content/props/<id>/<id>.glb` (fountain, truck, sandbags, lamp post, drum, crate, machine placeholder) | `build_props.sh [prop…]` |
 | `characters/build_zombie.py` | `game/content/characters/animations/zombie_anims.glb` (12 clips), `game/content/enemies/zombie/zombie_orderly.glb` | `build_characters.sh` |
+| `characters/build_survivors.py` | `game/content/characters/animations/survivor_anims.glb` (18 clips), `game/content/characters/{calloway,orlov,brandt,ashcombe}/*.glb` (Step 7) | `build_survivors.sh [anims] [id…]` |
 | `weapons/build_m1911.py` | `game/content/weapons/m1911/m1911_{viewmodel,world}.glb` | `build_weapons.sh` |
 | everything | — | `build_all.sh` |
 | `tools/lookdev/build_lookdev.gd` (Godot) | `game/maps/_test/lookdev.tscn` | `tools/lookdev/build_lookdev.sh` |
@@ -56,6 +57,7 @@ Shared helpers: `tools/blender/lazarus_bpy.py` (scene reset, palette preview mat
   2. **Authored or downloaded** (Blender / CC0 / Mixamo): export a GLB of the armature + actions, import it in Godot as *Animation Library*, and in the Advanced Import dialog set *Skeleton3D → Retarget → Bone Map* to a BoneMap with profile `SkeletonProfileHumanoid` (Mixamo names auto-map). Set loop modes. Add it to the `ZombieModel.animations` library or a second library.
   3. Log the source in ASSET_LICENSES.md.
 - **Model scene:** `content/enemies/zombie/zombie_<variant>.tscn` = `ZombieModel` (`core/enemies/zombie_model.gd`) with `model_scene` (GLB), `animations` (library), `hitboxes` (`HitboxProfile`) and `skin_material` (variant). Variants: `orderly`, `orderly_pallid`, `orderly_frostbitten`.
+- **Survivors (Step 7):** `build_survivors.py` reuses the zombie rig helpers (`build_zombie.py` is importable; its `main()` runs only as a script). Survivor library clips (in place): `idle`, `walk`, `run`, `crouch_idle`, `crouch_walk`, `slide`, `jump`, `downed_crawl`, `revive`, `drink`, upper-body `hold_pistol|rifle|shotgun|lmg`, `fire_pistol|long`, `reload_pistol|long` (neutral arms-down stance instead of the zombie hunch). Each character has its own proportions and an armband in its identification colour. Scenes `content/characters/<id>/<id>_model.tscn` = `SurvivorModel` (`core/player/survivor_model.gd`, AnimationTree built in code: locomotion Transition → spine-up Blend2 weapon hold → fire / action OneShots). Loop flags are set in `survivor_anims.glb.import`.
 - **Hitboxes:** `content/enemies/zombie/zombie_hitboxes.tres` maps bones to hitzones (head, neck, 4 torso, 8 limb capsules). `ZombieModel` builds a `BoneAttachment3D` + `Hurtbox` (physics layer 3) per entry, so hitboxes follow the animated pose on every peer (test: `test_zombie_model.gd`).
 
 ## 6. Weapons (hero model path)

@@ -11,11 +11,11 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | **M1 First Playable** (Step 6: round-based survival in the Arrival Station slice of Vesper Peak, solo + LAN co-op; AC-6.8 playtest = human check) |
-| Next step to start | **Step 7 — Online co-op, lobby & player characters → M2** (7A first) |
+| Current milestone | **M2 Play with friends** (automated criteria; Step 7: lobby, late join, reconnect, 4 survivors, pings; AC-7.6 internet session = human check) |
+| Next step to start | **Step 8 — Vesper Peak full greybox → M3** (8A first) |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-12 (Step 6 session) |
-| Main branch playable? | **Yes** — default map `vesper_peak` (Arrival Station slice): `godot --path game` → Solo/Host; rounds, points, D01/D02, M14/Coachgun wall-buys, barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-12 (Step 7 session) |
+| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (Arrival Station slice): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, M14/Coachgun wall-buys, barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -30,7 +30,7 @@
 | 4 | Art direction, asset pipeline & look development | **Complete** (AC-4.3 / AC-4.4 awaiting human) | 4A + 4B | 2026-11-11 |
 | 5 | Zombie AI, animation & networked enemies | **Complete (with deferrals)** (AC-5.5 desktop + AC-5.8 awaiting human) | 5A + 5B | 2026-11-11 |
 | 6 | Core survival loop (→ M1 First Playable) | **Complete** (AC-6.8 awaiting human) | 6A + 6B | 2026-11-12 |
-| 7 | Online co-op, lobby & player characters (→ M2) | Not started | 7A / 7B | — |
+| 7 | Online co-op, lobby & player characters (→ M2) | **Complete** (AC-7.6 awaiting human) | 7A + 7B | 2026-11-12 |
 | 8 | Vesper Peak full greybox (→ M3) | Not started | 8A / 8B | — |
 | 9 | Arsenal, wall-buys & Relic Box | Not started | 9A / 9B | — |
 | 10 | Vigor Tonics & power-ups | Not started | — | — |
@@ -108,13 +108,13 @@
 - [x] **M1 reached** (automated criteria; AC-6.8 confirms the fun)
 
 ### Step 7 — Online co-op
-- [ ] AC-7.1 4-client NetSim 10-round state convergence
-- [ ] AC-7.2 Late join < 2 s, correct state
-- [ ] AC-7.3 Reconnect restores state
-- [ ] AC-7.4 ≤ 25 KB/s per client
-- [ ] AC-7.5 4 characters + third-person anims + arms
-- [ ] AC-7.6 [HUMAN] Internet session 10+ rounds
-- [ ] **M2 reached**
+- [x] AC-7.1 4-client NetSim 10-round state convergence (`net_tests.sh coop4`: host + 3 clients at 150 ms ±30 ms, 3 % loss, client aim bots through the real hit-claim path + host SurvivalBot, D01/D02 bought along the way: **30 / 30 state hashes match** over rounds 1–10 — round, zones, doors, barricades, flags, every player's points / weapons / lethals / perks, zombie count; 0 mismatches)
+- [x] AC-7.2 Late join < 2 s, correct state (`net_tests.sh late_join`: client joins mid-round 3 → full state in **0.33 s**, world digest equals the host's (D01 open, barricade 2 planks), flag replicated, 1250 points, spectates, spawns at round 4 with the M1911)
+- [x] AC-7.3 Reconnect restores state (`net_tests.sh reconnect`: client SIGKILLed and relaunched with the same profile — both before (1 s) and after (6 s) the host's timeout: 3210 points, kills stat, M14 + mirrored ammo, perk, character restored; one ledger row; waits and respawns next round)
+- [x] AC-7.4 ≤ 25 KB/s per client (`coop4` phase A, 32 zombies + 4 players at 150 ms / 3 %: **12.4–12.5 KB/s avg, 13.4 KB/s peak** per client)
+- [x] AC-7.5 4 characters + third-person anims + arms (`test_coop_rules`, `test_lobby_state`, `net_tests.sh lobby`: unique per lobby, taken pick refused; `test_survivor_model`: 4 retargeted models, 18 clips, per-class holds change the arm pose, locomotion under the hold layer, downed / revive / slide; arms tinted per character; `visual_tests.sh survivor_showcase` → `docs/screenshots/step7/`) — [H] visual review of the poses
+- [H] AC-7.6 [HUMAN] Internet session 10+ rounds (steps in `docs/sessions/2026-11-12_step-7.md`, guide `docs/NETWORKING.md`)
+- [x] **M2 reached** (automated criteria; AC-7.6 confirms over the internet)
 
 ### Step 8 — Vesper Peak greybox
 - [ ] AC-8.1 All zones/doors with canonical ids, costs, unlocks
@@ -207,6 +207,10 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-12 | 7 | `tools/check.sh` | Pass | 25 scripts / 137 tests (new: `test_lobby_state` — slots, unique characters, reservations for reconnects, ready / countdown reset, chat sanitising, round trip; `test_coop_rules` — late-join points, 4 characters + §13 colours + distinct sleeves, Steam lobby metadata, Steam absent = graceful, name-tag fade, ping kinds + cues) |
+| 2026-11-12 | 7 | `tools/run_tests.sh integration` | Pass | 13 scripts / 59 tests (new `test_survivor_model`: retargeted skeletons, 18 clips, triangle budget 9.8–10.8k, per-class holds differ ≥ 4°, crouch bends legs with the rifle hold kept, downed hips on the ground, fire/reload one-shots, placeholder + authored M1911 arms tinted) |
+| 2026-11-12 | 7 | `tools/net_tests.sh` (all 12) | Pass except pre-existing flakes | New: **lobby** (host + 2 clients + refused 3rd: unique characters, chat, countdown 3.0 s, round held until all scene-ready, starting round 2, late join off refused, game over → return to lobby), **late_join** (0.33 s), **reconnect** (fast + slow rejoin), **coop4** (30/30 hashes, 12.5 KB/s). `replication` "no_visible_snapping" fails ~3/4 and `weapons` "client_saw_host_fire_burst" intermittently **on the Step 6 commit too** in this container (I-012, I-014) |
+| 2026-11-12 | 7 | `tools/run_sim.sh smoke`, `round_flow`; `tools/visual_tests.sh survivor_showcase lobby_ui` | Pass | Screenshots: `docs/screenshots/step7/` (lobby, main menu, map select, survivors' holds and states, first-person arms) |
 | 2026-11-12 | 6 | `tools/check.sh` | Pass | 23 scripts / 124 tests (new: `test_round_curve` — N(r,p) rounds 1–50 × 1–4 players, hp(r) 1–50, spawn interval, alive caps, tier mix anchors; `test_points_rules` — hit/kill points by zone/kind, repair cap 500, penalties rounded to 10) |
 | 2026-11-12 | 6 | `tools/run_tests.sh integration` | Pass | 12 scripts / 53 tests. Fixed a pre-existing flake in `test_zombie_pursuit` (door re-bake is threaded and could outlast the 180-frame window under `--fixed-fps`; the test now waits for the bake) |
 | 2026-11-12 | 6 | `tools/run_sim.sh round_flow` (AC-6.2, 6.4, 6.5) | Pass | 30 checks: intro → r1 6 zombies @150 HP, re-queue keeps total, no early end, intermission 10.0 s, r2 8 @250 HP, last 2 promoted to Run, insufficient funds refused, D01 −750 + Z03 unlocked + nav path 31.9 m from a Z03 spawner, no double buy, M14 −500, ammo full refused, ammo −250, 2 planks +20, solo down → game over at r2 with summary |
@@ -254,6 +258,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Peers | NetSim profile | KB/s per client | Desyncs | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-12 | 7 | 4 (loopback) | 150 ms ±30 ms, 3% loss | 12.4–12.5 avg / 13.4 peak (all downstream traffic) at 32 zombies + 4 players | 0 (30/30 round-end state hashes) | RTT ~310–330 ms; join snapshot 0.33 s at 100 ms; reliable lobby/session traffic negligible |
 | 2026-11-11 | 5 | 2 (loopback) | 100 ms ±20 ms, 2% loss | 9.4–9.5 for 32 zombies (stream 19 only; 489 B per 20 Hz packet) | 0 | Plus reliable spawn/death events; 100% of client hit claims on moving zombies accepted |
 | 2026-11-11 | 3 | 2 (loopback) | 100 ms ±20 ms, 2% loss | ~1–2 while firing (MP40: 9 reliable shot claims/s batched per frame, ≈60 B each + 41 B unreliable fire burst relayed per shot) | 0 | Claims carry no damage; host recomputes |
 | 2026-11-11 | 2 | 2 (loopback) | 100 ms ±20 ms, 2% loss | ~1 (player state 30 Hz: pos, yaw, pitch, flags, seq; snapshots 20 Hz) | 0 | Replication error max 0.015 m; 0 false corrections |
@@ -275,6 +280,10 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | I-009 | S4 | 5 | Ragdolls / death animation / corpses decide locally per peer, so a corpse can lie in a slightly different pose on each peer | Cosmetic; corpses aren't targets |
 | I-010 | S4 | 6 | Vesper Peak slice: ~260 stuck/far re-queues across the 20-round 4-bot soak (≈ 11 % of spawns), mostly window queues on the gallery ledges where waiting zombies box each other in. Rounds still end correctly (re-queues return through the SpawnDirector queue) | Step 8: wider ledges / more window entrances in the full greybox; revisit I-008 tuning |
 | I-011 | S4 | 6 | HUD v1 is functional placeholder art (fallback font, drawn tallies); prompts show "[F]" regardless of rebinding / gamepad | Step 15A (final HUD, input glyphs) |
+| I-012 | S3 | 7 | `net_tests.sh replication` "no_visible_snapping" (max per-frame step of the interpolated host avatar) fails ~3 of 4 runs in this container (steps 0.3–7.7 m) — **reproduced on the Step 6 commit**, so it is environmental (frame hitches / clock) rather than a Step 7 regression; replication error itself stays < 0.13 m | Step 16 netcode polish: investigate interpolation under frame hitches (clamp per-frame catch-up), re-baseline the threshold on a desktop |
+| I-013 | S4 | 7 | Under opengl3 + xvfb, quitting after a menu screen was shown prints "Texture with GL ID … leaked" (default-font glyph atlases); `godot_log_has_errors` ignores that exit message | Re-check with Step 15's final theme/fonts |
+| I-014 | S4 | 3 | `net_tests.sh weapons` "client_saw_host_fire_burst" is intermittent (the host's single relayed fire burst is one unreliable packet at 2 % loss / single-frame trigger); also fails on the Step 6 commit | Make the test fire a short burst (Step 9 weapons work) |
+| I-015 | S4 | 7 | Placeholder first-person arms (greybox guns) sit mostly below the screen edge at the current hip framing; the M1911's authored arms are tinted instead | Step 9/15 authored arms per weapon |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
 Severity: **S1** crash / data loss / progress-blocking · **S2** major feature broken · **S3** minor feature issue / visual bug · **S4** polish.
@@ -291,10 +300,13 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Foot-placement IK on near zombies (Step 5 scope 5) | Step 13 | Zombies are navmesh-snapped and the test/greybox floors are flat or ramp-like; IK matters once art stairs/rubble exist. `TwoBoneIK3D` is available in 4.7 and slots in as another SkeletonModifier3D on near zombies |
 | `NavigationAgent3D` RVO avoidance (Step 5 scope 4) | Step 16 (if needed) | Replaced by custom separation + surround slots (D-034), which met the surround and budget criteria |
 | ~~Window swipe + plank rebuild~~ | — | Done in Step 6 (`BarricadeRepair`, `ZombieSim` window swipe 1.6 m) |
-| Late-join policy (spawn at next round with 500 + 250 × round points) and reconnect (GAME_DESIGN §13) | Step 7 | Step 6 joiners play immediately with 500 points; Step 7 owns sessions / lobby / reconnect |
+| ~~Late-join policy and reconnect (GAME_DESIGN §13)~~ | — | Done in Step 7 (`MatchSession`, D-047) |
 | Kit-based greybox, real zone elevations, gondola dock, Second Wind machine, door-burst spawners in Z01/Z03 | Step 8 (perks: 10) | Step 6 slice is box greybox with flattened elevations; Z01 + stubs of Z03 / Z06 only |
 | Bots replicated to clients | Not planned | Host bots are soak-test tooling (D-041) |
-| Remote-player downed / spectate animation (prone pose, crawl) | Step 7 (7B characters) | Puppets squash to a low capsule while downed and hide while spectating |
+| ~~Remote-player downed / spectate animation~~ | — | Done in Step 7 (`SurvivorModel` downed_crawl / revive) |
+| Steam live test (lobby, overlay invites, P2P) | Human (AC-7.6) / Step 16 | GodotSteam GDExtension is not vendored and no Steam client exists in the container; `SteamTransport` is implemented against GodotSteam's API and unit-tested for its pure parts (D-045). Direct IP + UPnP + VPN is the always-available path |
+| Drink animation trigger, character quips / VO, character-coloured kill markers (optional), occluded-teammate outlines | Step 10 (drink) / Step 15 (VO, markers, outlines) | `SurvivorModel.play_action(&"drink")` exists; perks arrive in Step 10. Name tags render through walls meanwhile |
+| Host bots in the lobby roster | Not planned | Bots are test tooling (D-041); they use a slot-based character |
 | Full `ProjectileBehavior` (launchers, crossbow, Ray Pistol) | Step 9 | Plan scope: stub interface now (`core/weapons/behaviors/projectile_behavior.gd`) |
 | Authored viewmodel/arms models and animation clips | Step 9 | Step 4 delivered the M1911 hero model (viewmodel + world); the other weapons stay greybox; clips are still code-built from the definition timings (`ViewmodelAnimations`) |
 | Hand-authored textures (256 px/m trims) | Step 13 | Step 4 kit/props use world-space triplanar detail noise + vertex-colour grime (no UVs); unique hero textures come with the art pass |
@@ -326,7 +338,9 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Step 4 | Optional: download Mixamo animations (requires Adobe account) if the scripted library is insufficient (import path: ART_PIPELINE §5) | Open |
 | Step 4 | ~~Confirm Blender availability~~ — resolved: the container installs Blender 5.3 as the `bpy` pip module (`pip install bpy`); a local Blender 4.2+ also works (`$BLENDER`) | Done |
 | Step 4 | AC-4.3 GPU performance on the look-dev scene and AC-4.4 art-direction approval (steps in `docs/sessions/2026-11-11_step-4.md`) | Open |
-| Step 7 | Have a friend available for an internet co-op test; install Steam client if Steam transport is used | Open |
+| Step 7 | **AC-7.6**: internet co-op session, 10+ rounds, host + ≥ 1 friend (steps in `docs/sessions/2026-11-12_step-7.md`, guide `docs/NETWORKING.md`); record the path used, join time, ping, issues | Open |
+| Step 7 | Optional Steam: install GodotSteam GDExtension for Godot 4.7 into `game/addons/godotsteam/` (docs/NETWORKING.md §3) and test lobby + overlay invite with a friend (App ID 480) | Open |
+| Step 7 | AC-7.5 visual review: survivors' third-person poses per weapon class (`docs/screenshots/step7/`, or watch a friend in co-op) and first-person sleeves | Open |
 | Step 13 | Optional: LightmapGI bakes on a desktop GPU | Open |
 | Step 15 | Provide or approve music (jingles, EE song), VO approach (recorded vs. TTS), and fonts | Open |
 | Any | Monitor Git LFS storage/bandwidth quota | Recurring |
@@ -352,3 +366,4 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 | 2026-11-11 | 4 | Art direction & pipeline: STYLE_GUIDE + ART_PIPELINE, Blender generators (16-piece kit, 7 props, zombie + 12-clip retargeted library, M1911 hero model), post-import material remap, 4 shaders + 31 materials, 4 environment presets, Graphics autoload + 4 quality presets, camera snow, ambience, look-dev scene + 5 reference shots, Forward+ screenshots via lavapipe | [2026-11-11_step-4.md](sessions/2026-11-11_step-4.md) |
 | 2026-11-11 | 5 | Zombies: ZombieArchetype, ZombieActor (sim + visual), ZombieSim brain (rise / window tear + climb / drop / vent / pursue / surround / attack / stagger / crawler / stuck + far re-queue), CrowdDirector (path budget, LOD think, separation, slots, timing), ZombieSync replication (NetIds, quantized 20 Hz snapshots, late join), WorldSync (barricades, nav doors), AnimationTree visuals with head look, gibs, ragdoll pool, placeholder audio with voice priority, nav torture map, console commands, unit/integration/net/sim/visual tests | [2026-11-11_step-5.md](sessions/2026-11-11_step-5.md) |
 | 2026-11-12 | 6 | Survival loop → M1: RoundCurve, RoundDirector, SpawnDirector (zones, fairness), ZoneManager, PointsLedger, Interactable framework (doors, wall-buys, barricade rebuild), DownedSystem (last stand, revive, bleedout, spectate, respawn, game over), HUD v1, game-over screen, round stings, M14 + Coachgun, Vesper Peak Arrival Station slice, SurvivalBots, unit/sim/net tests | [2026-11-12_step-6.md](sessions/2026-11-12_step-6.md) |
+| 2026-11-12 | 7 | Online co-op → M2: Session autoload + LobbyState (unique characters, ready, chat, host settings, countdown), main menu v1 / map select / settings, scene-ready gate, MatchSession (late join WAITING + points, reconnect by uid incl. stale-connection replacement, match flags, state-hash convergence, bandwidth), UPnP + SteamTransport (GodotSteam, dynamic) + NETWORKING.md, CharacterDefinition ×4, survivor models + 18-clip survivor animation library (bpy), SurvivorModel AnimationTree, tinted first-person arms, name tags, pings, lobby / late_join / reconnect / coop4 net tests (D-045…D-050) | [2026-11-12_step-7.md](sessions/2026-11-12_step-7.md) |
