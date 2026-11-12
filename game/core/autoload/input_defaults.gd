@@ -30,6 +30,7 @@ const ACTIONS: Dictionary = {
 	"lethal": ["key:G", "joy:10"],
 	"tactical": ["key:Q", "joy:9"],
 	"placeable": ["key:4", "joy:14"],
+	"alt_fire": ["key:B", "joy:13"],
 	"weapon_next": ["mouse:4", "joy:3"],
 	"weapon_prev": ["mouse:5"],
 	"weapon_slot_1": ["key:1"],

@@ -9,6 +9,8 @@
 #   nav_validate  vesper_peak navigation: tiles, islands, standable coverage, spawner reach (AC-8.2)
 #   flow        vesper_peak flow: door order, sprint travel times, perk spacing, bot loop (AC-8.3)
 #   perks       vesper_peak solo: perk machines, cap, drink, effects, Second Wind x3, power-ups (AC-10.1/2/4)
+#   progression vesper_peak solo: relays + pause rules, bridge, Forge, upgraded behaviors, traps,
+#               hazards (AC-11.1..11.5)
 # perf_arena and soak run with --fixed-fps 60 (simulated time, deterministic frames; per-frame
 # AI cost is measured in wall-clock microseconds either way). More come later (quest).
 set -euo pipefail
@@ -75,6 +77,18 @@ case "$SCENARIO" in
       echo "[sim:perks] FAIL (exit $code)" >&2; [[ -f "$JSON" ]] && cat "$JSON" >&2; tail -30 "$LOG" >&2; exit 1
     fi
     echo "[sim:perks] PASS"
+    ;;
+  progression)
+    LOG="$OUT/progression.log"; JSON="$OUT/progression.json"; rm -f "$JSON"
+    set +e
+    "$GODOT" --headless --path "$GAME_DIR" -- --solo --map="${MAP:-vesper_peak}" --profile=sim \
+      --autotest=res://tests/sim/progression.gd --autotest-out="$JSON" >"$LOG" 2>&1
+    code=$?
+    set -e
+    if [[ $code -ne 0 ]] || godot_log_has_errors "$LOG"; then
+      echo "[sim:progression] FAIL (exit $code)" >&2; [[ -f "$JSON" ]] && cat "$JSON" >&2; tail -30 "$LOG" >&2; exit 1
+    fi
+    echo "[sim:progression] PASS"
     ;;
   round_flow|survival)
     LOG="$OUT/$SCENARIO.log"; JSON="$OUT/$SCENARIO.json"; rm -f "$JSON"

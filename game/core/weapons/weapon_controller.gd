@@ -43,6 +43,11 @@ var drinking_def: PerkDefinition = null
 var drink_left: float = 0.0
 var drinks: int = 0
 var aim_snaps: int = 0  # Bullseye Bitters ADS head snaps (tests)
+# Forge upgrades (Step 11): alt-fire attachments keep their own runtime (magazine) per attachment id;
+# dual-wield weapons alternate the muzzle between the two guns.
+var alt_runtimes: Dictionary = {}  # attachment id -> WeaponRuntime
+var alt_shots: int = 0
+var _left_hand: bool = false
 var _equip_seq: int = 0
 var _drink_total: float = 0.0
 var _drink_bottle: Node3D = null
@@ -179,7 +184,30 @@ func apply_equipment(
 	placeable_count = place_n
 
 
+# The held weapon's alt-fire attachment runtime (Skullcrusher's launcher), created on first use.
+func alt_runtime() -> WeaponRuntime:
+	var h: WeaponRuntime = held()
+	if h == null or h.def.alt_fire_id == &"":
+		return null
+	if not alt_runtimes.has(h.def.alt_fire_id):
+		var d: WeaponDefinition = WeaponCatalog.get_def(h.def.alt_fire_id)
+		if d == null:
+			return null
+		WeaponAudio.ensure(d)
+		var rt: WeaponRuntime = WeaponRuntime.new(d)
+		rt.make_ready()
+		rt.dry_fired.connect(_on_runtime_dry)
+		rt.ammo_added.connect(_on_ammo_added.bind(rt))
+		alt_runtimes[d.id] = rt
+	return alt_runtimes[h.def.alt_fire_id]
+
+
 func set_ammo(weapon_id: StringName, mag: int, reserve: int) -> void:
+	if alt_runtimes.has(weapon_id):
+		var art: WeaponRuntime = alt_runtimes[weapon_id]
+		if mag >= 0:
+			art.mag = mag
+		art.reserve = reserve
 	var idx: int = inventory.slot_of(weapon_id)
 	if idx >= 0:
 		if mag >= 0:  # -1 = keep the magazine (Max Ammo)
@@ -223,6 +251,14 @@ func physics_step(f: PlayerInputFrame, dt: float) -> void:
 		var shots: int = h.update(dt, trigger, f.aim, player.motor.sprinting)
 		for i: int in shots:
 			_fire_shot(h)
+		var alt: WeaponRuntime = alt_runtime()
+		if alt != null and h.is_ready():
+			var alt_n: int = alt.update(dt, f.alt_fire and not f.fire, false, player.motor.sprinting)
+			for i: int in alt_n:
+				alt_shots += 1
+				_fire_shot(alt)
+		if player.is_local:
+			ZombieVisual.thermal_on = h.def.thermal_scope and h.ads > 0.6
 	inventory.update()
 	_update_recoil_recovery(dt)
 
@@ -516,6 +552,8 @@ func render_update(delta: float) -> void:
 func _present_local_shot(def: WeaponDefinition, h: WeaponRuntime, result: Ballistics.ShotResult) -> void:
 	Audio.play_event(WeaponAudio.event(def, "mech"))
 	Audio.play_event(WeaponAudio.event(def, "body"))
+	if def.is_upgraded():
+		Audio.play_event(WeaponAudio.event(def, "zap"))  # the Forge layer (GAME_DESIGN §9.2)
 	Audio.play_event(WeaponAudio.tail_event(def, player.get_world_3d().direct_space_state, eye_position()))
 	var fx: WeaponFx = WeaponFx.of(self)
 	var muzzle: Vector3 = eye_position() + aim_forward() * 0.5
@@ -523,7 +561,8 @@ func _present_local_shot(def: WeaponDefinition, h: WeaponRuntime, result: Ballis
 		viewmodel.update(0.0)  # make sure the viewmodel follows the camera before sampling markers
 		viewmodel.kick(h.ads)
 		viewmodel.play(&"fire")
-		var mx: Transform3D = viewmodel.muzzle_transform()
+		_left_hand = def.dual_wield and not _left_hand
+		var mx: Transform3D = viewmodel.muzzle_transform(_left_hand)
 		muzzle = mx.origin
 		fx.muzzle_flash(mx, def.muzzle_flash_scale, true)
 		var b: Basis = player.camera_rig.view_basis()
@@ -539,7 +578,7 @@ func _present_impacts(def: WeaponDefinition, result: Ballistics.ShotResult, muzz
 		var n: int = 0
 		for end: Vector3 in result.tracer_ends:
 			if n < 3:  # a few pellet tracers are plenty
-				fx.tracer(muzzle, end)
+				fx.tracer(muzzle, end, def.tracer_color.a > 0.0)
 			n += 1
 	var sounds: int = 0
 	for imp: Ballistics.Impact in result.impacts:
@@ -646,10 +685,12 @@ func set_remote_weapon(def: WeaponDefinition) -> void:
 		_tp_model.scale = Vector3.ONE * 1.15
 		_tp_weapon.add_child(_tp_model)
 		mesh.visible = false
+		WeaponCamo.apply(_tp_model, def)
 		var m: Node3D = _tp_model.get_node_or_null(^"Muzzle") as Node3D
 		_tp_muzzle.position = m.position * _tp_model.scale if m != null else Vector3(0, 0.02, -0.22)
 		return
 	mesh.visible = true
+	mesh.material_overlay = WeaponCamo.material(def.camo) if def != null else null
 	var length: float = 0.22
 	match def.viewmodel_style if def != null else &"pistol":
 		&"smg":
@@ -682,6 +723,8 @@ func replay_remote_shot(
 	Audio.play_event_3d(WeaponAudio.event(def, "body"), pos)
 	Audio.play_event_3d(WeaponAudio.tail_event(def, player.get_world_3d().direct_space_state, pos), pos)
 	Audio.play_event_3d(WeaponAudio.event(def, "mech"), pos)
+	if def.is_upgraded():
+		Audio.play_event_3d(WeaponAudio.event(def, "zap"), pos)
 	var fx: WeaponFx = WeaponFx.of(self)
 	var muzzle: Vector3 = _tp_muzzle.global_position if _tp_muzzle != null else pos
 	if _tp_muzzle != null:

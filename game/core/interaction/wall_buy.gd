@@ -1,9 +1,13 @@
 # WallBuy — a weapon bought off the wall (GAME_DESIGN §6.2): the definition's cost for the weapon,
 # half of it for an ammo refill when already owned (refused when full). Builds a greybox chalk
 # board with the weapon's silhouette and name/price so it reads in-world.
+# Holding the weapon's Lazarus Forge upgrade instead: upgraded ammo for UPGRADED_AMMO_COST (4500,
+# GAME_DESIGN §6.2 / §9.2) refills the upgraded weapon.
 # Authority: HOST executes through WeaponSync (loadout + validator ammo); prompts are local.
 class_name WallBuy
 extends Interactable
+
+const UPGRADED_AMMO_COST: int = 4500
 
 @export var weapon_id: StringName = &""
 
@@ -32,6 +36,17 @@ func owns(player: PlayerCharacter) -> bool:
 	return wc.placeable_def != null and wc.placeable_def.id == weapon_id
 
 
+# The upgraded version of this wall weapon, if the player holds it (else &"").
+func held_upgrade(player: PlayerCharacter) -> StringName:
+	var up: WeaponDefinition = WeaponCatalog.upgrade_of(weapon_id)
+	if up == null:
+		return &""
+	var ws: WeaponSync = WeaponSync.instance(self)
+	if ws != null and WeaponSync.is_authority() and ws.loadouts.has(player.peer_id):
+		return up.id if ((ws.loadouts[player.peer_id] as Dictionary)["ids"] as Array).has(up.id) else &""
+	return up.id if player.weapons != null and player.weapons.inventory.slot_of(up.id) >= 0 else &""
+
+
 # Equipment (Ice Axe, tripmines) is bought once; guns can be re-bought as ammo.
 func is_equipment() -> bool:
 	var d: WeaponDefinition = definition()
@@ -44,6 +59,8 @@ func get_cost(player: PlayerCharacter) -> int:
 		return 0
 	if is_equipment():
 		return 0 if owns(player) else d.cost
+	if held_upgrade(player) != &"":
+		return UPGRADED_AMMO_COST
 	return d.cost / 2 if owns(player) else d.cost
 
 
@@ -52,6 +69,8 @@ func get_prompt(player: PlayerCharacter) -> String:
 	var label: String = d.display_name if d != null else String(weapon_id)
 	if owns(player) and is_equipment():
 		return "%s owned" % label
+	if held_upgrade(player) != &"":
+		return "Hold [F] for upgraded ammo [%d]" % get_cost(player)
 	if owns(player):
 		return "Hold [F] for %s ammo [%d]" % [label, get_cost(player)]
 	return "Hold [F] to buy %s [%d]" % [label, get_cost(player)]
@@ -65,8 +84,10 @@ func host_check(peer_id: int, player: PlayerCharacter) -> String:
 		return "Already owned"
 	if owns(player):
 		var ws: WeaponSync = WeaponSync.instance(self)
-		var a: Array = ws.validator.ammo(peer_id, weapon_id)
-		if int(a[0]) >= d.mag_size and int(a[1]) >= d.reserve_max:
+		var up: StringName = held_upgrade(player)
+		var ad: WeaponDefinition = WeaponCatalog.get_def(up) if up != &"" else d
+		var a: Array = ws.validator.ammo(peer_id, ad.id)
+		if int(a[0]) >= ad.mag_size and int(a[1]) >= ad.reserve_max:
 			return "Ammo full"
 	return ""
 
@@ -76,7 +97,8 @@ func host_execute(peer_id: int, player: PlayerCharacter) -> bool:
 	if ws == null:
 		return false
 	if owns(player):
-		ws.host_refill_weapon(peer_id, weapon_id)
+		var up: StringName = held_upgrade(player)
+		ws.host_refill_weapon(peer_id, up if up != &"" else weapon_id)
 		return true
 	return ws.host_give(peer_id, weapon_id)
 

@@ -23,6 +23,7 @@ var decals: FxRing = null
 var impacts: FxRing = null
 var shells: FxRing = null
 var tracers: FxRing = null
+var hot_tracers: FxRing = null  # incendiary / dragon's-breath tracers (Forge upgrades, Step 11)
 var flashes: FxRing = null
 var explosions: FxRing = null
 var shots_shown: int = 0
@@ -32,6 +33,7 @@ var _timed: Dictionary = {}  # Node -> seconds left (hidden when it reaches 0)
 var _tracer_state: Dictionary = {}  # MeshInstance3D -> [from, to, travelled]
 var _flash_material: StandardMaterial3D = null
 var _tracer_material: StandardMaterial3D = null
+var _hot_tracer_material: StandardMaterial3D = null
 var _particle_material: StandardMaterial3D = null
 var _shell_material: StandardMaterial3D = null
 
@@ -55,6 +57,7 @@ func _ready() -> void:
 	_decal_texture = _make_decal_texture()
 	_flash_material = _unshaded(Color(1.0, 0.75, 0.35), true)
 	_tracer_material = _unshaded(Color(1.0, 0.85, 0.55), true)
+	_hot_tracer_material = _unshaded(Color(1.0, 0.38, 0.08), true)
 	_particle_material = _unshaded(Color.WHITE, false)
 	_particle_material.vertex_color_use_as_albedo = true
 	_shell_material = StandardMaterial3D.new()
@@ -64,6 +67,7 @@ func _ready() -> void:
 	impacts = FxRing.new(self, IMPACT_CAP, _new_particles)
 	shells = FxRing.new(self, SHELL_CAP, _new_shell)
 	tracers = FxRing.new(self, TRACER_CAP, _new_tracer)
+	hot_tracers = FxRing.new(self, TRACER_CAP / 2, _new_hot_tracer)
 	flashes = FxRing.new(self, FLASH_CAP, _new_flash)
 	explosions = FxRing.new(self, EXPLOSION_CAP, _new_explosion)
 
@@ -94,10 +98,10 @@ func muzzle_flash(xform: Transform3D, scale_factor: float, viewmodel: bool) -> v
 	_timed[f] = FLASH_TIME
 
 
-func tracer(from: Vector3, to: Vector3) -> void:
+func tracer(from: Vector3, to: Vector3, hot: bool = false) -> void:
 	if from.distance_to(to) < 1.0:
 		return
-	var t: MeshInstance3D = tracers.next() as MeshInstance3D
+	var t: MeshInstance3D = (hot_tracers if hot else tracers).next() as MeshInstance3D
 	_tracer_state[t] = [from, to, 0.0]
 	t.visible = true
 	_place_tracer(t)
@@ -284,6 +288,16 @@ func _new_tracer() -> Node:
 	t.mesh = cm
 	t.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	t.visible = false
+	return t
+
+
+func _new_hot_tracer() -> Node:
+	var t: MeshInstance3D = _new_tracer() as MeshInstance3D
+	var cm: CylinderMesh = t.mesh.duplicate() as CylinderMesh
+	cm.top_radius = 0.014
+	cm.bottom_radius = 0.014
+	cm.material = _hot_tracer_material
+	t.mesh = cm
 	return t
 
 

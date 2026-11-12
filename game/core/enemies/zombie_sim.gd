@@ -26,6 +26,7 @@ const TARGET_HYSTERESIS: float = 3.0  # m shorter path needed to switch targets
 const RISE_TIME: float = 1.2
 const WINDOW_QUEUE_RANGE: float = 1.8  # wait this far from a busy window instead of pushing in
 const STUCK_NEAR_TARGET: float = 8.0  # crowding around a target is not "stuck"
+const WEAK_LURE_MARGIN: float = 4.0  # m: a relay lure must be this much closer than the player
 const LIFT_GIVE_UP: float = 20.0  # waiting this long for / on a lift -> re-queue
 
 var actor: ZombieActor = null
@@ -80,6 +81,8 @@ var reached_target: bool = false  # statistics: got into attack range at least o
 var requeue_reason: String = ""
 var separation: Vector3 = Vector3.ZERO
 var traversals: Dictionary = {}  # TraversalLink.Action -> count (statistics / tests)
+var speed_scale: float = 1.0  # StatusEffects: slows (Glacier Breaker)
+var frozen: bool = false  # StatusEffects: Coolant Purge freeze (no movement, no attacks)
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
@@ -109,14 +112,14 @@ func state_name() -> String:
 
 
 func current_speed_cap() -> float:
-	return archetype.crawler_speed if actor.is_crawler() else move_speed
+	return (archetype.crawler_speed if actor.is_crawler() else move_speed) * speed_scale
 
 
 # --- think (staggered, LOD rate) --------------------------------------------------------------
 
 
 func think(dt: float) -> void:
-	if state == State.DEAD:
+	if state == State.DEAD or frozen:
 		return
 	target_eval_timer -= dt
 	if target_eval_timer <= 0.0 and state in [State.PURSUE, State.IDLE, State.WAIT, State.SPAWNING]:
@@ -219,6 +222,10 @@ func _select_attractor() -> int:
 		var l: float = director.path_length(self, pos, a.global_position)
 		if l < 0.0:
 			return -1
+		# Weak lures (Resonance Relays) lose to a player who is nearer than the relay.
+		var weak: bool = bool(a.get_meta(&"attract_weak", false))
+		if weak and target != null and not director.is_attractor(target) and target_path_length < l + WEAK_LURE_MARGIN:
+			continue
 		if l <= radius and l < best_len:
 			best_len = l
 			best = a
@@ -236,6 +243,11 @@ func _select_attractor() -> int:
 
 
 func move(dt: float) -> void:
+	if frozen:
+		velocity = Vector3.ZERO
+		actor.speed = 0.0
+		_write_actor()
+		return
 	state_time += dt
 	attack_cooldown -= dt
 	match state:
@@ -598,6 +610,17 @@ func on_damaged(info: DamageInfo, survives: bool) -> void:
 		_release_barricade()
 		_enter(State.STAGGER)
 		actor.start_action(ZombieActor.Action.STAGGER)
+
+
+# Stun from a hazard (H3 electrified puddles): a stagger of `seconds`, unless climbing / rising.
+func host_stun(seconds: float) -> void:
+	if state in [State.TRAVERSE, State.SPAWNING, State.DEAD] or frozen:
+		return
+	stagger_time = maxf(seconds, stagger_time if state == State.STAGGER else 0.0)
+	actor.set_flag(ZombieActor.Flag.STUNNED, true)
+	_release_barricade()
+	_enter(State.STAGGER)
+	actor.start_action(ZombieActor.Action.STAGGER)
 
 
 func _release_barricade() -> void:

@@ -15,6 +15,7 @@
 #   owner -> host : `_wtac`    [seq, origin xyz, velocity xyz]  throw a Drummer Decoy
 #   owner -> host : `_wmine`   [seq, x, y, z, yaw] ; host -> all: `_wmine_r` [peer, seq, x, y, z, yaw]
 #   host  -> joiner: `_wmines_full` [[peer, seq, x, y, z, yaw]...]
+#   host  -> all  : `_wsplash` [x, y, z, radius]  impact splash / cluster blast (Step 11 upgrades)
 # `_wloadout` also carries equipment: [peer, ids, current, lethal, melee, tactical, tac_n, placeable, place_n].
 #   host  -> owner: `_wcheat`  [infinite_ammo]
 # The host validates every claim with HitValidator, recomputes damage from the definition and
@@ -45,6 +46,8 @@ var projectiles: Dictionary = {}  # key -> Projectile (local copies)
 var mines: Dictionary = {}  # key -> Tripmine (every peer)
 var attraction: Callable = Callable()  # host: func(decoy: Node3D, def) -> registers a zombie attractor
 var explosions: int = 0  # host: explosions applied (tests)
+var status: StatusEffects = null  # host: slow / burn on hit (Forge upgrades)
+var impact_splashes: int = 0  # host: upgraded-weapon impact splashes + cluster blasts (tests)
 
 var _outbox: Array = []
 var _standalone_controllers: Array[WeaponController] = []
@@ -85,6 +88,7 @@ func _ready() -> void:
 	Net.register_message(&"_wmine", _on_msg_mine)
 	Net.register_message(&"_wmine_r", _on_msg_mine_relay)
 	Net.register_message(&"_wmines_full", _on_msg_mines_full)
+	Net.register_message(&"_wsplash", _on_msg_splash)
 	Net.register_stream(STREAM_FIRE, _on_fire_stream)
 	Net.peer_joined.connect(_on_peer_joined)
 	Net.peer_left.connect(_on_peer_left)
@@ -114,7 +118,8 @@ func _exit_tree() -> void:
 		&"_wtac",
 		&"_wmine",
 		&"_wmine_r",
-		&"_wmines_full"
+		&"_wmines_full",
+		&"_wsplash"
 	]:
 		Net.unregister_message(msg)
 	Net.unregister_stream(STREAM_FIRE)
@@ -253,9 +258,42 @@ func host_give(peer_id: int, weapon_id: StringName) -> bool:
 		else:
 			ids.append(weapon_id)
 	validator.give(peer_id, def)
+	var alt: WeaponDefinition = WeaponCatalog.get_def(def.alt_fire_id)
+	if alt != null:
+		validator.give(peer_id, alt)  # the underbarrel's own magazine (Skullcrusher)
 	lo["current"] = weapon_id
 	_broadcast_loadout(peer_id)
 	return true
+
+
+# HOST: removes a primary weapon from a player's loadout (Lazarus Forge: the weapon goes in).
+func host_take_weapon(peer_id: int, weapon_id: StringName) -> bool:
+	var lo: Dictionary = _loadout(peer_id)
+	var ids: Array = lo["ids"]
+	if not ids.has(weapon_id) or bool(lo.get("last_stand", false)):
+		return false
+	ids.erase(weapon_id)
+	validator.take(peer_id, weapon_id)
+	var def: WeaponDefinition = WeaponCatalog.get_def(weapon_id)
+	if def != null and def.alt_fire_id != &"":
+		validator.take(peer_id, def.alt_fire_id)
+	if StringName(lo["current"]) == weapon_id:
+		lo["current"] = StringName(ids[0]) if not ids.is_empty() else &""
+	_broadcast_loadout(peer_id)
+	return true
+
+
+# Weapon ids whose ammo a refill covers: the primaries plus their alt-fire attachments.
+func _ammo_ids(lo: Dictionary) -> Array[StringName]:
+	var out: Array[StringName] = []
+	for wid: Variant in lo["ids"]:
+		var def: WeaponDefinition = WeaponCatalog.get_def(StringName(wid))
+		if def == null:
+			continue
+		out.append(def.id)
+		if def.alt_fire_id != &"" and WeaponCatalog.get_def(def.alt_fire_id) != null:
+			out.append(def.alt_fire_id)
+	return out
 
 
 # Melee upgrade / tactical / placeable (GAME_DESIGN §3.4): equipment slots, not primaries.
@@ -281,6 +319,9 @@ func host_owns(peer_id: int, weapon_id: StringName) -> bool:
 	var lo: Dictionary = _loadout(peer_id)
 	if (lo["ids"] as Array).has(weapon_id):
 		return true
+	var up: WeaponDefinition = WeaponCatalog.upgrade_of(weapon_id)
+	if up != null and (lo["ids"] as Array).has(up.id):
+		return true  # holding the Forge version counts (box eligibility, GAME_DESIGN §10.1)
 	if StringName(lo.get("melee", &"")) == weapon_id:
 		return true
 	if StringName(lo.get("placeable", &"")) == weapon_id:
@@ -329,10 +370,8 @@ func host_max_ammo(peer_id: int) -> void:
 	if not loadouts.has(peer_id):
 		_loadout(peer_id)
 	var lo: Dictionary = loadouts[peer_id]
-	for wid: Variant in lo["ids"]:
-		var def: WeaponDefinition = WeaponCatalog.get_def(StringName(wid))
-		if def == null:
-			continue
+	for wid: StringName in _ammo_ids(lo):
+		var def: WeaponDefinition = WeaponCatalog.get_def(wid)
 		var a: Array = validator.ammo(peer_id, def.id)
 		validator.give(peer_id, def, int(a[0]), def.reserve_max)
 		_send_to(peer_id, &"_wammo", [String(def.id), -1, def.reserve_max])
@@ -350,8 +389,8 @@ func host_max_ammo(peer_id: int) -> void:
 
 func host_refill(peer_id: int) -> void:
 	var lo: Dictionary = _loadout(peer_id)
-	for wid: Variant in lo["ids"]:
-		var def: WeaponDefinition = WeaponCatalog.get_def(StringName(wid))
+	for wid: StringName in _ammo_ids(lo):
+		var def: WeaponDefinition = WeaponCatalog.get_def(wid)
 		validator.give(peer_id, def)
 		_send_to(peer_id, &"_wammo", [String(def.id), def.mag_size, def.reserve_max])
 	var frag: WeaponDefinition = WeaponCatalog.get_def(WeaponController.FRAG_ID)
@@ -367,6 +406,10 @@ func host_refill_weapon(peer_id: int, weapon_id: StringName) -> void:
 		return
 	validator.give(peer_id, def)
 	_send_to(peer_id, &"_wammo", [String(def.id), def.mag_size, def.reserve_max])
+	var alt: WeaponDefinition = WeaponCatalog.get_def(def.alt_fire_id)
+	if alt != null:
+		validator.give(peer_id, alt)
+		_send_to(peer_id, &"_wammo", [String(alt.id), alt.mag_size, alt.reserve_max])
 
 
 # Round start: +amount lethals up to the carry max (GAME_DESIGN §3.4).
@@ -620,6 +663,7 @@ func _host_process_shot(peer_id: int, claim: Array) -> void:
 	var eye: Vector3 = _shooter_eye(peer_id, origin)
 	var space: PhysicsDirectSpaceState3D = get_viewport().get_world_3d().direct_space_state
 	var killed: Array[HitTarget] = []
+	var splashed: bool = false
 	for h: Variant in claim[11]:
 		var hit: Array = h
 		if hit.size() < 5:
@@ -655,6 +699,91 @@ func _host_process_shot(peer_id: int, claim: Array) -> void:
 		targets.host_damage(t, info)
 		if not t.alive:
 			killed.append(t)
+		if def.is_upgraded() and t is ZombieActor:
+			splashed = _host_upgrade_on_hit(peer_id, def, t as ZombieActor, zone, not t.alive, splashed)
+
+
+# HOST: Forge behavior changes on a bullet hit (GAME_DESIGN §9.3): impact splash (Two Graves once
+# per shot; Avalanche every headshot; Black Widow a headshot kill), slow (Glacier Breaker) and burn
+# (Grease Fire). Returns whether this shot already splashed.
+func _host_upgrade_on_hit(
+	peer_id: int, def: WeaponDefinition, z: ZombieActor, zone: int, killed: bool, splashed: bool
+) -> bool:
+	if status != null and z.alive:
+		if def.slow_factor > 0.0:
+			status.host_slow(z, def.slow_factor, def.slow_time)
+		if def.burn_dps > 0.0:
+			status.host_burn(z, def.burn_dps, def.burn_time, peer_id, def.id)
+	var head: bool = zone == WeaponDefinition.Hitzone.HEAD
+	var go: bool = false
+	match def.impact_splash:
+		&"hit":
+			go = not splashed
+		&"headshot":
+			go = head
+		&"headshot_kill":
+			go = head and killed
+	if not go:
+		return splashed
+	var pos: Vector3 = z.zone_position(zone)
+	host_splash(
+		pos, def.impact_splash_radius, def.impact_splash_damage, def.impact_splash_damage * 0.25, def.id, peer_id
+	)
+	return true
+
+
+# HOST: an explosion that is not a weapon's own blast (impact splash, cluster bomblets, hazards):
+# damage with linear falloff to every live zombie / target in line of sight, no self damage, and
+# `_wsplash` so every peer shows it.
+func host_splash(
+	pos: Vector3,
+	radius: float,
+	centre: float,
+	edge: float,
+	weapon_id: StringName,
+	peer_id: int,
+	kind: DamageInfo.Kind = DamageInfo.Kind.EXPLOSIVE
+) -> int:
+	impact_splashes += 1
+	var hit: int = 0
+	var space: PhysicsDirectSpaceState3D = get_viewport().get_world_3d().direct_space_state
+	if targets != null:
+		for id: int in targets.targets.keys():
+			var t: HitTarget = targets.get_target(id)
+			if t == null or not t.alive:
+				continue
+			var tp: Vector3 = t.zone_position(WeaponDefinition.Hitzone.TORSO)
+			var d: float = pos.distance_to(tp)
+			if d > radius or not HitValidator.has_line_of_sight(space, pos + Vector3.UP * 0.1, tp):
+				continue
+			var info: DamageInfo = DamageInfo.make(
+				DamageModel.splash_damage(centre, edge, radius, d),
+				WeaponDefinition.Hitzone.TORSO,
+				kind,
+				weapon_id,
+				peer_id
+			)
+			info.distance = d
+			info.position = pos
+			targets.host_damage(t, info)
+			hit += 1
+	Net.send_reliable(0, &"_wsplash", [pos.x, pos.y, pos.z, radius])
+	if not Net.is_active() or Net.is_host():
+		_show_splash(pos, radius)
+	return hit
+
+
+func _show_splash(pos: Vector3, radius: float) -> void:
+	if not is_inside_tree():
+		return
+	WeaponFx.of(self).explosion(pos, radius)
+	Audio.play_event_3d(&"frag_explode", pos)
+
+
+func _on_msg_splash(sender: int, p: Array) -> void:
+	if sender != 1 or Net.is_host() or p.size() < 4:
+		return
+	_show_splash(Vector3(float(p[0]), float(p[1]), float(p[2])), float(p[3]))
 
 
 # Perk damage (host): Twin-Fire fires every hitscan bullet twice (×2, ammo once; projectile /
@@ -774,6 +903,29 @@ func host_explode(def: WeaponDefinition, peer_id: int, pos: Vector3) -> void:
 			players.damage_player(peer_id, dmg, pos, HealthComponent.DamageType.EXPLOSIVE)
 	WeaponFx.of(self).explosion(pos, def.splash_radius)
 	Audio.play_event_3d(&"frag_explode", pos)
+	if def.cluster_count > 0:
+		_host_cluster(def, peer_id, pos)
+
+
+# L.A.W. of Averages (GAME_DESIGN §9.3): micro-cluster bomblets scatter around the rocket's blast
+# (a fixed ring, so the result is deterministic) and burst 0.2 s apart.
+func _host_cluster(def: WeaponDefinition, peer_id: int, pos: Vector3) -> void:
+	for i: int in def.cluster_count:
+		var a: float = TAU * float(i) / float(def.cluster_count)
+		var at: Vector3 = pos + Vector3(cos(a), 0.2, sin(a)) * def.splash_radius * 0.6
+		var delay: float = 0.2 * float(i + 1)
+		get_tree().create_timer(delay, false, true).timeout.connect(
+			func() -> void:
+				if is_inside_tree():
+					host_splash(
+						at,
+						def.cluster_radius,
+						def.splash_damage_centre * 0.5,
+						def.splash_damage_edge * 0.5,
+						def.id,
+						peer_id
+					)
+		)
 
 
 # HOST: launches the authoritative projectile of an accepted shot and relays it.
@@ -781,6 +933,8 @@ func _host_launch(peer_id: int, def: WeaponDefinition, seq: int, eye: Vector3, d
 	var p: Projectile = _spawn_projectile(def, peer_id, seq, eye, dir, true)
 	p.struck.connect(_on_projectile_struck)
 	p.detonated.connect(_on_projectile_detonated)
+	if def.attract_radius > 0.0 and attraction.is_valid():
+		p.stuck_to.connect(func(stuck: Projectile) -> void: attraction.call(stuck, stuck.def))  # Lure of the Lantern
 	Net.send_reliable(0, &"_wproj", [peer_id, String(def.id), seq, eye.x, eye.y, eye.z, dir.x, dir.y, dir.z])
 
 

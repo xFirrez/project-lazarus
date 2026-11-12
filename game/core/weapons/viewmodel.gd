@@ -121,6 +121,9 @@ func set_weapon(p_def: WeaponDefinition, p_runtime: WeaponRuntime) -> void:
 			g = GreyboxGun.build(def)
 		anim_root.add_child(g)
 		ViewmodelArms.attach(g, def, player.character, LAYER)
+		if def.dual_wield:
+			_add_left_gun(g, def)
+		WeaponCamo.apply(g, def)
 		_guns[def.id] = g
 		var lib_name: StringName = StringName(String(def.id))
 		anim.add_animation_library(lib_name, ViewmodelAnimations.build(def, g, melee_time))
@@ -167,9 +170,32 @@ func kick(ads: float) -> void:
 	)
 
 
-func muzzle_transform() -> Transform3D:
-	var m: Node3D = gun.get_node_or_null(^"Muzzle") as Node3D if gun != null else null
+func muzzle_transform(left: bool = false) -> Transform3D:
+	var m: Node3D = null
+	if gun != null:
+		if left:
+			m = gun.get_node_or_null(^"LeftGun/Muzzle") as Node3D
+		if m == null:
+			m = gun.get_node_or_null(^"Muzzle") as Node3D
 	return m.global_transform if m != null else camera.global_transform
+
+
+# Dual wield (Gemini, Black Scorpions): a mirrored copy of the gun in the left hand. It rides the
+# right gun's animation (child node) so recoil and reloads stay in sync; shots alternate muzzles.
+func _add_left_gun(g: Node3D, p_def: WeaponDefinition) -> void:
+	var left: Node3D = null
+	if p_def.viewmodel_scene != null:
+		left = p_def.viewmodel_scene.instantiate() as Node3D
+		GreyboxGun.set_layers(left, LAYER)
+	else:
+		left = GreyboxGun.build(p_def)
+	left.name = "LeftGun"
+	var dot: Node = left.find_child("SightDot", true, false)
+	if dot != null:
+		dot.free()  # the ADS sight stays the right gun's
+	left.position = Vector3(-2.0 * p_def.viewmodel_offset.x, -0.01, 0.02)
+	left.scale = Vector3(-1.0, 1.0, 1.0)
+	g.add_child(left)
 
 
 func eject_position() -> Vector3:

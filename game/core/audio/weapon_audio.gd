@@ -58,6 +58,23 @@ static func ensure(def: WeaponDefinition) -> void:
 	Audio.register_event(event(def, "shell"), _click(rng, 1100.0, 0.07, 0.6), &"Weapons", -8.0)
 	Audio.register_event(event(def, "pump"), _noise(rng, 0.4, 0.18, 500.0, 0.7, 6.0), &"Weapons", -5.0)
 	Audio.register_event(event(def, "raise"), _noise(rng, 0.6, 0.12, 300.0, 0.4, 8.0), &"Weapons", -12.0)
+	if def.is_upgraded():
+		# The Forge layer (GAME_DESIGN §9.2): a crackling vesperite zap over the base report.
+		Audio.register_event(event(def, "zap"), _zap(rng, def.sound_body_hz * 4.0), &"Weapons", v - 3.0)
+
+
+# Upgraded firing layer: a falling-pitch electric chirp with crackle.
+static func _zap(rng: RandomNumberGenerator, hz: float, seconds: float = 0.14) -> AudioStreamWAV:
+	var n: int = int(RATE * seconds)
+	var out: PackedFloat32Array = PackedFloat32Array()
+	out.resize(n)
+	var phase: float = 0.0
+	for i: int in n:
+		var t: float = float(i) / float(n)
+		phase += TAU * hz * lerpf(1.6, 0.6, t) / float(RATE)
+		var crackle: float = rng.randf_range(-1.0, 1.0) * (0.5 if rng.randf() < 0.15 else 0.1)
+		out[i] = (signf(sin(phase)) * 0.35 + crackle) * pow(1.0 - t, 2.0)
+	return _wav(out)
 
 
 static func ensure_common() -> void:

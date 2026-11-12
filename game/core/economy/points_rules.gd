@@ -28,8 +28,8 @@ static func for_damage(kind: int, zone: int, killed: bool) -> int:
 	match kind:
 		DamageInfo.Kind.MELEE:
 			return KILL_MELEE
-		DamageInfo.Kind.EXPLOSIVE:
-			return KILL_EXPLOSIVE
+		DamageInfo.Kind.EXPLOSIVE, DamageInfo.Kind.TRAP:
+			return KILL_EXPLOSIVE  # traps pay 50 per kill, to the activator only (GAME_DESIGN §6.1)
 	match zone:
 		WeaponDefinition.Hitzone.HEAD:
 			return KILL_HEAD

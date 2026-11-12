@@ -29,7 +29,8 @@ func build() -> void:
 	nav_areas.append(AABB(Vector3(0.0, -52.5, -78.0), Vector3(56.0, 26.5, 56.0)))  # chamber + gantry
 	mark(&"forge", "FRG_LazarusForge", Vector3(33.5, -34.0, -60.0), "Lazarus Forge (5000)", true)
 	mark(&"trap", "T3_CoolantPurge", _on_ring(0.0, 22.0), "Coolant Purge (ring quadrant)", true)
-	mark(&"trap", "T3_Console", _on_ring(10.0, 24.6), "T3 console (1000)", true)
+	# Step 11: the console sits just outside the 90° freeze sector (-45..45) so its user isn't frozen.
+	mark(&"trap", "T3_Console", _on_ring(52.0, 24.6), "T3 console (1000)", true)
 	mark(&"ee", "EE_CoreSocket", _on_ring(-90.0, 20.0), "core socket (stage 5 / finale)")
 	for i: int in 4:
 		var a: float = deg_to_rad(45.0 + 90.0 * i)
@@ -211,6 +212,10 @@ func _core_and_forge() -> void:
 	core.material_override = _mat(&"vesperite")
 	core.position = C + Vector3(0, 4.0, 0)
 	geometry.add_child(core)
+	var state: ReactorState = ReactorState.new()
+	state.name = "ReactorState"
+	state.core = core
+	state.bridge_position = Vector3(44.0, -31.0, -60.0)
 	for i: int in 3:
 		var ring: MeshInstance3D = MeshInstance3D.new()
 		ring.name = "ContainmentRing%d" % (i + 1)
@@ -222,8 +227,10 @@ func _core_and_forge() -> void:
 		ring.position = core.position
 		ring.rotation = Vector3(PI * 0.5 * (i % 2), PI / 3.0 * i, 0.3 * i)
 		geometry.add_child(ring)
+		state.rings.append(ring)
 	var glow: OmniLight3D = lamp(core.position, Color(0.4, 1.0, 0.55), 6.0, 45.0, true, 0.25)
 	glow.shadow_enabled = false
+	geometry.add_child(state)  # adds its own stage light (the glow above follows the power cascade)
 	var pit: MeshInstance3D = MeshInstance3D.new()
 	pit.name = "PitGlow"
 	var pm: CylinderMesh = CylinderMesh.new()
@@ -249,7 +256,9 @@ func _core_and_forge() -> void:
 			r[0] + Vector3(0, 1.0, 0),
 			Vector3(r[1].x, 3.0, r[1].z)
 		)
-	box("ForgeAnvil", Vector3(33.0, -33.4, -60.0), Vector3(2.0, 1.2, 1.4), &"metal")
+	# Collision + nav carve of the Lazarus Forge; the machine itself is drawn by LazarusForge (Step 11).
+	var anvil: StaticBody3D = box("ForgeAnvil", Vector3(33.0, -33.4, -60.0), Vector3(2.0, 1.2, 1.4), &"metal")
+	(anvil.get_child(0) as MeshInstance3D).visible = false
 	for p: Vector3 in [
 		_on_ring(45.0, 24.0) + Vector3(0, 6, 0),
 		_on_ring(135.0, 24.0) + Vector3(0, 6, 0),

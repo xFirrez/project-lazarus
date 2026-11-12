@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TrapDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/traps/trap_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"t1"
+display_name = "Electro-Therapy Corridor"
+effect = &"electric"
+box_size = Vector3(4, 3, 15)
+color = Color(0.45, 0.75, 1, 1)

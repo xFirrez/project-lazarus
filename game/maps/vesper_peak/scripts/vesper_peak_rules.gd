@@ -1,7 +1,9 @@
 # VesperPeakRules — Vesper Peak's MapRules (VESPER_PEAK §9). Step 8: the traversal machines unlock
 # the zone they arrive in (riding the gondola to the Comms Array or the freight lift / laundry
 # chute down to Specimen Storage before buying the doors there still activates that zone's
-# spawners). Relays, the bridge sequence, special rounds (Galvanics) and the quest: Steps 9-14.
+# spawners). Step 11: all three Resonance Relays -> the Reactor Bridge extends to the Forge platform
+# and the Lazarus Forge wakes (ReactorState plays the beat on every peer). Special rounds
+# (Galvanics) and the quest: Steps 12-14.
 # Authority: host only (hooks are called by core on the host).
 extends MapRules
 
@@ -26,3 +28,11 @@ func _unlock(zone: StringName) -> void:
 
 func on_zone_unlocked(zone: StringName) -> void:
 	Log.info(&"vesper_peak", "Zone %s open" % zone)
+
+
+func on_relays_complete() -> void:
+	Log.info(&"vesper_peak", "All relays resonating: the Reactor Bridge extends.")
+	for d: Node in match_node.map_root.find_children("*", "NavDoor", true, false):
+		if (d as NavDoor).solid_when_open:
+			(d as NavDoor).host_set_open(true)
+	match_node.session.host_set_flag(ForgeSystem.FLAG_UNLOCKED, true)

@@ -2,7 +2,8 @@
 # MatchSession (late join / reconnect / scene-ready gate / state hash), PlayerSync, TargetRegistry,
 # WeaponSync, WeaponFx, WorldSync, ZombieSync + CrowdDirector, ZoneManager, PointsLedger,
 # InteractionSystem, RelicBoxSystem, PerkSystem, DownedSystem, RoundDirector, SpawnDirector,
-# PowerUpSystem, the map's MapRules, PingSystem and the match HUD. Reachable via Match.current.
+# PowerUpSystem, StatusEffects, RelaySystem, ForgeSystem, TrapSystem, HazardSystem (Step 11), the
+# map's MapRules, PingSystem and the match HUD. Reachable via Match.current.
 # Authority: exists on every peer; host-only systems check Net.is_host().
 class_name Match
 extends Node
@@ -30,6 +31,11 @@ var pings: PingSystem = null
 var box: RelicBoxSystem = null
 var perks: PerkSystem = null
 var powerups: PowerUpSystem = null
+var status: StatusEffects = null
+var relays: RelaySystem = null
+var forge: ForgeSystem = null
+var traps: TrapSystem = null
+var hazards: HazardSystem = null
 var session_joined_at: float = -1.0  # client: Net.now() at the session welcome (join timing)
 
 
@@ -57,6 +63,10 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	rules.match_node = self
 	fx = WeaponFx.new()
 	add_child(fx)
+	# Hazard drums / icicles are HitTargets (tree-order ids): build them before the target scan.
+	hazards = HazardSystem.new()
+	hazards.match_node = self
+	hazards.setup(map_root)
 	targets = TargetRegistry.new()
 	add_child(targets)
 	targets.scan(map_root)
@@ -85,6 +95,12 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	add_child(zombies)
 	zombies.scan_spawners(map_root)
 	weapons.attraction = _on_attractor
+	status = StatusEffects.new()
+	status.targets = targets
+	status.players = players
+	add_child(status)
+	weapons.status = status
+	targets.target_damaged.connect(_on_target_damaged)
 	zones = ZoneManager.new()
 	zones.players = players
 	add_child(zones)
@@ -100,6 +116,16 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	perks.match_node = self
 	perks.setup(map_root)
 	add_child(perks)
+	# Step 11 progression: relays, the Forge and the trap levers are interactables too.
+	relays = RelaySystem.new()
+	relays.match_node = self
+	relays.setup(map_root)
+	forge = ForgeSystem.new()
+	forge.match_node = self
+	forge.setup(map_root)
+	traps = TrapSystem.new()
+	traps.match_node = self
+	traps.setup(map_root)
 	interaction = InteractionSystem.new()
 	interaction.players = players
 	interaction.ledger = points
@@ -120,6 +146,10 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	rounds.hold = from_lobby and Net.is_host()
 	rounds.first_round = first_round
 	add_child(rounds)
+	add_child(relays)
+	add_child(forge)
+	add_child(traps)
+	add_child(hazards)
 	if def.survival:
 		spawns = SpawnDirector.new()
 		spawns.rounds = rounds
@@ -147,6 +177,12 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 		rules.on_match_start()
 	Log.info(&"match", "Match started on '%s'" % def.id)
 	return OK
+
+
+# Host: anything that damages a frozen zombie shatters it (Coolant Purge, StatusEffects).
+func _on_target_damaged(t: HitTarget, _amount: float, _zone: int, kind: int, _source_peer: int) -> void:
+	if status != null and t is ZombieActor and (Net.is_host() or not Net.is_active()):
+		status.host_on_damaged(t as ZombieActor, kind)
 
 
 # Drummer Decoys (WeaponSync, host) pull zombies through the crowd director.

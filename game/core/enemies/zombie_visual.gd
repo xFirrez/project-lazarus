@@ -56,6 +56,10 @@ const RAGDOLL_BONES: Array = [
 	[&"RightLowerLeg", 0.42, 0.06, 4.0],
 ]
 
+# Dread Novice's thermal scope (Step 11): while the local player aims it, zombies glow hot.
+static var thermal_on: bool = false
+static var _overlays: Dictionary = {}  # state -> overlay material (shared)
+
 var actor: ZombieActor = null
 var model: ZombieModel = null
 var tree: AnimationTree = null
@@ -84,6 +88,8 @@ var _ragdoll_sim: PhysicalBoneSimulator3D = null
 var _corpse_timer: float = 0.0
 var _fading: bool = false
 var _pitch: float = 1.0
+var _overlay_state: int = -1
+var _geoms: Array[GeometryInstance3D] = []
 
 
 func _ready() -> void:
@@ -210,7 +216,50 @@ func _process(delta: float) -> void:
 	_update_rise()
 	_update_look(view_d, delta)
 	_update_audio(delta, view_d)
+	_update_status()
+	if actor.flags & ZombieActor.Flag.FROZEN != 0:
+		return  # frozen solid: the pose holds (Coolant Purge)
 	_advance(delta)
+
+
+# Status tint from the replicated flags: frozen = ice, burning = embers, thermal scope = hot white.
+func _update_status() -> void:
+	var st: int = 0
+	if actor.flags & ZombieActor.Flag.FROZEN != 0:
+		st = 1
+	elif actor.flags & ZombieActor.Flag.BURNING != 0:
+		st = 2
+	elif thermal_on:
+		st = 3
+	if st == _overlay_state:
+		return
+	_overlay_state = st
+	if _geoms.is_empty():
+		for n: Node in model.find_children("*", "GeometryInstance3D", true, false):
+			_geoms.append(n as GeometryInstance3D)
+	var mat: Material = overlay_material(st)
+	for g: GeometryInstance3D in _geoms:
+		if is_instance_valid(g):
+			g.material_overlay = mat
+
+
+static func overlay_material(st: int) -> Material:
+	if st == 0:
+		return null
+	if not _overlays.has(st):
+		var m: StandardMaterial3D = StandardMaterial3D.new()
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED if st == 3 else BaseMaterial3D.SHADING_MODE_PER_PIXEL
+		m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD if st != 1 else BaseMaterial3D.BLEND_MODE_MIX
+		var c: Color = [Color(), Color(0.65, 0.85, 1.0, 0.75), Color(1.0, 0.35, 0.05, 0.45), Color(1.0, 0.9, 0.6, 0.8)][st]
+		m.albedo_color = c
+		m.emission_enabled = st != 1
+		m.emission = Color(c.r, c.g, c.b) * (1.5 if st == 3 else 0.8)
+		if st == 1:
+			m.roughness = 0.1
+			m.metallic_specular = 1.0
+		_overlays[st] = m
+	return _overlays[st]
 
 
 func _advance(delta: float) -> void:

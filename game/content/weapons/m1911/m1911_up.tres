@@ -1,0 +1,83 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+[ext_resource type="PackedScene" path="res://content/weapons/m1911/m1911_viewmodel.glb" id="2"]
+[ext_resource type="PackedScene" path="res://content/weapons/m1911/m1911_world.glb" id="3"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.1, 1.4, 0, 0, 0, 0, -0.15, 1.5, 0, 0, 0, 0, 0.2, 1.6, 0, 0, 0, 0, -0.1, 1.6)
+}
+point_count = 4
+
+[resource]
+script = ExtResource("1")
+id = &"m1911_up"
+display_name = "\"Gemini\" Twin Grenadiers"
+weapon_class = 0
+cost = 0
+behavior = &"projectile"
+fire_mode = 0
+rpm = 400.0
+damage = 80.0
+max_range = 80.0
+head_multiplier = 3.0
+neck_multiplier = 2.0
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 12.0
+range_max = 30.0
+min_damage_fraction = 0.6
+penetration = 1
+penetration_loss = 0.25
+mag_size = 12
+reserve_max = 72
+reload_partial_time = 1.6
+reload_empty_time = 2.0
+ammo_in_partial = 1.15
+ammo_in_empty = 1.35
+raise_time = 0.35
+lower_time = 0.25
+ads_time = 0.15
+sprint_out_time = 0.15
+ads_fov_multiplier = 0.9
+spread_hip = 1.6
+spread_ads = 0.05
+spread_move = 1.2
+spread_per_shot = 0.45
+spread_max = 4.0
+spread_recovery = 9.0
+recoil_random = 0.25
+recoil_ads_multiplier = 0.7
+recoil_recovery = 0.7
+recoil_recovery_speed = 8.0
+view_kick = 0.8
+vm_kick_back = 0.05
+vm_kick_rot = 6.0
+viewmodel_scene = ExtResource("2")
+world_scene = ExtResource("3")
+viewmodel_style = &"pistol"
+viewmodel_color = Color(0.24, 0.24, 0.26, 1)
+viewmodel_offset = Vector3(0.15, -0.15, -0.33)
+sight_height = 0.062
+viewmodel_fov = 65.0
+tracer_every = 2
+shell_size = 0.01
+muzzle_flash_scale = 0.8
+sound_body_hz = 210.0
+sound_mech_hz = 2600.0
+sound_tail_s = 0.45
+sound_volume_db = -3.0
+recoil_pattern = SubResource("recoil")
+base_id = &"m1911"
+camo = &"vesperite"
+dual_wield = true
+projectile_kind = &"rocket"
+projectile_speed = 55.0
+projectile_gravity = 3.0
+projectile_radius = 0.04
+projectile_arm_distance = 1.0
+splash_radius = 2.0
+splash_damage_centre = 300.0
+splash_damage_edge = 60.0
+self_damage_max = 30.0

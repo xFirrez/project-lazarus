@@ -28,6 +28,11 @@ func on_door_opened(_door_id: StringName, _peer_id: int) -> void:
 	pass
 
 
+# Every Resonance Relay (RelaySystem) is done: unlock what the map gates behind them.
+func on_relays_complete() -> void:
+	pass
+
+
 # Special-round enemy for round r (Step 12); &"" = a normal round.
 func get_special_round_enemy(_round: int) -> StringName:
 	return &""

@@ -1,0 +1,87 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.000, 0.800, 0, 0, 0, 0, -0.069, 0.768, 0, 0, 0, 0, 0.078, 0.736, 0, 0, 0, 0, -0.087, 0.704, 0, 0, 0, 0, 0.096, 0.672, 0, 0, 0, 0, -0.105, 0.640, 0, 0, 0, 0, 0.114, 0.608, 0, 0, 0, 0, -0.123, 0.576)
+}
+point_count = 8
+
+[resource]
+script = ExtResource("1")
+id = &"crossbow_up"
+display_name = "\"Lure of the Lantern\""
+weapon_class = 6
+cost = 0
+behavior = &"projectile"
+fire_mode = 0
+rpm = 60.0
+burst_count = 3
+damage = 1500.0
+pellets = 1
+pellet_spread_deg = 0.0
+max_range = 150.0
+head_multiplier = 4.0
+neck_multiplier = 2.0
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 0.0
+range_max = 1.0
+min_damage_fraction = 1.0
+penetration = 1
+penetration_loss = 0.25
+mag_size = 2
+reserve_max = 30
+reload_partial_time = 3.0
+reload_empty_time = 3.0
+ammo_in_partial = 2.2
+ammo_in_empty = 2.2
+raise_time = 0.6
+lower_time = 0.4
+ads_time = 0.28
+sprint_out_time = 0.3
+ads_fov_multiplier = 0.8
+move_speed_multiplier = 0.95
+spread_hip = 1.8
+spread_ads = 0.1
+spread_move = 1.0
+spread_per_shot = 0.0
+spread_max = 3.0
+spread_recovery = 8.0
+recoil_random = 0.06
+recoil_ads_multiplier = 0.65
+recoil_recovery = 0.6
+recoil_recovery_speed = 6.0
+view_kick = 0.7
+vm_kick_back = 0.034
+vm_kick_rot = 2.9
+splash_radius = 3.0
+splash_damage_centre = 1400.0
+splash_damage_edge = 0.0
+self_damage_max = 60.0
+fuse_time = 4.0
+projectile_kind = &"bolt"
+projectile_speed = 60.0
+projectile_gravity = 2.0
+projectile_bounce = 0.0
+projectile_radius = 0.03
+projectile_arm_distance = 0.0
+viewmodel_style = &"crossbow"
+viewmodel_color = Color(0.3, 0.22, 0.14, 1)
+viewmodel_offset = Vector3(0.16, -0.17, -0.3)
+sight_height = 0.09
+viewmodel_fov = 65.0
+scope_sway = 0.0
+tracer_every = 0
+shell_size = 0.01
+muzzle_flash_scale = 1.6
+sound_body_hz = 240.0
+sound_mech_hz = 1000.0
+sound_tail_s = 0.3
+sound_volume_db = -6.0
+recoil_pattern = SubResource("recoil")
+base_id = &"crossbow"
+camo = &"vesperite"
+attract_radius = 18.0
+attract_time = 4.0

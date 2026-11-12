@@ -16,6 +16,7 @@ extends Node3D
 
 signal struck(projectile: Projectile, target: HitTarget, zone: int, position: Vector3)
 signal detonated(projectile: Projectile, position: Vector3)
+signal stuck_to(projectile: Projectile)  # a bolt stuck (Lure of the Lantern attracts zombies)
 
 const LIFETIME: float = 8.0
 const COSMETIC_GRACE: float = 1.5
@@ -177,6 +178,7 @@ func _stick(node: Node3D, target: HitTarget) -> void:
 		_stuck_local = node.global_transform.affine_inverse() * global_transform
 	velocity = Vector3.ZERO
 	Audio.play_event_3d(&"bolt_stick", global_position)
+	stuck_to.emit(self)
 
 
 func _follow_stuck() -> void:

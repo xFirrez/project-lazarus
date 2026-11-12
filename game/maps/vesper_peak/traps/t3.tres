@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TrapDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/traps/trap_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"t3"
+display_name = "Coolant Purge"
+effect = &"freeze"
+shape = &"ring"
+ring_centre = Vector3(28, -48, -50)
+ring_inner = 18.5
+ring_outer = 25.5
+ring_arc_deg = 90.0
+color = Color(0.7, 0.9, 1, 1)

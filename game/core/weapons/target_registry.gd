@@ -86,6 +86,14 @@ func host_reset_all() -> void:
 		Net.send_reliable(0, &"_target_health", [id, t.health, 0.0, 0, 0, 0, true])
 
 
+# HOST: brings a dead target back (hazards regrow / respawn) and tells every peer.
+func host_revive_target(t: HitTarget) -> void:
+	if t == null or t.alive or (Net.is_active() and not Net.is_host()):
+		return
+	t.host_revive()
+	Net.send_reliable(0, &"_target_health", [t.target_id, t.health, 0.0, 0, 0, 0, true])
+
+
 func _respawn_later(t: HitTarget) -> void:
 	await get_tree().create_timer(t.respawn_time).timeout
 	if is_instance_valid(t) and not t.alive:

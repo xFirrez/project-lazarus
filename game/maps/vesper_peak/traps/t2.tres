@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TrapDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/traps/trap_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"t2"
+display_name = "Steam Purge"
+effect = &"steam"
+box_size = Vector3(20, 3, 3)
+color = Color(0.95, 0.95, 0.9, 1)

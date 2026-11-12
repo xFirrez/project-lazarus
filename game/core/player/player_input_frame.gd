@@ -22,6 +22,7 @@ var switch_delta: int = 0  # +1 next / -1 previous (wheel, gamepad)
 var interact: bool = false  # interact key held (purchases, repairs, revives)
 var tactical_pressed: bool = false  # edge: throw a Drummer Decoy (Step 9)
 var placeable_pressed: bool = false  # edge: place a tripmine (Step 9)
+var alt_fire: bool = false  # alt-fire held: the underbarrel attachment (Step 11, Skullcrusher)
 
 
 func duplicate_frame() -> PlayerInputFrame:
@@ -43,4 +44,5 @@ func duplicate_frame() -> PlayerInputFrame:
 	f.interact = interact
 	f.tactical_pressed = tactical_pressed
 	f.placeable_pressed = placeable_pressed
+	f.alt_fire = alt_fire
 	return f
