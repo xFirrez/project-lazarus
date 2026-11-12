@@ -64,6 +64,8 @@ func _register_builtin_commands() -> void:
 	WeaponCommands.register(commands)
 	RenderCommands.register(commands)
 	ZombieCommands.register(commands)
+	SurvivalCommands.register(commands)
+	Net.register_message(&"_cheat", SurvivalCommands.on_msg_cheat)
 
 
 func _cmd_help(_args: Array) -> String:

@@ -115,6 +115,8 @@ static func _cmd_god(args: Array) -> String:
 	if me == null:
 		return "No local player"
 	me.health.invulnerable = bool(args[0])
+	if Net.is_active() and not Net.is_host():
+		SurvivalCommands.request("god", 1 if me.health.invulnerable else 0)  # damage is applied on the host
 	return "god %s" % ("on" if me.health.invulnerable else "off")
 
 

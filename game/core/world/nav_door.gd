@@ -1,6 +1,6 @@
 # NavDoor — a door that blocks players and zombie navigation while closed. Opening it disables its
 # collider and asks the owning NavigationRegion3D to re-bake (threaded), which connects the areas
-# on both sides. Purchasable doors (Step 6/8) build on this; the test maps toggle it by console.
+# on both sides. Purchasable doors (PurchasableDoor) open it; the test maps toggle it by console.
 # Authority: open state is host-authoritative (WorldSync `_door` events + join snapshot); only the
 # host re-bakes navigation (clients don't run zombie AI).
 class_name NavDoor
@@ -50,7 +50,16 @@ func apply_open(on: bool, animate: bool = true) -> void:
 	is_open = on
 	collision_layer = 0 if on else 1
 	_shape.disabled = on
-	_mesh.visible = not on
+	if animate and on and is_inside_tree():
+		# Debris collapses / door drops away, then hides.
+		var tw: Tween = create_tween()
+		tw.tween_property(_mesh, "position", Vector3(0, -size.y, 0), 0.7).set_ease(Tween.EASE_IN)
+		tw.parallel().tween_property(_mesh, "rotation", Vector3(0.25, 0.0, 0.15), 0.7)
+		tw.tween_callback(func() -> void: _mesh.visible = false)
+	else:
+		_mesh.position = Vector3.ZERO
+		_mesh.rotation = Vector3.ZERO
+		_mesh.visible = not on
 	if animate:
 		Audio.play_event_3d(&"door_open" if on else &"door_close", global_position)
 	if WorldSync.is_authority():

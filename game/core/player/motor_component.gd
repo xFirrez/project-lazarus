@@ -17,7 +17,8 @@ signal sprint_changed(sprinting: bool)
 
 enum Stance { STAND, CROUCH, SLIDE, MANTLE }
 
-const WORLD_MASK: int = 1
+const PLAYER_CLIP_LAYER: int = 1 << 8  # 3d_physics/layer_9 "player_clip" (blocks players only)
+const WORLD_MASK: int = 1 | PLAYER_CLIP_LAYER
 
 var tuning: PlayerTuning = null
 var body: CharacterBody3D = null
@@ -34,6 +35,7 @@ var current_height: float = 1.8
 var last_floor_y: float = 0.0
 var wish_dir: Vector3 = Vector3.ZERO
 var weapon_speed_multiplier: float = 1.0  # held weapon's move speed (WeaponDefinition)
+var downed: bool = false  # last stand: crawl only (PlayerCharacter filters the input)
 
 var _lunge_velocity: Vector3 = Vector3.ZERO
 var _lunge_time: float = 0.0
@@ -261,6 +263,8 @@ func _slide_velocity(f: PlayerInputFrame, delta: float) -> Vector3:
 
 func target_speed() -> float:
 	var s: float = tuning.walk_speed
+	if downed:
+		return tuning.downed_crawl_speed * speed_multiplier
 	if stance == Stance.CROUCH:
 		s = tuning.crouch_speed
 	elif sprinting:

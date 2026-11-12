@@ -218,6 +218,7 @@ toggle_net_overlay={
 3d_physics/layer_6="projectile"
 3d_physics/layer_7="trigger"
 3d_physics/layer_8="nav_obstacle"
+3d_physics/layer_9="player_clip"
 
 [navigation]
 

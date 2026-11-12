@@ -1,7 +1,7 @@
 # ZombieSpawner — a spawn point placed by maps (ARCHITECTURE §7.3). `kind` selects the entry
 # behavior: WINDOW spawns outside a barricade (the brain tears in through its TraversalLink),
 # RISER rises from the ground, VENT drops in, DOOR_BURST and SPECIAL are used by later steps.
-# `zone` is the canonical zone id the SpawnDirector (Step 6) filters on.
+# `zone` is the canonical zone id the SpawnDirector filters on (active zones only).
 # Authority: map data, read by the host.
 class_name ZombieSpawner
 extends Marker3D
@@ -11,6 +11,7 @@ enum Kind { WINDOW, RISER, VENT, DOOR_BURST, SPECIAL }
 @export var kind: Kind = Kind.RISER
 @export var zone: StringName = &""
 @export var barricade_path: NodePath = ^""
+@export var min_round: int = 1  # first round this spawner is used (e.g. vents from round 3)
 
 var barricade: Barricade = null
 

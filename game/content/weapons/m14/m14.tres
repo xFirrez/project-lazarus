@@ -1,0 +1,68 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.1, 1.6)
+}
+point_count = 1
+
+[resource]
+script = ExtResource("1")
+id = &"m14"
+display_name = "M14"
+weapon_class = 2
+cost = 500
+move_speed_multiplier = 0.95
+behavior = &"hitscan"
+fire_mode = 0
+rpm = 320.0
+damage = 105.0
+max_range = 150.0
+head_multiplier = 4.0
+neck_multiplier = 2.0
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 25.0
+range_max = 60.0
+min_damage_fraction = 0.7
+penetration = 2
+penetration_loss = 0.25
+mag_size = 8
+reserve_max = 92
+reload_partial_time = 2.4
+reload_empty_time = 2.9
+ammo_in_partial = 1.6
+ammo_in_empty = 2.0
+raise_time = 0.5
+lower_time = 0.4
+ads_time = 0.25
+sprint_out_time = 0.3
+ads_fov_multiplier = 0.75
+spread_hip = 2.5
+spread_ads = 0.05
+spread_move = 1.8
+spread_per_shot = 0.6
+spread_max = 6.0
+spread_recovery = 10.0
+recoil_random = 0.4
+recoil_ads_multiplier = 0.6
+recoil_recovery = 0.85
+recoil_recovery_speed = 4.0
+view_kick = 1.2
+vm_kick_back = 0.08
+vm_kick_rot = 8.0
+viewmodel_style = &"smg"
+viewmodel_color = Color(0.2, 0.2, 0.2, 1)
+viewmodel_offset = Vector3(0.15, -0.18, -0.32)
+sight_height = 0.075
+viewmodel_fov = 62.0
+tracer_every = 1
+shell_size = 0.012
+muzzle_flash_scale = 1.4
+sound_body_hz = 120.0
+sound_mech_hz = 1700.0
+sound_tail_s = 1.2
+sound_volume_db = 0.0
+recoil_pattern = SubResource("recoil")

@@ -19,6 +19,7 @@ var melee_pressed: bool = false
 var lethal_held: bool = false
 var switch_slot: int = -1  # 0-based slot requested this frame (keys 1-3), -1 = none
 var switch_delta: int = 0  # +1 next / -1 previous (wheel, gamepad)
+var interact: bool = false  # interact key held (purchases, repairs, revives)
 
 
 func duplicate_frame() -> PlayerInputFrame:
@@ -37,4 +38,5 @@ func duplicate_frame() -> PlayerInputFrame:
 	f.lethal_held = lethal_held
 	f.switch_slot = switch_slot
 	f.switch_delta = switch_delta
+	f.interact = interact
 	return f

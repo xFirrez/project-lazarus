@@ -76,6 +76,14 @@ extends Resource
 @export var fall_damage_max_height: float = 10.0
 @export var fall_damage_max: float = 50.0
 
+@export_group("Downed (GAME_DESIGN §3.3)")
+@export var downed_crawl_speed: float = 1.2
+@export var eye_height_downed: float = 0.55
+@export var bleedout_time: float = 45.0
+@export var revive_time: float = 4.0
+@export var revive_radius: float = 2.0
+@export var revive_health_fraction: float = 0.5
+
 @export_group("Net validation (host)")
 @export var validation_max_horizontal_speed: float = 10.5
 @export var validation_max_vertical_up_speed: float = 12.0

@@ -24,6 +24,7 @@ const TIER_NAMES: PackedStringArray = ["shamble", "walk", "jog", "run", "sprint"
 @export var crawler_attack_damage: float = 25.0
 @export var attack_range: float = 1.4
 @export var lunge_range: float = 2.0  # sprinters
+@export var window_swipe_range: float = 1.6  # swipe through a partly broken window (GAME_DESIGN §12)
 @export var attack_windup: float = 0.45
 @export var attack_duration: float = 1.0
 @export var attack_cooldown: float = 1.1

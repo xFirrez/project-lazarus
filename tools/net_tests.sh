@@ -8,7 +8,9 @@
 #   weapons      gun range at --netsim: hit markers, host damage + replication, forged claims rejected (AC-3.4)
 #   zombies      nav torture at --netsim: 32 zombies, late join, bandwidth, smoothness, hit claims on
 #                moving zombies accepted >= 98%, barricade replication (AC-5.3, AC-5.6)
-# Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies]...   (default: all)
+#   survival     vesper_peak at --netsim: late-join door, purchase race without double-spend,
+#                revive / bleedout / spectate / respawn / game over on both peers (AC-6.4..6.6)
+# Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies|survival]... (default: all)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
@@ -114,9 +116,23 @@ test_speedhack() { pair_test speedhack sandbox host_speedhack.gd client_speedhac
 test_course() { pair_test course movement_course host_course.gd client_course.gd; }
 test_weapons() { pair_test weapons gun_range host_weapons.gd client_weapons.gd; }
 test_zombies() { pair_test zombies nav_torture host_zombies.gd client_zombies.gd; }
+test_survival() {
+  # Like pair_test, but the client joins only after the host bought D01 (late-join door state).
+  local port; port="$(free_port)"
+  rm -f "$OUT"/survival_*.json
+  launch host "$OUT/survival_host.log" -- --host="$port" --map=vesper_peak --netsim="$NETSIM" \
+    --autotest=res://tests/net/host_survival.gd --autotest-out="$OUT/survival_host.json" --profile=nethost
+  wait_for_log "$OUT/survival_host.log" "AUTOTEST READY host" 20
+  launch client "$OUT/survival_client.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_survival.gd --autotest-out="$OUT/survival_client.json" --profile=netclient1
+  wait "$PID_client" || true
+  wait "$PID_host" || true
+  report survival_client "$OUT/survival_client.json" "$OUT/survival_client.log"
+  report survival_host "$OUT/survival_host.json" "$OUT/survival_host.log"
+}
 
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival)
 fail=0
 for t in "${TESTS[@]}"; do
   "test_$t" || fail=1

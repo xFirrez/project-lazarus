@@ -102,7 +102,7 @@ func live_targets() -> Array[Node3D]:
 	if players != null:
 		for id: int in players.avatars:
 			var p: PlayerCharacter = players.avatars[id]
-			if not p.health.is_downed:
+			if not p.health.is_downed and not p.notarget:
 				out.append(p)
 	for t: Node3D in extra_targets:
 		if is_instance_valid(t) and t.is_inside_tree() and not is_downed(t):

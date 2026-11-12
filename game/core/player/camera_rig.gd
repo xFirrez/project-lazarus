@@ -80,6 +80,8 @@ func _on_landed(impact_speed: float, _fall_height: float) -> void:
 
 
 func target_eye_height() -> float:
+	if motor.downed:
+		return tuning.eye_height_downed
 	match motor.stance:
 		MotorComponent.Stance.CROUCH:
 			return tuning.eye_height_crouch

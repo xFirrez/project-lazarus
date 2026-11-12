@@ -58,6 +58,14 @@ func apply_remote(new_health: float, damage: float, source_position: Vector3, ty
 	health_changed.emit(health, max_health)
 
 
+# Revive (host): back up with a fraction of max health.
+func revive(fraction: float) -> void:
+	is_downed = false
+	health = max_health * clampf(fraction, 0.01, 1.0)
+	time_since_damage = 0.0
+	health_changed.emit(health, max_health)
+
+
 func restore_full() -> void:
 	is_downed = false
 	health = max_health

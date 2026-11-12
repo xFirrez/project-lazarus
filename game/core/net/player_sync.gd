@@ -5,6 +5,8 @@
 #   host  -> all  : `_player_health` (reliable) [id, hp, damage, src, type]  on damage/heal/downed
 #   owner -> host : `_player_fall` (reliable) [height]   fall-damage claim (host clamps + applies)
 #   any   -> host : `_player_tp` (reliable) [pos]        debug teleport request
+# Host bots (`add_bot`, soak tests) are host-simulated avatars with ids >= BOT_ID_BASE; they are
+# not replicated to clients (test tooling, D-040).
 # Entries carry the host-clock time at which that position was valid (D-011).
 # Authority: owner-authoritative movement validated by the host (MovementValidator); health is
 # host-authoritative. Solo and co-op run the same code: with no remote peers sends are no-ops.
@@ -14,13 +16,14 @@ extends Node3D
 signal avatar_spawned(peer_id: int, avatar: PlayerCharacter)
 signal avatar_removed(peer_id: int)
 signal corrected(peer_id: int, reason: String)
+signal player_downed(peer_id: int)
 
 const STREAM_PLAYER_STATE: int = 16
 const STREAM_PLAYER_SNAPSHOT: int = 17
 const STATE_RATE: float = 30.0
 const SNAPSHOT_RATE: float = 20.0
 const PLAYER_SCENE: PackedScene = preload("res://core/player/player_character.tscn")
-const DOWNED_PLACEHOLDER_REVIVE_S: float = 3.0
+const BOT_ID_BASE: int = 1 << 30
 
 var avatars: Dictionary = {}  # peer_id -> PlayerCharacter
 var spawn_points: Array[Vector3] = []
@@ -50,6 +53,25 @@ func _ready() -> void:
 		_spawn(id, Net.peers[id])
 
 
+# HOST: adds a host-simulated bot player (soak tests). Returns its avatar.
+func add_bot(bot_name: String = "") -> PlayerCharacter:
+	if not Net.is_host():
+		return null
+	var id: int = BOT_ID_BASE + avatars.size()
+	while avatars.has(id):
+		id += 1
+	return _spawn(id, {"name": bot_name if bot_name != "" else "Bot %d" % (id - BOT_ID_BASE + 1)}, true)
+
+
+# Ids of the players taking part (session peers + host bots), sorted.
+func player_ids() -> Array[int]:
+	var ids: Array[int] = []
+	for id: int in avatars:
+		ids.append(id)
+	ids.sort()
+	return ids
+
+
 func _exit_tree() -> void:
 	Net.unregister_stream(STREAM_PLAYER_STATE)
 	Net.unregister_stream(STREAM_PLAYER_SNAPSHOT)
@@ -64,7 +86,10 @@ func local_avatar() -> PlayerCharacter:
 func spawn_point_for(peer_id: int) -> Vector3:
 	if spawn_points.is_empty():
 		return Vector3(0, 1, 0)
-	return spawn_points[(Net.peer_ids().find(peer_id) + spawn_points.size()) % spawn_points.size()]
+	var idx: int = player_ids().find(peer_id)
+	if idx < 0:
+		idx = avatars.size()
+	return spawn_points[idx % spawn_points.size()]
 
 
 # --- host API ---------------------------------------------------------------------------------
@@ -97,10 +122,14 @@ func request_teleport(pos: Vector3) -> void:
 		Net.send_reliable(1, &"_player_tp", [pos.x, pos.y, pos.z])
 
 
+func host_teleport(peer_id: int, pos: Vector3) -> void:
+	_host_teleport(peer_id, pos)
+
+
 func _host_teleport(peer_id: int, pos: Vector3) -> void:
 	if not avatars.has(peer_id):
 		return
-	if peer_id == Net.local_id():
+	if peer_id == Net.local_id() or (avatars[peer_id] as PlayerCharacter).is_bot:
 		(avatars[peer_id] as PlayerCharacter).motor.teleport(pos)
 		return
 	var v: MovementValidator = validators[peer_id]
@@ -119,6 +148,11 @@ func _physics_process(delta: float) -> void:
 			if me.global_position.y < PlayerCharacter.KILL_Y:
 				me.motor.teleport(spawn_point_for(me.peer_id))
 			_latest[me.peer_id] = [Net.host_time(), me.global_position, me.get_yaw(), me.get_pitch(), me.state_flags()]
+	if Net.is_host():
+		for id: int in avatars:
+			var b: PlayerCharacter = avatars[id]
+			if b.is_bot and b.global_position.y < PlayerCharacter.KILL_Y:
+				b.motor.teleport(spawn_point_for(id))
 		_state_timer -= delta
 		if _state_timer <= 0.0:
 			_state_timer += 1.0 / STATE_RATE
@@ -261,18 +295,17 @@ func _on_fall_claim(height: float) -> void:
 		Net.send_reliable(1, &"_player_fall", [height])
 
 
+# Host: the HealthComponent reached 0 (DownedSystem takes over: last stand, revive, bleedout).
 func _on_downed(peer_id: int) -> void:
-	Audio.play_event(&"player_downed")
-	Log.info(
-		&"players",
-		(
-			"Peer %d downed (placeholder: auto-restore in %.0f s; Step 6 adds last stand)"
-			% [peer_id, DOWNED_PLACEHOLDER_REVIVE_S]
-		)
-	)
-	if Net.is_host():
-		await get_tree().create_timer(DOWNED_PLACEHOLDER_REVIVE_S).timeout
-		heal_player(peer_id)
+	Log.info(&"players", "Peer %d downed" % peer_id)
+	if avatars.has(peer_id):
+		player_downed.emit(peer_id)
+
+
+# Host: health broadcast for revive / respawn (DownedSystem).
+func broadcast_health(peer_id: int) -> void:
+	if Net.is_host() and avatars.has(peer_id):
+		_broadcast_health(avatars[peer_id], 0.0, Vector3.INF, HealthComponent.DamageType.GENERIC)
 
 
 # --- spawn / despawn --------------------------------------------------------------------------
@@ -295,10 +328,11 @@ func _on_peer_left(peer_id: int) -> void:
 		avatar_removed.emit(peer_id)
 
 
-func _spawn(peer_id: int, info: Dictionary) -> void:
+func _spawn(peer_id: int, info: Dictionary, bot: bool = false) -> PlayerCharacter:
 	var avatar: PlayerCharacter = PLAYER_SCENE.instantiate() as PlayerCharacter
 	avatar.peer_id = peer_id
-	avatar.is_local = peer_id == Net.local_id()
+	avatar.is_local = peer_id == Net.local_id() and not bot
+	avatar.is_bot = bot
 	avatar.display_name = String(info.get("name", "Peer %d" % peer_id))
 	avatar.slot = avatars.size()
 	avatar.position = spawn_point_for(peer_id)
@@ -308,13 +342,14 @@ func _spawn(peer_id: int, info: Dictionary) -> void:
 	if avatar.is_local:
 		avatar.fall_damage_claimed.connect(_on_fall_claim)
 	avatar.health.downed.connect(_on_downed.bind(peer_id))
-	if Net.is_host() and not avatar.is_local:
+	if Net.is_host() and not avatar.is_local and not bot:
 		var v: MovementValidator = MovementValidator.new(avatar.tuning)
 		v.kill_y = PlayerCharacter.KILL_Y
 		validators[peer_id] = v
 	Audio.play_event(&"net_peer_joined")
 	Log.info(&"players", "Spawned avatar for peer %d (%s)" % [peer_id, "local" if avatar.is_local else "remote"])
 	avatar_spawned.emit(peer_id, avatar)
+	return avatar
 
 
 static func _put_vec(buf: StreamPeerBuffer, v: Vector3) -> void:

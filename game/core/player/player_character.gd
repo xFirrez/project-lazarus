@@ -19,6 +19,10 @@ const KILL_Y: float = -30.0
 
 var peer_id: int = 0
 var is_local: bool = false
+var is_bot: bool = false  # host-simulated test player (no camera / HUD / input; Step 6 soak bots)
+var spectating: bool = false  # bled out: hidden, waits for the next round (DownedSystem)
+var reviving: bool = false  # local: holding revive on a teammate (can't shoot)
+var notarget: bool = false  # host: zombies ignore this player (debug `notarget`)
 var display_name: String = ""
 var slot: int = 0
 var buffer: InterpolationBuffer = InterpolationBuffer.new()
@@ -57,9 +61,10 @@ func _ready() -> void:
 	health.setup(tuning)
 	footsteps.setup(self, not is_local)
 	_build_visual()
-	if is_local:
+	if is_local or is_bot:
 		collision_layer = 1 << 1  # player
-		collision_mask = 1 << 0  # world
+		collision_mask = 1 << 0 | MotorComponent.PLAYER_CLIP_LAYER  # world + player clip
+	if is_local:
 		input_source = PlayerInputSource.new(tuning)
 		camera.current = true
 		_visual.visible = false
@@ -74,7 +79,9 @@ func _ready() -> void:
 		hud = DamageHud.new()
 		hud.player = self
 		_hud_layer.add_child(hud)
-	else:
+	if is_bot:
+		camera.current = false
+	elif not is_local:
 		# Remote puppets are positioned from snapshots, never by local physics.
 		collision_layer = 0
 		collision_mask = 0
@@ -98,9 +105,15 @@ func set_view(p_yaw: float, p_pitch: float) -> void:
 	rotation.y = p_yaw
 
 
-# Bit-packed movement state for replication: stance (2 bits), grounded, sprinting.
+# Bit-packed movement state for replication: stance (2 bits), grounded, sprinting, downed, spectating.
 func state_flags() -> int:
-	return int(motor.stance) | (4 if motor.grounded else 0) | (8 if motor.sprinting else 0)
+	return (
+		int(motor.stance)
+		| (4 if motor.grounded else 0)
+		| (8 if motor.sprinting else 0)
+		| (16 if health.is_downed else 0)
+		| (32 if spectating else 0)
+	)
 
 
 func remote_stance() -> int:
@@ -129,7 +142,7 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	health.tick(delta)
-	if is_local:
+	if is_local or is_bot:
 		_simulate(delta)
 	else:
 		_puppet(delta)
@@ -141,12 +154,45 @@ func _simulate(delta: float) -> void:
 		f = bot_driver.call(self, delta)
 	if f == null:
 		f = input_source.gather() if input_source != null else PlayerInputFrame.new()
+	_filter_for_state(f)
 	last_frame = f
 	camera_rig.add_look(f.look_delta)
 	rotation.y = camera_rig.yaw
+	motor.downed = health.is_downed
 	motor.physics_step(f, delta)
-	weapons.physics_step(f, delta)
+	if is_local:
+		weapons.physics_step(f, delta)
 	footsteps.update(motor.grounded, motor.sprinting, motor.is_crouched())
+
+
+# Downed: crawl with the last-stand pistol only; spectators don't act; revivers can't shoot.
+func _filter_for_state(f: PlayerInputFrame) -> void:
+	if spectating:
+		for prop: String in ["fire", "aim", "jump_pressed", "jump_held", "sprint", "crouch_pressed"]:
+			f.set(prop, false)
+		f.move = Vector2.ZERO
+		f.melee_pressed = false
+		f.lethal_held = false
+		f.reload_pressed = false
+		f.interact = false
+		f.switch_slot = -1
+		f.switch_delta = 0
+		return
+	if health.is_downed:
+		f.sprint = false
+		f.jump_pressed = false
+		f.jump_held = false
+		f.crouch = true
+		f.crouch_pressed = false
+		f.melee_pressed = false
+		f.lethal_held = false
+		f.switch_slot = -1
+		f.switch_delta = 0
+		f.interact = false
+	if reviving:
+		f.fire = false
+		f.aim = false
+		f.sprint = false
 
 
 func _puppet(_delta: float) -> void:
@@ -158,6 +204,9 @@ func _puppet(_delta: float) -> void:
 	var crouched: bool = stance == MotorComponent.Stance.CROUCH or stance == MotorComponent.Stance.SLIDE
 	var grounded: bool = (remote_flags & 4) != 0
 	var target_scale: float = tuning.crouch_height / tuning.stand_height if crouched else 1.0
+	if remote_flags & 16:
+		target_scale = 0.35  # downed: lying on the ground
+	_visual.visible = (remote_flags & 32) == 0
 	_visual.scale.y = move_toward(_visual.scale.y, target_scale, _delta * 4.0)
 	if grounded and not _remote_grounded:
 		footsteps.play(&"land")

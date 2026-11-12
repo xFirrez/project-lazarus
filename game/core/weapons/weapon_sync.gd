@@ -24,6 +24,7 @@ signal hit_rejected(peer_id: int, reason: String)
 const STREAM_FIRE: int = 18
 const ORIGIN_SLACK: float = 2.5
 const PRIMARY_SLOTS: int = 2
+const LAST_STAND_PISTOL: StringName = &"m1911"
 
 var validator: HitValidator = HitValidator.new()
 var targets: TargetRegistry = null
@@ -167,6 +168,8 @@ func host_give(peer_id: int, weapon_id: StringName) -> bool:
 	if def == null or def.is_melee() or def.weapon_class == WeaponDefinition.WeaponClass.LETHAL:
 		return false
 	var lo: Dictionary = _loadout(peer_id)
+	if bool(lo.get("last_stand", false)):
+		return false
 	var ids: Array = lo["ids"]
 	if not ids.has(weapon_id):
 		if ids.size() >= PRIMARY_SLOTS:
@@ -191,6 +194,93 @@ func host_refill(peer_id: int) -> void:
 	if frag != null:
 		lo["lethal"] = frag.carry_max
 		_broadcast_loadout(peer_id)
+
+
+# Wall-buy ammo: refills one owned weapon (mag + reserve) on host and owner.
+func host_refill_weapon(peer_id: int, weapon_id: StringName) -> void:
+	var def: WeaponDefinition = WeaponCatalog.get_def(weapon_id)
+	if def == null:
+		return
+	validator.give(peer_id, def)
+	_send_to(peer_id, &"_wammo", [String(def.id), def.mag_size, def.reserve_max])
+
+
+# Round start: +amount lethals up to the carry max (GAME_DESIGN §3.4).
+func host_add_lethal(peer_id: int, amount: int) -> void:
+	var frag: WeaponDefinition = WeaponCatalog.get_def(WeaponController.FRAG_ID)
+	if frag == null or not loadouts.has(peer_id):
+		return
+	var lo: Dictionary = loadouts[peer_id]
+	var next: int = mini(int(lo["lethal"]) + amount, frag.carry_max)
+	if next != int(lo["lethal"]):
+		lo["lethal"] = next
+		_broadcast_loadout(peer_id)
+
+
+# Downed (GAME_DESIGN §3.3): switch to the best owned pistol with 2 extra mags, else a
+# temporary M1911. The other weapons stay in the loadout (kept on revive).
+func host_enter_last_stand(peer_id: int) -> void:
+	var lo: Dictionary = _loadout(peer_id)
+	if bool(lo.get("last_stand", false)):
+		return
+	lo["last_stand"] = true
+	lo["pre_down"] = lo["current"]
+	var best: WeaponDefinition = null
+	for wid: Variant in lo["ids"]:
+		var d: WeaponDefinition = WeaponCatalog.get_def(StringName(wid))
+		if d != null and d.weapon_class == WeaponDefinition.WeaponClass.PISTOL:
+			if best == null or d.damage * d.rpm > best.damage * best.rpm:
+				best = d
+	if best == null:
+		best = WeaponCatalog.get_def(LAST_STAND_PISTOL)
+		if best == null:
+			return
+		(lo["ids"] as Array).append(best.id)
+		lo["last_stand_added"] = best.id
+		validator.give(peer_id, best)
+	else:
+		var a: Array = validator.ammo(peer_id, best.id)
+		var reserve: int = mini(int(a[1]) + best.mag_size * 2, best.reserve_max + best.mag_size * 2)
+		validator.give(peer_id, best, int(a[0]), reserve)
+		_send_to(peer_id, &"_wammo", [String(best.id), int(a[0]), reserve])
+	lo["current"] = best.id
+	_broadcast_loadout(peer_id)
+
+
+func host_exit_last_stand(peer_id: int) -> void:
+	if not loadouts.has(peer_id):
+		return
+	var lo: Dictionary = loadouts[peer_id]
+	if not bool(lo.get("last_stand", false)):
+		return
+	lo["last_stand"] = false
+	var added: StringName = StringName(lo.get("last_stand_added", &""))
+	if added != &"":
+		(lo["ids"] as Array).erase(added)
+		validator.take(peer_id, added)
+		lo.erase("last_stand_added")
+	var ids: Array = lo["ids"]
+	var back: StringName = StringName(lo.get("pre_down", &""))
+	lo["current"] = back if ids.has(back) else (StringName(ids[0]) if not ids.is_empty() else &"")
+	_broadcast_loadout(peer_id)
+
+
+# Bled out (GAME_DESIGN §3.3): weapons are lost; the player respawns with the starting loadout.
+func host_reset_loadout(peer_id: int) -> void:
+	if loadouts.has(peer_id):
+		for wid: Variant in (loadouts[peer_id] as Dictionary)["ids"]:
+			validator.take(peer_id, StringName(wid))
+		loadouts.erase(peer_id)
+	_loadout(peer_id)
+	_broadcast_loadout(peer_id)
+	for wid: StringName in starting_weapons:
+		var def: WeaponDefinition = WeaponCatalog.get_def(wid)
+		if def != null:
+			_send_to(peer_id, &"_wammo", [String(def.id), def.mag_size, def.reserve_max])
+
+
+func is_last_stand(peer_id: int) -> bool:
+	return loadouts.has(peer_id) and bool((loadouts[peer_id] as Dictionary).get("last_stand", false))
 
 
 func host_set_infinite_ammo(peer_id: int, on: bool) -> void:
@@ -234,7 +324,7 @@ func _host_process_shot(peer_id: int, claim: Array) -> void:
 		return
 	var now: float = Net.host_time()
 	# The host's own shots are trusted (it is the authority); every client claim is validated.
-	var trusted: bool = not Net.is_active() or peer_id == Net.local_id()
+	var trusted: bool = not Net.is_active() or peer_id == Net.local_id() or _is_host_bot(peer_id)
 	var res: HitValidator.Result = HitValidator.Result.OK
 	if trusted:
 		validator.accepted_shots += 1
@@ -285,6 +375,10 @@ func _host_process_shot(peer_id: int, claim: Array) -> void:
 		targets.host_damage(t, info)
 		if not t.alive:
 			killed.append(t)
+
+
+func _is_host_bot(peer_id: int) -> bool:
+	return players != null and players.avatars.has(peer_id) and (players.avatars[peer_id] as PlayerCharacter).is_bot
 
 
 func _shooter_eye(peer_id: int, claimed: Vector3) -> Vector3:
@@ -550,6 +644,8 @@ func _on_peer_left(peer_id: int) -> void:
 
 
 func _send_to(peer_id: int, msg: StringName, payload: Array) -> void:
+	if _is_host_bot(peer_id):
+		return  # host bots shoot without ammo bookkeeping
 	if Net.is_active():
 		Net.send_reliable(peer_id, msg, payload)  # to self dispatches locally
 	else:

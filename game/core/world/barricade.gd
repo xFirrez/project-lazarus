@@ -1,6 +1,7 @@
 # Barricade — a boarded window (GAME_DESIGN §12): `max_planks` planks that zombies tear one at a
-# time and players rebuild (Step 6 adds the rebuild interaction). One zombie works a window at a
-# time (`occupant`); the rest wait outside. A TraversalLink (action WINDOW) crosses the opening.
+# time and players rebuild through the BarricadeRepair interactable it creates on the inside.
+# One zombie works a window at a time (`occupant`); the rest wait outside. A TraversalLink
+# (action WINDOW) crosses the opening.
 # Authority: plank count is host-authoritative; WorldSync replicates `_barricade` events and the
 # full state on join. Visual planks are local presentation on every peer.
 class_name Barricade
@@ -18,6 +19,7 @@ var world_id: int = -1
 var planks: int = 6
 var occupant: int = 0  # host: net id of the zombie working this window (0 = free)
 var tears: int = 0  # host statistics
+var repair: BarricadeRepair = null
 var _plank_nodes: Array[MeshInstance3D] = []
 var _plank_rest: Array[Transform3D] = []
 
@@ -26,6 +28,11 @@ func _ready() -> void:
 	add_to_group(&"barricade")
 	planks = max_planks
 	_build_planks()
+	repair = BarricadeRepair.new()
+	repair.name = "Repair"
+	repair.barricade = self
+	repair.position = Vector3(0, 0, -0.6)  # inside (-Z of the barricade frame)
+	add_child(repair)
 
 
 func is_open() -> bool:
@@ -46,6 +53,14 @@ func host_tear() -> bool:
 	return true
 
 
+# HOST: puts one plank back. Returns true if a plank was added.
+func host_repair_one() -> bool:
+	if planks >= max_planks:
+		return false
+	WorldSync.host_set_barricade(self, planks + 1)
+	return true
+
+
 func host_repair_all() -> void:
 	WorldSync.host_set_barricade(self, max_planks)
 
@@ -60,7 +75,10 @@ func apply_planks(count: int, animate: bool = true) -> void:
 		var on: bool = i < planks
 		var p: MeshInstance3D = _plank_nodes[i]
 		if on:
-			p.transform = _plank_rest[i]
+			if animate and not p.visible and is_inside_tree():
+				_board_up(p, _plank_rest[i])
+			else:
+				p.transform = _plank_rest[i]
 			p.visible = true
 		elif p.visible:
 			if animate and is_inside_tree():
@@ -78,6 +96,13 @@ func _fling(p: MeshInstance3D) -> void:
 	out.basis = out.basis.rotated(Vector3.UP, randf_range(-0.8, 0.8))
 	tw.tween_property(p, "transform", out, 0.35).set_ease(Tween.EASE_OUT)
 	tw.tween_callback(func() -> void: p.visible = false)
+
+
+# Plank board-up animation: slides in from the inside and snaps onto the frame.
+func _board_up(p: MeshInstance3D, rest: Transform3D) -> void:
+	p.transform = rest.translated(Vector3(0.0, 0.25, -0.7))
+	var tw: Tween = create_tween()
+	tw.tween_property(p, "transform", rest, 0.18).set_ease(Tween.EASE_IN)
 
 
 func _build_planks() -> void:

@@ -146,6 +146,19 @@ func show_game_over(reason: String) -> void:
 	_set_screen(screen)
 
 
+# Game over v1 (GAME_DESIGN §15): rounds survived + per-player stats, then back to the menu.
+func show_match_summary(round_reached: int, rows: Array) -> void:
+	_end_match("game over")
+	_set_state(State.GAME_OVER)
+	var screen: GameOverScreen = GameOverScreen.new()
+	screen.round_reached = round_reached
+	screen.rows = rows
+	screen.local_peer = Net.local_id() if Net.is_active() else 1
+	screen.menu_pressed.connect(func() -> void: leave_game(""))
+	_set_screen(screen)
+	Log.info(&"game", "Game over screen: round %d, %d players" % [round_reached, rows.size()])
+
+
 func state_name() -> String:
 	return STATE_NAMES[state]
 

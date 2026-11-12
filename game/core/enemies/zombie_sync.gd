@@ -7,7 +7,7 @@
 # Zombies get host-assigned NetIds (u16) and TargetRegistry ids TARGET_ID_BASE + NetId, so client
 # hit claims address them like any HitTarget. Re-queued zombies (stuck / far / unreachable) are
 # despawned without counting as kills and respawned at a spawner away from the players
-# (`auto_respawn`, until Step 6's SpawnDirector takes the signal).
+# (`auto_respawn`; on survival maps the SpawnDirector turns it off and re-queues them itself).
 # Without a session (integration scenes) this node is the authority.
 # Authority: host spawns, simulates (CrowdDirector) and decides deaths; clients present.
 class_name ZombieSync
@@ -15,7 +15,7 @@ extends Node3D
 
 signal zombie_spawned(actor: ZombieActor)
 signal zombie_died(actor: ZombieActor, source_peer: int)
-signal zombie_requeued(archetype: ZombieArchetype, tier: int, reason: String)
+signal zombie_requeued(archetype: ZombieArchetype, tier: int, reason: String, net_id: int)
 
 enum Gib { HEAD = 1, ARM_L = 2, ARM_R = 4, LEG_L = 8, LEG_R = 16 }
 
@@ -206,8 +206,9 @@ func _on_requeue(sim: ZombieSim, reason: String) -> void:
 		return
 	var arch: ZombieArchetype = a.archetype
 	var tier: int = a.tier
+	var id: int = a.net_id
 	host_despawn(a)
-	zombie_requeued.emit(arch, tier, reason)
+	zombie_requeued.emit(arch, tier, reason, id)
 	if auto_respawn:
 		host_spawn_at_spawner(arch, tier, null, true)
 

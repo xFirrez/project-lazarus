@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://core/world/map_definition.gd" id="1"]
+[ext_resource type="Script" path="res://core/world/zone_def.gd" id="2"]
+[ext_resource type="Resource" path="res://content/rounds/default_round_curve.tres" id="3"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/vesper_peak_rules.gd" id="4"]
+
+[sub_resource type="Resource" id="z01"]
+script = ExtResource("2")
+id = &"Z01"
+display_name = "Arrival Station"
+adjacent = Array[StringName]([&"Z03", &"Z06"])
+start_unlocked = true
+
+[sub_resource type="Resource" id="z03"]
+script = ExtResource("2")
+id = &"Z03"
+display_name = "Sanatorium Lobby"
+adjacent = Array[StringName]([&"Z01"])
+
+[sub_resource type="Resource" id="z06"]
+script = ExtResource("2")
+id = &"Z06"
+display_name = "Frozen Courtyard"
+adjacent = Array[StringName]([&"Z01"])
+
+[resource]
+script = ExtResource("1")
+id = &"vesper_peak"
+display_name = "Vesper Peak"
+scene_path = "res://maps/vesper_peak/vesper_peak.tscn"
+is_test_map = false
+max_players = 4
+starting_weapons = Array[StringName]([&"m1911"])
+starting_points = 500
+survival = true
+round_curve = ExtResource("3")
+zones = Array[ZoneDef]([SubResource("z01"), SubResource("z03"), SubResource("z06")])
+starting_zone = &"Z01"
+rules_script = ExtResource("4")

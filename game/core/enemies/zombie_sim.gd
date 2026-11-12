@@ -63,6 +63,7 @@ var traverse_to: Vector3 = Vector3.ZERO
 var traverse_duration: float = 1.0
 var barricade: Barricade = null
 var tear_timer: float = 0.0
+var window_swipe_timer: float = -1.0  # wind-up of a swipe through the window bars (< 0 = none)
 var attack_cooldown: float = 0.0
 var attack_hit_done: bool = false
 var attack_target: Node3D = null
@@ -393,7 +394,21 @@ func _move_tear(dt: float) -> void:
 	if barricade == null or barricade.is_open():
 		_start_traverse()
 		return
+	if window_swipe_timer >= 0.0:
+		window_swipe_timer -= dt
+		if window_swipe_timer < 0.0:
+			var v: Node3D = _window_victim()
+			if v != null:
+				director.damage_target(v, archetype.attack_damage, pos)
+			tear_timer = archetype.attack_cooldown
+		return
 	tear_timer -= dt
+	if tear_timer <= 0.0 and barricade.planks < barricade.max_planks and _window_victim() != null:
+		# A player stands at a partly broken window: swipe through the bars (telegraphed).
+		window_swipe_timer = archetype.attack_windup
+		actor.start_action(ZombieActor.Action.ATTACK)
+		Audio.play_event_3d(&"zombie_attack", pos)
+		return
 	if tear_timer <= 0.0:
 		barricade.host_tear()
 		Audio.play_event_3d(&"zombie_tear", pos)
@@ -402,6 +417,14 @@ func _move_tear(dt: float) -> void:
 		else:
 			tear_timer = archetype.tear_time_for(actor.tier)
 			actor.start_action(ZombieActor.Action.TEAR)
+
+
+func _window_victim() -> Node3D:
+	for t: Node3D in director.live_targets():
+		var d: Vector3 = t.global_position - pos
+		if absf(d.y) < 1.5 and Vector2(d.x, d.z).length() <= archetype.window_swipe_range:
+			return t
+	return null
 
 
 func _move_traverse(dt: float) -> void:
