@@ -48,6 +48,7 @@ var attraction: Callable = Callable()  # host: func(decoy: Node3D, def) -> regis
 var explosions: int = 0  # host: explosions applied (tests)
 var status: StatusEffects = null  # host: slow / burn on hit (Forge upgrades)
 var impact_splashes: int = 0  # host: upgraded-weapon impact splashes + cluster blasts (tests)
+var splashes_shown: int = 0  # every peer: splashes presented (net test)
 
 var _outbox: Array = []
 var _standalone_controllers: Array[WeaponController] = []
@@ -774,6 +775,7 @@ func host_splash(
 
 
 func _show_splash(pos: Vector3, radius: float) -> void:
+	splashes_shown += 1
 	if not is_inside_tree():
 		return
 	WeaponFx.of(self).explosion(pos, radius)

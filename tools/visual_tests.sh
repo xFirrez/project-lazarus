@@ -7,6 +7,8 @@
 #   survivor_showcase the four survivors: weapon-class holds, full-body states, tinted first-person arms (Step 7)
 #   lobby_ui          lobby (characters, chat, ready), main menu v1, map select (Step 7)
 #   perk_showcase     the 7 Vigor Tonic machines power off / on, the 6 power-up drops (Step 10)
+#   forge_showcase    relays idle / charging / active, reactor + bridge, Lazarus Forge forging / offer,
+#                     traps active, breaker puddles, upgraded weapons with the vesperite camo (Step 11)
 # Same renderer selection as screenshot.sh: Vulkan if an ICD exists, otherwise opengl3 (D-013).
 # Usage: tools/visual_tests.sh [out_dir] [test...]   (frames go to docs/screenshots by default)
 set -euo pipefail
@@ -43,7 +45,7 @@ run_visual() { # name map resolution [session args...]
 }
 
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(damage_direction viewmodel_ads lookdev_perf zombie_showcase survivor_showcase lobby_ui perk_showcase)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(damage_direction viewmodel_ads lookdev_perf zombie_showcase survivor_showcase lobby_ui perk_showcase forge_showcase)
 fail=0
 for t in "${TESTS[@]}"; do
   case "$t" in
@@ -53,6 +55,7 @@ for t in "${TESTS[@]}"; do
     zombie_showcase) run_visual zombie_showcase nav_torture 1280x720 || fail=1 ;;
     survivor_showcase) run_visual survivor_showcase vesper_peak 1280x720 || fail=1 ;;
     perk_showcase) run_visual perk_showcase vesper_peak 1280x720 || fail=1 ;;
+    forge_showcase) run_visual forge_showcase vesper_peak 1280x720 || fail=1 ;;
     lobby_ui) run_visual lobby_ui vesper_peak 1280x720 --host=24599 --lobby || fail=1 ;;
     *) echo "unknown visual test $t" >&2; fail=1 ;;
   esac

@@ -32,7 +32,15 @@ const KIND_COLORS: Dictionary = {
 @export var zone: StringName = &""
 @export var label: String = ""
 @export var requires_power: bool = false
-@export var show_visual: bool = true
+# Turning it off after `_ready` removes the post / label already built (systems that replace a
+# marker with the real object set it during Match.setup, when the map is already in the tree).
+@export var show_visual: bool = true:
+	set(v):
+		show_visual = v
+		if not v and is_inside_tree():
+			for c: Node in get_children():
+				if c.has_meta(&"marker_visual"):
+					c.queue_free()
 
 
 func _ready() -> void:
@@ -58,6 +66,7 @@ func _build_visual() -> void:
 	m.emission = c * 0.4
 	mi.material_override = m
 	mi.visibility_range_end = 40.0
+	mi.set_meta(&"marker_visual", true)
 	add_child(mi)
 	var l: Label3D = Label3D.new()
 	l.text = "%s\n%s" % [marker_id, label] if label != "" else String(marker_id)
@@ -66,6 +75,7 @@ func _build_visual() -> void:
 	l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	l.modulate = c
 	l.visibility_range_end = 25.0
+	l.set_meta(&"marker_visual", true)
 	add_child(l)
 	if requires_power:
 		var pl: PoweredLight = PoweredLight.new()
@@ -76,4 +86,5 @@ func _build_visual() -> void:
 		o.omni_range = 3.0
 		o.position.y = 1.0
 		pl.add_child(o)
+		pl.set_meta(&"marker_visual", true)
 		add_child(pl)

@@ -45,13 +45,15 @@ void fragment() {
 	uv *= scale;
 	float t = TIME * flow_speed;
 	float f = fbm(uv + vec2(t, -t * 0.6));
-	// Veins: thin bands where the warped noise crosses 0.5.
-	float band = 1.0 - smoothstep(0.0, 0.06, abs(fbm(uv * 0.7 + f * 1.8 - t) - 0.5));
+	// Veins: thin contour lines of the warped noise (~10 % coverage), gold everywhere else.
+	float v = fbm(uv * 0.7 + f * 1.8 - t);
+	float d = 1.0 - abs(fract(v * 4.0) - 0.5) * 2.0;  // 0 on a contour line, 1 between lines
+	float band = 1.0 - smoothstep(0.04, 0.12, d);
 	float pulse = 0.6 + 0.4 * sin(TIME * pulse_speed + f * 6.0);
 	float plates = step(0.5, fract(uv.x * 0.25 + uv.y * 0.11)) * 0.08;
 	ALBEDO = mix(gold * (0.85 + plates + f * 0.3), vein, band);
-	METALLIC = mix(0.9, 0.0, band);
+	METALLIC = mix(0.55, 0.0, band);
 	ROUGHNESS = mix(0.3 + f * 0.2, 0.4, band);
-	EMISSION = vein * band * pulse * 2.5 + gold * 0.05;
+	EMISSION = vein * band * pulse * 1.6 + gold * 0.04;
 	ALPHA = coverage;
 }

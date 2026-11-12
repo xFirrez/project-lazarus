@@ -12,10 +12,10 @@
 | Field | Value |
 |---|---|
 | Current milestone | **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
-| Next step to start | **Step 11 — Power progression: Relays, Lazarus Forge, traps & hazards** |
+| Next step to start | **Step 12 — Wonder weapons & special enemies (→ M4)** |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-12 (Step 10 session) |
-| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **7 Vigor Tonic machines** (cap 4, loss on down, Second Wind solo self-revive ×3), **6 power-ups** (drops, timers, `powerup <id>`), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
+| Last updated | 2026-11-12 (Step 11 session) |
+| Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**full greybox**: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **7 Vigor Tonic machines** (cap 4, loss on down, Second Wind solo self-revive ×3), **6 power-ups** (drops, timers, `powerup <id>`), **Resonance Relays R1–R3 → Reactor Bridge → Lazarus Forge** (23 upgraded weapons with camo, alt-fire key B), **traps T1–T3**, **hazards** (fuel drums, icicles, lab breaker), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
 
@@ -34,7 +34,7 @@
 | 8 | Vesper Peak full greybox (→ M3) | **Complete** (AC-8.7 / AC-8.8 awaiting human) | 8A + 8B | 2026-11-12 |
 | 9 | Arsenal, wall-buys & Relic Box | **Complete (with deferrals)** (AC-9.7 awaiting human; authored weapon art deferred) | 9A + 9B | 2026-11-12 |
 | 10 | Vigor Tonics & power-ups | **Complete (with deferrals)** (AC-10.5 / AC-10.6 awaiting human; authored machine models deferred) | — | 2026-11-12 |
-| 11 | Relays, Lazarus Forge, traps & hazards | Not started | 11A / 11B | — |
+| 11 | Relays, Lazarus Forge, traps & hazards | **Complete (with deferrals)** (AC-11.6 awaiting human; authored Forge / relay / trap models deferred) | 11A + 11B | 2026-11-12 |
 | 12 | Wonder weapons & special enemies (→ M4) | Not started | 12A / 12B | — |
 | 13 | Vesper Peak art & atmosphere (→ M5) | Not started | 13A / 13B / 13C / 13D | — |
 | 14 | Easter egg, lore & secrets | Not started | 14A / 14B | — |
@@ -145,12 +145,12 @@
 - [H] AC-10.6 [HUMAN] Perks/power-ups feel impactful
 
 ### Step 11 — Relays, Forge, traps, hazards
-- [ ] AC-11.1 Relay sequence + bridge + replication
-- [ ] AC-11.2 Forge upgrades every conventional weapon correctly
-- [ ] AC-11.3 All upgraded behavior changes implemented
-- [ ] AC-11.4 Traps per spec + replication
-- [ ] AC-11.5 Hazards + resets
-- [ ] AC-11.6 [HUMAN] Forge feels rewarding
+- [x] AC-11.1 Relay sequence + bridge + replication (`run_sim.sh progression`: power gate, 20 s defend, pause outside the zone, bridge, reactor stage; `net_tests.sh progression`: client relay start, pause replicated, late-join flags)
+- [x] AC-11.2 Forge upgrades every conventional weapon correctly (`test_forge_upgrades` over all 23; sim: 5000 / Fire Sale ignored / 5 s / owner take / 15 s expiry / Free Upgrade; net: client job + owner lock)
+- [x] AC-11.3 All upgraded behavior changes implemented (`test_forge_upgrades` checklist + live sim checks; Ray Pistol / Conduit upgrades with the weapons in Step 12)
+- [x] AC-11.4 Traps per spec + replication (sim: kills, 50 / kill to activator, player 110 HP/s, cooldown, freeze + shatter; net: client activation + points, FROZEN on client)
+- [x] AC-11.5 Hazards + resets (sim: drums chain + respawn after 3 rounds, icicles + regrow after 2, breaker stun / recharge; net: drum death / respawn)
+- [H] AC-11.6 [HUMAN] Forge feels rewarding (`docs/screenshots/step11/`, steps in the session report)
 
 ### Step 12 — Wonder weapons & specials
 - [ ] AC-12.1 Ray Pistol spec + upgrade bounce
@@ -207,6 +207,11 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-12 | 11 | `tools/check.sh` | Pass | 31 unit scripts / 173 tests (new `test_forge_upgrades`: 7 tests over the 23 upgrades + traps) |
+| 2026-11-12 | 11 | `tools/run_sim.sh progression` (new) | Pass | 88 checks: relays (pause, 20.0 s defend), bridge / Forge / reactor, Forge 5.0 s + 15 s expiry + Free Upgrade, upgraded behaviors live, traps T2 / T3, hazards |
+| 2026-11-12 | 11 | `tools/net_tests.sh progression` (new) | Pass | host 25 / client 20 checks at 100 ms ±20 / 2 %: late-join relay + trap flags, client relay / Forge / trap, FROZEN + splash + drum replication |
+| 2026-11-12 | 11 | Regression: `run_tests.sh integration`, `run_sim.sh smoke round_flow perks`, `net_tests.sh weapons box perks late_join reconnect survival traversal solo` | Pass | all green (integration, 3 sims, 8 net tests) |
+| 2026-11-12 | 11 | `tools/visual_tests.sh docs/screenshots/step11 forge_showcase` (new) | Pass | 13 frames (relays idle / charging / active, reactor dormant / stabilized + bridge, Forge forging / offer, traps active, breaker puddles, camo row); camo veins and marker-post hiding fixed after review |
 | 2026-11-12 | 10 | `tools/check.sh` | Pass | 30 scripts / 166 tests (new `test_perks`: stat fold, perk data vs §8, each perk measured on the components; `test_powerup_dropper`: 30-round simulation 1p / 4p × 100 matches, trap / Nuke kills, threshold growth stop, bag, conditions, cap 4) |
 | 2026-11-12 | 10 | `tools/run_sim.sh perks` (new) | Pass | 56 checks: 7 machines on markers, power gating, Second Wind 500 without power, 3 s drink (weapon lowered), owned / cap refusals, HP 250, reload halved, 3 weapons; 3 solo self-revives (perks + 3rd weapon lost) → machine vanishes → 4th down game over; Max Ammo (mag kept), Insta-Kill one hit + 30 s timer, Double Points hit = 20, Nuke all dead in ~2 s +400 no drops, Carpenter +200 all planks, Fire Sale, bullet-kill drop at a reachable spot, none from a trap kill, expiry |
 | 2026-11-12 | 10 | `tools/net_tests.sh perks` (new) | Pass ×3 | 100 ms ±20, 2 %: co-op price 1500, client buys Quickdraw through the machine (3000 paid, drink, perk + halved reload on the client), Second Wind revive of the downed host 2.24 s, client picks Max Ammo (reserve refilled, mag kept) + Insta-Kill, identical timer flag, clock error median 12 ms, perks lost on down on both peers |
@@ -314,6 +319,9 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | I-022 | S4 | 9 | Projectile bolts stuck to a zombie that dies keep following the corpse until the fuse ends; the box display floats a greybox gun (no authored models yet) | Cosmetic |
 | I-023 | S3 | 10 | `net_tests.sh zombies` client `smooth_motion` (max per-frame zombie step 1.26 m) fails on the Step 9 commit too — same environmental snapping family as I-012 | Step 16 netcode polish with I-012 |
 | I-024 | S4 | 10 | Second Wind solo self-revive: zombies ignore the downed player but don't "scatter" (GAME_DESIGN §3.3); perk machines get a collider after spawn, so zombies path through them until the next tile re-bake | Step 16 polish: a short flee goal for the crowd; bake machine footprints with the map |
+| I-025 | S4 | 11 | Dual wield (Gemini, Black Scorpions): the left gun is a static mirrored child of the right one (no own reload clip / arms); third person shows one gun | Step 13 (authored weapons) |
+| I-026 | S4 | 11 | Zombies lured by a charging relay crowd it but never attack it (GAME_DESIGN §9.1 has no relay damage); a player in the zone stays the real target when nearer | Step 16 balance (decide whether relays take damage) |
+| I-027 | S4 | 11 | Coolant Purge shatter is the normal gib death (forced limb gibs), no ice-shard VFX / frozen corpse material beyond the overlay | Step 13 / 15 VFX |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
 
 Severity: **S1** crash / data loss / progress-blocking · **S2** major feature broken · **S3** minor feature issue / visual bug · **S4** polish.
@@ -334,7 +342,10 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | ~~Kit-based greybox, real zone elevations, gondola dock, door bursts~~ | — | Done in Step 8 (box greybox with kit materials, D-053); Second Wind machine = marker until Step 10 |
 | Kit *meshes* on the greybox, per-zone camera-snow intensity (I-006), occluders beyond floor/roof slabs, reverb areas | Step 13 | Step 8 uses box geometry with the kit materials (dimensions off the 2 m grid); one OccluderInstance3D per zone floor/roof + visibility ranges on small props; ambience markers only |
 | S1 Director's Office / S2 Ice Grotto rooms | Step 13 / 14 | Entrances + content markers (L13, L14, crate, MB4) are placed; rooms come with the secrets |
-| Reactor Bridge extension on relays; Z12 reactor-view gallery framing | Step 11 / 13 | Bridge is an inverted NavDoor toggled by `bridge`; the view is an art task (VESPER_PEAK §9.1) |
+| ~~Reactor Bridge extension on relays~~ (done Step 11); Z12 reactor-view gallery framing | Step 13 | The view is an art task (VESPER_PEAK §9.1) |
+| Authored Lazarus Forge / relay / trap models (Step 11 scope 2 "final model"), map-dressed relay rooms, ice-shard / steam VFX polish | Step 13 (art pass) | Step 11 uses the **greybox+** path (procedural, animated) like Steps 9 / 10 |
+| Final Forge / relay / trap / hazard sounds | Step 15 | `ProgressionAudio` placeholders under the final event names |
+| Ray Pistol "Nova Mk.II" / Lazarus Conduit "Lazarus Requiem" upgrades (bounce bolts) | Step 12 | Need the wonder weapons; add to `upgrades_spec.json` + `gen_upgrades.py` |
 | Bots replicated to clients | Not planned | Host bots are soak-test tooling (D-041) |
 | ~~Remote-player downed / spectate animation~~ | — | Done in Step 7 (`SurvivorModel` downed_crawl / revive) |
 | Steam live test (lobby, overlay invites, P2P) | Human (AC-7.6) / Step 16 | GodotSteam GDExtension is not vendored and no Steam client exists in the container; `SteamTransport` is implemented against GodotSteam's API and unit-tested for its pure parts (D-045). Direct IP + UPnP + VPN is the always-available path |
@@ -356,6 +367,9 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 
 | Date | Proposed by (step) | Change | Rationale | Decision |
 |---|---|---|---|---|
+| 2026-11-12 | 11 | Forge / relay / trap / hazard numbers not in the docs (GAME_DESIGN tuning log, 2 rows): upgrade mags / reserves / behavior numbers (`tests/data/upgrades_spec.json`), relay lure 14 m (weak), trap player 110 HP/s, freeze 2.5 s, drum / icicle / puddle values | Docs give behaviors, not numbers | Agent decision (tuning log) |
+| 2026-11-12 | 11 | Forge edge rules: the weapon leaves the loadout on insert; an untaken offer is lost (no refund); taking it with full slots replaces the held weapon; a Free Upgrade makes the next insert free; alt-fire = key B (gamepad 13) | §9.2 silent beyond "lost if not taken" | Agent decision |
+| 2026-11-12 | 11 | `T3_Console` moved 10° → 52° on the Lower Ring (outside the −45°…45° freeze sector) | The lever stood inside its own trap | Agent decision (VESPER_PEAK §9.1) |
 | 2026-11-12 | 10 | Power-up drop threshold **2000 ×1.14 → 600 ×1.06** per drop (growth still stops after round 20; max 4 / round; data in `content/powerups/powerup_rules.tres`) | The literal §11 numbers give ~1 drop per round (simulated 30 rounds, 1p and 4p) — contradicting §11's own target "about 4 drops per round early" and AC-10.3 (2–4). 600 / ×1.06 gives 2.2 (solo) / 3.0 (4p) per round in rounds 1–10 and ~2.9 later | Agent decision (tuning log; revisit in the AC-10.6 playtest) |
 | 2026-11-12 | 10 | Perk rules not in §8: perk granted when the 3 s drink ends (downed mid-drink = lost, no refund); Pack Mule loss drops the **last-acquired** weapon; Second Wind self-revive takes 5 s (§3.3) and its 3 uses are per match (the machine vanishes after the 3rd *use*); free-perk crates ignore the cap; Bullseye snap = nearest visible head within 8° / 35 m; Quickdraw also speeds ADS; Insta-Kill doesn't apply to debug kills | §8 / §11 give effects, not edge rules | Agent decision |
 | 2026-11-12 | 9 | Launcher / crossbow "damage + splash X (r)" read as: direct-hit damage to the zombie struck + splash X at the centre falling linearly to 0 at r; China Lake grenades explode on zombie contact or after 2.5 s; tripmines trigger on a zombie within 2 m in front (players never trigger), 1 s arming, 0.25 s beep; Drummer Decoy pulls by path distance ≤ 25 m for 8 s (`attract_time` = fuse) | GDD §4.3 gives the numbers, not the rules | Agent decision (data in the .tres) |
@@ -385,6 +399,7 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Step 9 | **AC-9.7** weapon + Relic Box review (steps in `docs/sessions/2026-11-12_step-9.md`); optionally provide/approve weapon models (or approve scripted Blender models in Step 13) | Open |
 | Step 8 | **AC-8.7** GPU FPS on Medium on the minimum spec with 32 zombies + 4 bots on the full greybox, and **AC-8.8** greybox flow playtest solo + co-op (steps in `docs/sessions/2026-11-12_step-8.md`) | Open |
 | Step 10 | **AC-10.5** machine visual review (`docs/screenshots/step10/` or in game) and **AC-10.6** solo playtest (steps in `docs/sessions/2026-11-12_step-10.md`); decide on the drop-threshold tuning | Open |
+| Step 11 | **AC-11.6** Forge / upgraded-weapon feel playtest + relay / trap / hazard review (`docs/screenshots/step11/`, steps in `docs/sessions/2026-11-12_step-11.md`) | Open |
 | Step 13 | Optional: LightmapGI bakes on a desktop GPU | Open |
 | Step 15 | Provide or approve music (jingles, EE song), VO approach (recorded vs. TTS), and fonts | Open |
 | Any | Monitor Git LFS storage/bandwidth quota | Recurring |
@@ -403,6 +418,7 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 
 | Date | Step | Summary | Report |
 |---|---|---|---|
+| 2026-11-12 | 11 | Relays, Forge, traps & hazards (11A + 11B): RelaySystem / ResonanceRelay (hold, defend, zone pause, weak lure) → MapRules.on_relays_complete (bridge, Forge wake, ReactorState); ForgeSystem / LazarusForge (5000 / Free Upgrade, 5 s, 15 s owner offer); 23 generated upgrades + Skullcrusher launcher, behavior fields, vesperite camo, upgraded sound layer; StatusEffects (slow / burn / freeze); TrapSystem T1–T3; HazardSystem H1–H3; upgraded wall ammo 4500; debug commands; progression sim / net / visual tests (D-066…D-070) | [2026-11-12_step-11.md](sessions/2026-11-12_step-11.md) |
 | 2026-11-11 | 0 | Planning: architecture, roadmap, game design, map design, tracker, agent guide | (planning commit) |
 | 2026-11-11 | 1 | Godot 4.7.2 project, autoloads, Net layer v1 (Offline/ENet, NetSim, clock sync, uid), console + overlay, sandbox with replicated capsules, tool scripts, CI | [2026-11-11_step-1.md](sessions/2026-11-11_step-1.md) |
 | 2026-11-11 | 2 | PlayerCharacter (motor, camera rig, health + damage HUD, footsteps), PlayerTuning, movement course, host movement validation, health replication, bot/random drivers, integration + net + visual tests | [2026-11-11_step-2.md](sessions/2026-11-11_step-2.md) |

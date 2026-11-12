@@ -18,13 +18,16 @@
 #   coop4        host + 3 clients at 150 ms / 30 ms / 3 %: 32-zombie bandwidth phase, then 10 bot rounds
 #                with state-hash convergence at every round end (AC-7.1, AC-7.4)
 # Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies|survival|lobby|
-#        late_join|reconnect|coop4|traversal|box|perks]... (default: all)
+#        late_join|reconnect|coop4|traversal|box|perks|progression]... (default: all)
 #   traversal    vesper_peak at --netsim: power on before join (late join), gondola + lift (with a
 #                zombie) riders without corrections, chute grate + slide (AC-8.4, AC-8.5)
 #   box          vesper_peak at --netsim: Relic Box late-join location, spinner-only take, identical
 #                carousel on both peers, doll relocation, Fire Sale (AC-9.5)
 #   perks        vesper_peak at --netsim: perk purchase replication, co-op Second Wind revive 2 s,
 #                power-up pickups, timer flag + clock agreement < 100 ms, perk loss on down (AC-10.2/10.4)
+#   progression  vesper_peak at --netsim: late-join relay / trap flags, client relay start + pause,
+#                bridge / reactor / Forge on the client, client Forge job + upgrade, client trap kills
+#                + points, FROZEN + splash replication, drum death / respawn (AC-11.1/11.2/11.4/11.5)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
@@ -188,6 +191,20 @@ test_perks() {
   report perks_host "$OUT/perks_host.json" "$OUT/perks_host.log"
 }
 
+test_progression() {
+  local port; port="$(free_port)"
+  rm -f "$OUT"/progression_*.json
+  launch host "$OUT/progression_host.log" -- --host="$port" --map=vesper_peak --netsim="$NETSIM" \
+    --autotest=res://tests/net/host_progression.gd --autotest-out="$OUT/progression_host.json" --profile=nethost
+  wait_for_log "$OUT/progression_host.log" "AUTOTEST READY host" 30
+  launch client "$OUT/progression_client.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_progression.gd --autotest-out="$OUT/progression_client.json" --profile=netclient1
+  wait "$PID_client" || true
+  wait "$PID_host" || true
+  report progression_client "$OUT/progression_client.json" "$OUT/progression_client.log"
+  report progression_host "$OUT/progression_host.json" "$OUT/progression_host.log"
+}
+
 test_lobby() {
   local port; port="$(free_port)"
   rm -f "$OUT"/lobby_*.json
@@ -270,7 +287,7 @@ test_coop4() {
 }
 
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4 traversal box perks)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4 traversal box perks progression)
 fail=0
 for t in "${TESTS[@]}"; do
   "test_$t" || fail=1
