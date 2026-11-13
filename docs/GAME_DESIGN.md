@@ -124,7 +124,7 @@ Damage = base per bullet/pellet. Costs are wall-buy prices; ammo refill = half p
 | Class | Weapon | Dmg | RPM | Mag/Reserve | Source | Personality |
 |---|---|---|---|---|---|---|
 | Pistol | **M1911** | 40 | 400 semi | 8/32 | Start | Reliable starter; Forge version becomes dual grenade pistols |
-| Pistol | **"Widow" .357 Revolver** | 160 | 140 semi | 6/48 | Wall 1000 | Heavy hitter, slow reload, high headshot |
+| Pistol | **"Widow" .357 Revolver** | 210 | 140 semi | 6/48 | Wall 1000 | Heavy hitter, slow reload, high headshot |
 | Pistol | **Mauser C96** | 50 | 600 semi | 10/80 | Box | Fast tap-fire |
 | SMG | **MP40** | 40 | 550 auto | 32/192 | Wall 1000 | Accurate, all-rounder |
 | SMG | **M3 Grease Gun** | 50 | 450 auto | 30/180 | Wall 1000 | Slow, punchy, low recoil |
@@ -136,7 +136,7 @@ Damage = base per bullet/pellet. Costs are wall-buy prices; ammo refill = half p
 | AR | **FAL** | 120 | 500 semi | 20/160 | Box | Hard-hitting semi |
 | AR | **G3** | 115 | 550 auto | 20/180 | Box | Penetration king |
 | Shotgun | **Double-Barrel "Coachgun"** | 160×8 | 2-shot | 2/60 | Wall 500 | Devastating close, terrible reload |
-| Shotgun | **Model 37 Pump** | 130×8 | 70 pump | 6/54 | Wall 1500 | Classic reliable pump |
+| Shotgun | **Model 37 Pump** | 160×8 | 70 pump | 6/54 | Wall 1500 | Classic reliable pump |
 | Shotgun | **"Thunderer" Auto-12** | 110×8 | 250 semi | 8/64 | Box | Room clearer |
 | LMG | **RPD** | 110 | 700 auto | 100/400 | Box | Train-killer |
 | LMG | **M60** | 130 | 550 auto | 100/300 | Box | Heavy, high penetration |

@@ -2,7 +2,7 @@
  "doc": "GAME_DESIGN.md §4.3 roster table (+ §3.4 Ice Axe) as data. Checked against content/weapons by tests/unit/test_weapons_spec.gd (AC-9.1). fire: semi|auto|burst|pump|bolt|single (pump/bolt/single = SEMI fire mode). splash = [centre damage, radius]. source: start|wall|box.",
  "weapons": {
   "m1911":      {"class": "PISTOL",    "damage": 40,  "rpm": 400,  "fire": "semi",  "mag": 8,   "reserve": 32,  "source": "start", "cost": 0},
-  "revolver":   {"class": "PISTOL",    "damage": 160, "rpm": 140,  "fire": "semi",  "mag": 6,   "reserve": 48,  "source": "wall",  "cost": 1000},
+  "revolver":   {"class": "PISTOL",    "damage": 210, "rpm": 140,  "fire": "semi",  "mag": 6,   "reserve": 48,  "source": "wall",  "cost": 1000},
   "mauser":     {"class": "PISTOL",    "damage": 50,  "rpm": 600,  "fire": "semi",  "mag": 10,  "reserve": 80,  "source": "box"},
   "mp40":       {"class": "SMG",       "damage": 40,  "rpm": 550,  "fire": "auto",  "mag": 32,  "reserve": 192, "source": "wall",  "cost": 1000},
   "grease_gun": {"class": "SMG",       "damage": 50,  "rpm": 450,  "fire": "auto",  "mag": 30,  "reserve": 180, "source": "wall",  "cost": 1000},
@@ -14,7 +14,7 @@
   "fal":        {"class": "AR",        "damage": 120, "rpm": 500,  "fire": "semi",  "mag": 20,  "reserve": 160, "source": "box"},
   "g3":         {"class": "AR",        "damage": 115, "rpm": 550,  "fire": "auto",  "mag": 20,  "reserve": 180, "source": "box"},
   "coachgun":   {"class": "SHOTGUN",   "damage": 160, "pellets": 8, "fire": "semi", "mag": 2,   "reserve": 60,  "source": "wall",  "cost": 500},
-  "model37":    {"class": "SHOTGUN",   "damage": 130, "pellets": 8, "rpm": 70, "fire": "pump", "mag": 6, "reserve": 54, "source": "wall", "cost": 1500},
+  "model37":    {"class": "SHOTGUN",   "damage": 160, "pellets": 8, "rpm": 70, "fire": "pump", "mag": 6, "reserve": 54, "source": "wall", "cost": 1500},
   "auto12":     {"class": "SHOTGUN",   "damage": 110, "pellets": 8, "rpm": 250, "fire": "semi", "mag": 8, "reserve": 64, "source": "box"},
   "rpd":        {"class": "LMG",       "damage": 110, "rpm": 700,  "fire": "auto",  "mag": 100, "reserve": 400, "source": "box"},
   "m60":        {"class": "LMG",       "damage": 130, "rpm": 550,  "fire": "auto",  "mag": 100, "reserve": 300, "source": "box"},
