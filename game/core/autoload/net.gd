@@ -69,6 +69,10 @@ func _ready() -> void:
 	if spec != "":
 		var v: PackedFloat64Array = NetSim.parse_spec(spec)
 		set_netsim(v[0], v[1], v[2])
+	# Clients only ever talk to the host, and Net relays / announces peers itself (`_peer_joined`,
+	# `_peer_left`). SceneMultiplayer's own relay would also send its peer-removal notice to a
+	# client that is closing in the same frame ("Unable to send packet on channel 0", I-019).
+	(multiplayer as SceneMultiplayer).server_relay = false
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	multiplayer.connected_to_server.connect(_on_connected_to_server)
@@ -288,6 +292,25 @@ func _send_now(item: Dictionary) -> void:
 	var target: int = int(item["target"])
 	if target > 0 and target != local_id() and not multiplayer.get_peers().has(target):
 		return  # the peer left while this (NetSim-delayed) packet was queued
+	# A peer that is disconnecting is still listed for a frame but ENet refuses packets to it
+	# ("Unable to send packet on channel 0", I-019): skip it, and broadcast per peer meanwhile.
+	var targets: Array[int] = [target]
+	if target > 0 and not _peer_sendable(target):
+		return
+	if target == 0:
+		var all_ok: bool = true
+		for id: int in multiplayer.get_peers():
+			all_ok = all_ok and _peer_sendable(id)
+		if not all_ok:
+			targets.clear()
+			for id: int in multiplayer.get_peers():
+				if _peer_sendable(id):
+					targets.append(id)
+	for t: int in targets:
+		_send_to(item, t)
+
+
+func _send_to(item: Dictionary, target: int) -> void:
 	if bool(item["reliable"]):
 		var type: StringName = item["type"]
 		var payload: Array = item["payload"]
@@ -302,6 +325,14 @@ func _send_now(item: Dictionary) -> void:
 		(multiplayer as SceneMultiplayer).send_bytes(
 			bytes, target, MultiplayerPeer.TRANSFER_MODE_UNRELIABLE, SNAPSHOT_CHANNEL
 		)
+
+
+func _peer_sendable(id: int) -> bool:
+	var enet: ENetMultiplayerPeer = multiplayer.multiplayer_peer as ENetMultiplayerPeer
+	if enet == null or id == 1 and not is_host():
+		return true  # other transports / a client's link to the host (its own disconnect ends the session)
+	var pp: ENetPacketPeer = enet.get_peer(id)
+	return pp != null and pp.get_state() == ENetPacketPeer.STATE_CONNECTED
 
 
 func _has_remote_peers() -> bool:
