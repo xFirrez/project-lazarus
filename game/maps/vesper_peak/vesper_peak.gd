@@ -24,6 +24,10 @@ func _ready() -> void:
 		if c is VesperZone:
 			zones.append(c as VesperZone)
 	art.finish(self)
+	var dressing: PackedStringArray = PackedStringArray()
+	for z: VesperZone in zones:
+		dressing.append("%s %d/%d" % [z.zone_id, z.furnished, z.auto_lights])
+	Log.info(&"map", "vesper_peak furnishing (props/lights): %s" % ", ".join(dressing))
 	# Step 14 quest / secrets holders (built in _on_match_setup; the map root is busy then).
 	quest_world = VesperQuestWorld.new()
 	quest_world.name = "QuestWorld"

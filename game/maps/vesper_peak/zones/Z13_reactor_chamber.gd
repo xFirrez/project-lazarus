@@ -477,6 +477,18 @@ func _dress_cavern() -> void:
 			&"vesperite",
 			Vector3(rng.randf_range(-0.5, 0.5), rng.randf() * TAU, rng.randf_range(-0.5, 0.5))
 		)
+	# Service shaft: a work lamp over every landing (it was unlit).
+	for lp: Vector3 in [
+		Vector3(-1.2, -15.8, -42.5),
+		Vector3(-4.8, -15.8, -42.5),
+		Vector3(-1.2, -25.6, -65.5),
+		Vector3(-4.8, -25.6, -65.5),
+		Vector3(-1.2, -35.6, -42.5),
+		Vector3(-4.8, -35.6, -42.5),
+		Vector3(-1.2, -45.6, -65.5),
+		Vector3(-4.8, -45.6, -65.5),
+	]:
+		fixture_light(&"caged_bulb", lp, Color(1.0, 0.74, 0.45), 1.4, 11.0, PoweredLight.Pattern.NONE, true)
 	# Warm work lamps on the outer ring between the caged bulbs.
 	for k: int in 4:
 		var a3: float = deg_to_rad(112.0 + 90.0 * k)

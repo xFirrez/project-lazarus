@@ -157,8 +157,8 @@ func dress() -> void:
 			&"caged_bulb",
 			Vector3(79.5, Y + 3.8, float(ROOMS[r])),
 			Color(1.0, 0.8, 0.55),
-			0.5,
-			5.0,
+			1.1,
+			7.5,
 			PoweredLight.Pattern.NONE,
 			true
 		)
