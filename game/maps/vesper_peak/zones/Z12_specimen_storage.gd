@@ -26,6 +26,16 @@ func build() -> void:
 	# Thick observation glass (solid; sightline tests treat `glass` bodies as see-through).
 	var glass: StaticBody3D = box("ObservationGlass", Vector3(63.0, Y + 1.3, OBS_Z), Vector3(0.12, 1.8, 3.0), &"ice")
 	glass.set_meta(&"glass", true)
+	# Map quality pass: the glass looks 10 m through the rock to the cavern wall opening. A stone duct
+	# (under the D11 ramp, which crosses above at x 56.8..60.2) frames the view instead of the void.
+	box_mm("ObsDuctN", Vector3(52.6, -36.5, OBS_Z + 2.2), Vector3(63.0, -25.2, OBS_Z + 2.6), &"stone")
+	box_mm("ObsDuctS", Vector3(52.6, -36.5, OBS_Z - 2.6), Vector3(63.0, -25.2, OBS_Z - 2.2), &"stone")
+	box_mm("ObsDuctFloor", Vector3(52.6, -36.9, OBS_Z - 2.6), Vector3(63.0, -36.5, OBS_Z + 2.6), &"stone")
+	box_mm("ObsDuctRoofW", Vector3(52.6, -27.6, OBS_Z - 2.6), Vector3(56.6, -27.2, OBS_Z + 2.6), &"stone")
+	box_mm("ObsDuctRoofE", Vector3(60.4, -25.6, OBS_Z - 2.6), Vector3(63.0, -25.2, OBS_Z + 2.6), &"stone")
+	box_mm("ObsDuctRoofMid", Vector3(56.6, -27.6, OBS_Z - 2.6), Vector3(60.4, -27.2, OBS_Z + 2.6), &"stone")
+	box_mm("ObsDuctPlugS", Vector3(52.6, -36.5, -48.6), Vector3(55.9, -25.2, OBS_Z - 2.6), &"stone")
+	box_mm("ObsDuctStep", Vector3(60.2, -27.6, OBS_Z - 2.6), Vector3(60.6, -25.2, OBS_Z + 2.6), &"stone")
 	for i: int in 4:
 		box("Shelf%d" % i, Vector3(72 + i * 4.5, Y + 1.25, -39), Vector3(0.8, 2.5, 8.0), &"metal")
 	box_mm("LinenPile", Vector3(86, Y, -33), Vector3(90, Y + 0.3, -29.6), &"sandbag")
@@ -40,6 +50,11 @@ func build() -> void:
 	box_mm("StoreRoofS", Vector3(62.8, Y + 6.0, -46.2), Vector3(91.2, Y + 6.5, -34.2), &"tile")
 	box_mm("StoreRoofE", Vector3(68.2, Y + 6.0, -34.2), Vector3(91.2, Y + 6.5, -28.8), &"tile")
 	box_mm("ShaftPit", Vector3(62.8, Y - 3.5, -34.2), Vector3(68.2, Y - 3.0, -28.8), &"concrete")
+	# Pit walls (map quality pass): the space under the store floor isn't open to the void.
+	box_mm("ShaftPitW", Vector3(62.4, Y - 3.5, -34.6), Vector3(62.8, Y, -28.4), &"concrete")
+	box_mm("ShaftPitE", Vector3(68.2, Y - 3.5, -34.6), Vector3(68.6, Y - 0.5, -28.4), &"concrete")
+	box_mm("ShaftPitS", Vector3(62.4, Y - 3.5, -34.6), Vector3(68.6, Y - 0.5, -34.2), &"concrete")
+	box_mm("ShaftPitN", Vector3(62.4, Y - 3.5, -28.8), Vector3(68.6, Y, -28.4), &"concrete")
 	area("Store", Vector3(63, -29, -46), Vector3(91, -22, -29))
 	nav_areas.clear()
 	nav_areas.append(AABB(Vector3(63.0, -29.5, -46.0), Vector3(31.6, 6.0, 20.8)))

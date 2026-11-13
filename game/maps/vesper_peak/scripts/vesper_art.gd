@@ -24,6 +24,7 @@ var sky_mat: ShaderMaterial = null
 var searchlights: Array[Node3D] = []
 var shadows: ShadowBudget = null
 var pulses: int = 0
+var terrain: VesperTerrain = null
 
 var _pulse: float = 0.0
 var _t: float = 0.0
@@ -46,6 +47,7 @@ func build(map_root: Node3D) -> void:
 		atmosphere.default_profile = set_res.fallback
 	atmosphere.storm = storm
 	add_child(atmosphere)
+	atmosphere.sky_visibility_changed.connect(_on_sky_visibility)
 	_searchlights()
 	shadows = ShadowBudget.new()
 	shadows.name = "ShadowBudget"
@@ -56,6 +58,13 @@ func build(map_root: Node3D) -> void:
 
 # Zones exist by now (map _ready): collect their volumes for the zone lookup.
 func finish(map_root: Node3D) -> void:
+	# The mountain the complex is built into (map quality pass): needs the zones' colliders.
+	var zones: Array = []
+	for c: Node in map_root.get_children():
+		if c is VesperZone:
+			zones.append(c)
+	terrain = VesperTerrain.new()
+	terrain.build(self, zones)
 	atmosphere.setup(map_root, env, moon)
 	add_to_group(&"map_art")
 	# The art pass replaces the greybox marker posts / labels (debug: `markers_visible 1`).
@@ -102,6 +111,14 @@ static func cull_gameplay_meshes(map_root: Node, distance: float = GAMEPLAY_CULL
 				gi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 				n += 1
 	return n
+
+
+# Underground (no-sky profiles): the mountain ring, cloud sea and searchlight beams are hidden so a
+# crack in the rock reads as darkness, never as the outside of the map.
+func _on_sky_visibility(visible: bool) -> void:
+	for c: Node in get_children():
+		if c is MeshInstance3D or String(c.name).begins_with("Searchlight"):
+			(c as Node3D).visible = visible
 
 
 func _on_round_started(_r: int) -> void:
@@ -180,10 +197,15 @@ func _backdrop() -> void:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 1952
-	var rock: Color = Color(0.09, 0.1, 0.12)
-	var snow: Color = Color(0.62, 0.68, 0.78)
+	var rock: Color = Color(0.035, 0.045, 0.06)
+	var snow: Color = Color(0.3, 0.34, 0.42)
+	var rock0: Color = rock
+	var snow0: Color = snow
 	for ring: int in 3:
 		var r0: float = 230.0 + ring * 85.0
+		# aerial perspective: farther ranges fade toward the haze colour
+		rock = rock0.lerp(Color(0.1, 0.13, 0.19), ring * 0.35)
+		snow = snow0.lerp(Color(0.22, 0.27, 0.36), ring * 0.35)
 		var segs: int = 72
 		var heights: PackedFloat32Array = PackedFloat32Array()
 		for i: int in segs:
@@ -217,6 +239,9 @@ func _backdrop() -> void:
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	# Distance haze is baked into the vertex colours; scene fog would flatten the ridges into a
+	# pale wall (map quality pass).
+	mat.disable_fog = true
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.extra_cull_margin = 50.0
@@ -234,7 +259,7 @@ static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color,
 
 func _cloud_sea() -> void:
 	var shader: Shader = load(CLOUD_SHADER) as Shader
-	for layer: Array in [[-70.0, 0.62, 0.004, 0.9], [-40.0, 0.38, 0.006, 0.5], [62.0, 0.42, 0.003, 0.45]]:
+	for layer: Array in [[-70.0, 0.62, 0.004, 0.9], [-40.0, 0.38, 0.006, 0.5], [240.0, 0.42, 0.003, 0.45]]:
 		var mi: MeshInstance3D = MeshInstance3D.new()
 		mi.name = "CloudLayer_%d" % int(layer[0])
 		var pm: PlaneMesh = PlaneMesh.new()

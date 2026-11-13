@@ -201,7 +201,65 @@ func _cavern() -> void:
 				&"stone"
 			)
 	box_mm("CavernRoof", Vector3(0.5, -18.5, -77.5), Vector3(55.5, -18.0, -22.5), &"stone")
+	_seal_openings()
 	occluder("Occ_Roof", Vector3(28, -15.5, -50), Vector3(54, 4, 54))
+
+
+# Map quality pass: each wall opening is two 7.5° segments (~6.9 m) wide while the vents (4.4 m),
+# the east alcove (4.4 m) and the WSW spoke corridor (3 m) behind them are narrower, which left
+# slits through to the void beside them. Rock pockets close the openings around what's behind.
+func _seal_openings() -> void:
+	for deg: float in [90.0, -90.0, 0.0]:
+		var a: float = deg_to_rad(deg)
+		var out: Vector3 = Vector3(cos(a), 0, sin(a))
+		var tan_dir: Vector3 = Vector3(-out.z, 0, out.x)
+		var bs: Basis = Basis(Vector3.UP, atan2(out.x, out.z))
+		var base: Vector3 = C + out * WALL_R
+		# back face (behind the vent / alcove), side cheeks and a lid under the lintel
+		slab("SealBack_%d" % int(deg), Transform3D(bs, base + out * 4.0 + Vector3(0, 3.5, 0)), Vector3(8.4, 8.0, 0.6), &"stone")
+		for sd: float in [-1.0, 1.0]:
+			slab(
+				"SealSide_%d_%d" % [int(deg), int(sd)],
+				Transform3D(bs, base + out * 2.15 + tan_dir * sd * 4.0 + Vector3(0, 3.5, 0)),
+				Vector3(0.6, 8.0, 3.9),
+				&"stone"
+			)
+		slab("SealLid_%d" % int(deg), Transform3D(bs, base + out * 2.15 + Vector3(0, 4.3, 0)), Vector3(8.4, 0.5, 3.9), &"stone")
+	# Below the ring at the openings (the wall segments there start at the ring floor).
+	var step: float = TAU / SEGMENTS
+	var seg_len: float = 2.0 * WALL_R * tan(step * 0.5) + 0.2
+	var half: float = rad_to_deg(step) * 0.5 + 0.5
+	for i: int in SEGMENTS:
+		var a2: float = step * (i + 0.5)
+		if not _gap_at(rad_to_deg(wrapf(a2, -PI, PI)), LOWER_GAPS, half):
+			continue
+		var d2: Vector3 = Vector3(cos(a2), 0, sin(a2))
+		slab(
+			"WallLowFoot_%02d" % i,
+			Transform3D(Basis(Vector3.UP, atan2(d2.x, d2.z)), C + d2 * (WALL_R + 0.3) + Vector3(0, -4.0, 0)),
+			Vector3(seg_len, 7.0, 0.6),
+			&"stone"
+		)
+	# The pit: a rock shaft under the ring's inner edge down to the vesperite pool, so looking over
+	# the railing shows the shaft wall instead of the space under the ring. Its top stays 1.1 m under
+	# the ring so the rift climbs (pad r 16.5 -> ring r 20.6) pass over it.
+	var pit_len: float = 2.0 * (RING_IN + 0.4) * tan(step * 0.5) + 0.12
+	for i: int in SEGMENTS:
+		var a3: float = step * (i + 0.5)
+		var d3: Vector3 = Vector3(cos(a3), 0, sin(a3))
+		slab(
+			"PitWall_%02d" % i,
+			Transform3D(Basis(Vector3.UP, atan2(d3.x, d3.z)), C + d3 * (RING_IN + 0.4) + Vector3(0, -6.15, 0)),
+			Vector3(pit_len, 9.1, 0.6),
+			&"stone"
+		)
+	box("PitFloor", C + Vector3(0, -10.6, 0), Vector3(40.0, 0.6, 40.0), &"stone")
+	# WSW spoke: rock either side of the corridor where it pierces the wall.
+	box_mm("SealSpokeN", Vector3(3.5, -48.5, -63.8), Vector3(10.5, -43.0, -61.0), &"stone")
+	box_mm("SealSpokeS", Vector3(3.5, -48.5, -70.0), Vector3(10.5, -43.0, -67.2), &"stone")
+	box_mm("SealSpokeTop", Vector3(3.5, -44.8, -70.0), Vector3(10.5, -43.0, -61.0), &"stone")
+	# Shaft balcony opening: the shaft's north wall stops at z -40.8; the opening runs to ~-39.4.
+	box_mm("SealShaftN", Vector3(0.0, -39.0, -40.8), Vector3(4.2, -33.6, -38.2), &"stone")
 
 
 func _core_and_forge() -> void:

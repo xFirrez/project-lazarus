@@ -41,6 +41,12 @@ func build() -> void:
 	]:
 		box("GantryRail_%d" % int(absf(r[0].z)), r[0], r[1], &"metal")
 		clip("GantryClip_%d" % int(absf(r[0].z)), r[0] + Vector3(0, 1.0, 0), Vector3(r[1].x, 3.0, r[1].z))
+	# Map quality pass: the gantry runs 5 m through the rock to the cavern wall opening; enclose it
+	# (side walls + roof) so nothing past the opening's edges shows the void.
+	box_mm("GantryTunnelN", Vector3(49.0, Y - 1.0, -56.4), Vector3(56.0, Y + 4.0, -56.0), &"stone")
+	box_mm("GantryTunnelS", Vector3(49.0, Y - 1.0, -64.0), Vector3(56.0, Y + 4.0, -63.6), &"stone")
+	box_mm("GantryTunnelRoof", Vector3(49.0, Y + 3.6, -64.0), Vector3(56.0, Y + 4.0, -56.0), &"stone")
+	box_mm("GantryTunnelBase", Vector3(49.0, Y - 1.4, -64.0), Vector3(56.0, Y - 1.0, -56.0), &"stone")
 	# Reactor Bridge: an inverted NavDoor (solid when "open" = extended), gantry tip -> Forge platform.
 	var a: Vector3 = Vector3(50.0, Y, -60.0)
 	var b: Vector3 = Vector3(37.8, -34.0, -60.0)

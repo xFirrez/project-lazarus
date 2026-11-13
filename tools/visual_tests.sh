@@ -61,6 +61,7 @@ for t in "${TESTS[@]}"; do
     vesper_art) run_visual vesper_art vesper_peak 1280x720 --solo ${VESPER_SHOTS:+--shots=$VESPER_SHOTS} || fail=1 ;;
     lobby_ui) run_visual lobby_ui vesper_peak 1280x720 --host=24599 --lobby || fail=1 ;;
     hud_matrix) run_visual hud_matrix vesper_peak 3840x2160 --solo || fail=1 ;;
+    vesper_survey) VISUAL_TIMEOUT=900 run_visual vesper_survey vesper_peak 960x540 --solo ${VESPER_SHOTS:+--shots=$VESPER_SHOTS} || fail=1 ;;
     ui_showcase) run_visual ui_showcase vesper_peak 1280x720 --menu || fail=1 ;;
     *) echo "unknown visual test $t" >&2; fail=1 ;;
   esac

@@ -19,6 +19,7 @@ const FIELDS: Array[StringName] = [
 	&"moon_energy",
 	&"snow",
 	&"exposure",
+	&"sky",
 ]
 
 @export var fog_color: Color = Color(0.16, 0.22, 0.3)
@@ -34,6 +35,9 @@ const FIELDS: Array[StringName] = [
 @export var moon_energy: float = 1.0  # share of the moon light's authored energy
 @export var snow: float = 1.0  # camera-snow intensity (0 = none underground)
 @export var exposure: float = 1.25
+## 1 = the sky / distant backdrop shows through openings; 0 = underground: the background is a
+## dark rock colour and map presenters hide their distant backdrop, so no gap can show the outside.
+@export var sky: float = 1.0
 @export_multiline var note: String = ""
 
 

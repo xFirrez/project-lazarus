@@ -14,8 +14,10 @@ extends VesperZoneArt
 
 const WALL_T: float = 0.4
 const SLAB_T: float = 0.5
+const CORRIDOR_LAP: float = 0.25
 
 var nav_areas: Array[AABB] = []
+var _corridor_ends: Array = []  # [point, basis] of every corridor() end (joint fillers)
 var occluders: int = 0
 
 
@@ -119,7 +121,9 @@ func corridor(
 ) -> void:
 	ramp("%s_Floor" % prefix, a, b, width, style)
 	var bs: Basis = _basis_along(b - a)
-	var length: float = a.distance_to(b) + 0.05
+	# Walls and roof run CORRIDOR_LAP past both ends so a pitched passage meets the next wall (or a
+	# lintel) without a wedge-shaped slit to the outside (map quality pass).
+	var length: float = a.distance_to(b) + 0.05 + CORRIDOR_LAP * 2.0
 	var mid: Vector3 = (a + b) * 0.5
 	if walls:
 		for side: float in [-1.0, 1.0]:
@@ -137,6 +141,34 @@ func corridor(
 			Vector3(width + WALL_T * 2.0, SLAB_T, length),
 			style
 		)
+	# Where two passages meet at an angle (flat walkway -> ramp), the slabs open a wedge at the
+	# outer side of the bend: close it with a short joint section on the averaged slope.
+	for e: Vector3 in [a, b]:
+		for prev: Array in _corridor_ends:
+			var pe: Vector3 = prev[0]
+			var pb: Basis = prev[1]
+			if pe.distance_to(e) > 0.05 or pb.z.dot(bs.z) > 0.999 or absf(pb.z.dot(bs.z)) < 0.5:
+				continue
+			var other: Basis = pb if pb.z.dot(bs.z) > 0.0 else pb.rotated(pb.y, PI)
+			var jb: Basis = Basis(bs.get_rotation_quaternion().slerp(other.get_rotation_quaternion(), 0.5))
+			var jn: String = "%s_Joint%d" % [prefix, _corridor_ends.size()]
+			if roof:
+				slab(
+					"%s_Roof" % jn,
+					Transform3D(jb, e + jb.y * (height + SLAB_T * 0.5)),
+					Vector3(width + WALL_T * 2.0, SLAB_T, 1.6),
+					style
+				)
+			if walls:
+				for side: float in [-1.0, 1.0]:
+					slab(
+						"%s_Wall%d" % [jn, int(side)],
+						Transform3D(jb, e + jb.x * side * (width * 0.5 + WALL_T * 0.5) + jb.y * (height * 0.5)),
+						Vector3(WALL_T, height + SLAB_T, 1.6),
+						style
+					)
+	_corridor_ends.append([a, bs])
+	_corridor_ends.append([b, bs])
 
 
 # Steps (navigation and players both handle 0.25 m risers) from a (bottom) to b (top), width w.
