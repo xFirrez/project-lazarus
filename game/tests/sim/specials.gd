@@ -11,7 +11,7 @@
 #     warning counted) and the HUD state reaches the client-visible RoundDirector fields.
 #  4. Schedule: 50 rounds driven through the RoundDirector — the special rounds are exactly the
 #     seeded schedule (first 5-7, gaps 4-6), counts grow +2 per special round; mixed Galvanics from 20.
-#  5. Warden: `spawn_warden` health; the late-round rule is off by default (MapRules gate); when
+#  5. Warden: `spawn_warden` health; the late-round rule (on since Step 14B; `warden_late` toggles it); when
 #     enabled, a late Warden's death drops a Free Upgrade.
 extends "res://tests/net/autotest_base.gd"
 
@@ -247,7 +247,9 @@ func _warden(m: Match, me: PlayerCharacter) -> void:
 	if w != null:
 		check("warden_health", w.max_health == 25.0 * base.health_for_round(20), w.max_health)
 		m.zombies.host_kill(w)
-	check("late_rule_gated", not m.rules.warden_late_rounds_enabled())
+	check("late_rule_on_with_ee", m.rules.warden_late_rounds_enabled())  # Step 14B enables it
+	Debug.commands.execute("warden_late off")
+	check("late_rule_off_cmd", not m.rules.warden_late_rounds_enabled())
 	Debug.commands.execute("warden_late on")
 	check("late_rule_enabled", m.rules.warden_late_rounds_enabled())
 	var drops0: int = m.powerups.log_spawns.size()

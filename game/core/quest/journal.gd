@@ -29,7 +29,7 @@ static func _file() -> ConfigFile:
 
 
 # Drops the in-memory copy (tests: simulates a fresh launch reading the file again).
-static func reload() -> void:
+static func forget_cache() -> void:
 	_cfg = null
 	_loaded_path = ""
 

@@ -14,7 +14,9 @@
 #   specials    vesper_peak solo: Conduit buildable, Galvanic special round (rifts, burst, Max Ammo),
 #               warning build-up, 50-round schedule, Warden rules (AC-12.3, AC-12.4, AC-12.5)
 # perf_arena and soak run with --fixed-fps 60 (simulated time, deterministic frames; per-frame
-# AI cost is measured in wall-clock microseconds either way). More come later (quest).
+# AI cost is measured in wall-clock microseconds either way).
+#   quest       vesper_peak solo: every Easter-egg stage + failure rules, rewards, lore, secrets,
+#               4-player scaling (AC-14.1, 14.2, 14.4, 14.5)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
@@ -80,7 +82,7 @@ case "$SCENARIO" in
     fi
     echo "[sim:perks] PASS"
     ;;
-  progression|specials)
+  progression|specials|quest)
     LOG="$OUT/$SCENARIO.log"; JSON="$OUT/$SCENARIO.json"; rm -f "$JSON"
     set +e
     "$GODOT" --headless --path "$GAME_DIR" -- --solo --map="${MAP:-vesper_peak}" --profile=sim \

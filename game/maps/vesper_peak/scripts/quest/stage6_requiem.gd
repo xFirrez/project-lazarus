@@ -136,7 +136,9 @@ func on_tick(delta: float) -> void:
 
 
 func _tick_finale(delta: float) -> void:
-	finale_zombies = finale_zombies.filter(func(z: ZombieActor) -> bool: return is_instance_valid(z) and z.alive)
+	finale_zombies.assign(
+		finale_zombies.filter(func(z: Variant) -> bool: return is_instance_valid(z) and (z as ZombieActor).alive)
+	)
 	if now() >= _wave_at:
 		_wave_at = now() + WAVE_TIME
 		_wave()
@@ -238,3 +240,8 @@ func on_debug_complete() -> void:
 	if warden != null and is_instance_valid(warden) and warden.alive:
 		m().zombies.host_despawn(warden)
 	victory()
+
+
+func release() -> void:
+	nodes = null
+	super()

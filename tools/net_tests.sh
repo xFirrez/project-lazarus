@@ -18,7 +18,7 @@
 #   coop4        host + 3 clients at 150 ms / 30 ms / 3 %: 32-zombie bandwidth phase, then 10 bot rounds
 #                with state-hash convergence at every round end (AC-7.1, AC-7.4)
 # Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies|survival|lobby|
-#        late_join|reconnect|coop4|traversal|box|perks|progression|wonder]... (default: all)
+#        late_join|reconnect|coop4|traversal|box|perks|progression|wonder|quest]... (default: all)
 #   traversal    vesper_peak at --netsim: power on before join (late join), gondola + lift (with a
 #                zombie) riders without corrections, chute grate + slide (AC-8.4, AC-8.5)
 #   box          vesper_peak at --netsim: Relic Box late-join location, spinner-only take, identical
@@ -28,6 +28,9 @@
 #   progression  vesper_peak at --netsim: late-join relay / trap flags, client relay start + pause,
 #                bridge / reactor / Forge on the client, client Forge job + upgrade, client trap kills
 #                + points, FROZEN + splash replication, drum death / respawn (AC-11.1/11.2/11.4/11.5)
+#   quest        vesper_peak at --netsim: quest late join at stage 4 (Heart carried), Heart passed to the
+#                client, client SIGKILLed while carrying (auto-drop) + reconnect, finale + victory
+#                replicated, client Journal / blessing (AC-14.3, AC-14.4)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
@@ -280,6 +283,27 @@ test_reconnect() {
   report reconnect_host "$OUT/reconnect_host.json" "$OUT/reconnect_host.log"
 }
 
+test_quest() {
+  local port; port="$(free_port)"
+  rm -f "$OUT"/quest_*.json
+  launch host "$OUT/quest_host.log" -- --host="$port" --map=vesper_peak --netsim="$NETSIM" \
+    --autotest=res://tests/net/host_quest.gd --autotest-out="$OUT/quest_host.json" --profile=nethost
+  wait_for_log "$OUT/quest_host.log" "AUTOTEST READY host" 40
+  launch client "$OUT/quest_client_a.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_quest.gd --reconnect-phase=a --profile=netclient1
+  wait_for_log "$OUT/quest_client_a.log" "AUTOTEST READY client-a" 60
+  kill -9 "$PID_client"
+  wait "$PID_client" 2>/dev/null || true
+  sleep 1
+  launch client "$OUT/quest_client_b.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+    --autotest=res://tests/net/client_quest.gd --reconnect-phase=b \
+    --autotest-out="$OUT/quest_client.json" --profile=netclient1
+  wait "$PID_client" || true
+  wait "$PID_host" || true
+  report quest_client "$OUT/quest_client.json" "$OUT/quest_client_b.log"
+  report quest_host "$OUT/quest_host.json" "$OUT/quest_host.log"
+}
+
 test_coop4() {
   local port netsim="${COOP_NETSIM:-150,30,0.03}"; port="$(free_port)"
   rm -f "$OUT"/coop4_*.json
@@ -301,7 +325,7 @@ test_coop4() {
 }
 
 TESTS=("$@")
-[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4 traversal box perks progression wonder)
+[[ ${#TESTS[@]} -eq 0 ]] && TESTS=(solo replication host_loss speedhack course weapons zombies survival lobby late_join reconnect coop4 traversal box perks progression wonder quest)
 fail=0
 for t in "${TESTS[@]}"; do
   "test_$t" || fail=1

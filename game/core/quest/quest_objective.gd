@@ -40,6 +40,11 @@ func on_done() -> void:
 	pass
 
 
+# Match teardown: drop references that could form RefCounted cycles (helpers holding the objective).
+func release() -> void:
+	quest = null
+
+
 # --- helpers ----------------------------------------------------------------------------------
 
 

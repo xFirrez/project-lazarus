@@ -1089,6 +1089,14 @@
    0.0,
    0.0
   ],
+  "Z03_SanatoriumLobby/Gameplay/Zone_Z03_DirectorsOffice": [
+   35.4,
+   -2.75,
+   5.4,
+   0.0,
+   0.0,
+   0.0
+  ],
   "Z03_SanatoriumLobby/Gameplay/Zone_Z03_Lobby": [
    53.0,
    -3.75,
@@ -1125,6 +1133,14 @@
    38.0,
    -6.6,
    -11.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Geometry/S1_BookcaseDoor": [
+   38.0,
+   -2.8,
+   5.8,
    0.0,
    0.0,
    0.0
@@ -2297,6 +2313,14 @@
    0.0,
    0.0
   ],
+  "Z06_FrozenCourtyard/Gameplay/Zone_Z06_Grotto": [
+   -13.1,
+   -6.25,
+   -70.0,
+   0.0,
+   0.0,
+   0.0
+  ],
   "Z06_FrozenCourtyard/Gameplay/Zone_Z06_LiftShed": [
    67.0,
    -5.75,
@@ -2317,6 +2341,14 @@
    -10.0,
    -6.7,
    -24.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Geometry/S2_WaterfallIce": [
+   -9.5,
+   -5.0,
+   -70.0,
    0.0,
    0.0,
    0.0

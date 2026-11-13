@@ -32,3 +32,8 @@ func _calibrated() -> void:
 func on_debug_complete() -> void:
 	nodes.debug_break_all()
 	_calibrated()
+
+
+func release() -> void:
+	nodes = null
+	super()

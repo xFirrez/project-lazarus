@@ -73,6 +73,9 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	for o: QuestObjective in objectives.values():
+		o.release()
+	objectives.clear()
 	for t: StringName in [&"_carry_drop", &"_lore_open", &"_reel"]:
 		Net.unregister_message(t)
 
@@ -237,6 +240,7 @@ func host_complete(step_id: StringName) -> void:
 	Log.info(&"quest", "Step %s complete" % step_id)
 	if o != null:
 		o.on_done()
+		o.release.call_deferred()  # after the caller finishes (code may follow complete())
 	var g: QuestGraph = graph_of(step_id)
 	var s: QuestStep = step(step_id)
 	if g != null and s != null and s.completes_graph and not graph_done(g.id):
