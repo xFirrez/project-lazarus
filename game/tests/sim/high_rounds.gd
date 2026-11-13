@@ -9,9 +9,10 @@
 # memory within +-10 % and orphan nodes flat between the round-10 start and the end.
 extends "res://tests/net/autotest_base.gd"
 
-const PLAN: Array[int] = [1, 2, 3, 10, 20, 30, 40, 50, 55, 56, 57, 58, 59, 60]
+const DEFAULT_PLAN: Array[int] = [1, 2, 3, 10, 20, 30, 40, 50, 55, 56, 57, 58, 59, 60]
 const WEAPONS: Array[StringName] = [&"mg42_up", &"m60_up", &"rpd_up", &"ak47_up"]
 
+var plan: Array[int] = []  # --plan=1,2,60 overrides DEFAULT_PLAN (quick checks)
 var _started: bool = false
 var _bots: Array[SurvivalBot] = []
 var _errors: int = 0
@@ -32,6 +33,10 @@ var _done: bool = false
 
 func _ready() -> void:
 	timeout = 14400.0
+	for part: String in CommandLine.get_value("plan", "").split(",", false):
+		plan.append(part.to_int())
+	if plan.is_empty():
+		plan = DEFAULT_PLAN.duplicate()
 	Log.entry_added.connect(_on_log)
 
 
@@ -63,7 +68,7 @@ func _physics_process(_delta: float) -> void:
 			p.health.invulnerable = true
 			_bots.append(b)
 			n += 1
-		note("high-round soak: %d players, plan %s" % [m.players.avatars.size(), str(PLAN)])
+		note("high-round soak: %d players, plan %s" % [m.players.avatars.size(), str(plan)])
 		return
 	_max_alive = maxi(_max_alive, m.zombies.alive_count())
 	if _done:
@@ -93,18 +98,22 @@ func _on_round_started(r: int) -> void:
 			% [r, m.rounds.total, hp, float(_mem[r]) / 1048576.0, int(_orphans[r])]
 		)
 	)
-	if r == 60:
-		Debug.run("spawn_warden 60")
+	if r == plan[plan.size() - 1]:
+		Debug.run("spawn_warden %d" % r)
+		# The Warden's behaviour is attached after `zombie_spawned`: look it up among the actors.
+		for a: ZombieActor in m.zombies.actors.values():
+			if a.behavior is WardenBehavior:
+				_warden_hp = a.max_health
 
 
 func _on_round_ended(r: int) -> void:
 	_rounds_ended.append(r)
 	_round_seconds[r] = snappedf(elapsed() - _round_t0, 1.0)
-	var i: int = PLAN.find(r)
-	if i < 0 or i == PLAN.size() - 1:
+	var i: int = plan.find(r)
+	if i < 0 or i == plan.size() - 1:
 		_done = true
 		return
-	var nxt: int = PLAN[i + 1]
+	var nxt: int = plan[i + 1]
 	if nxt != r + 1:
 		(func() -> void: Match.current.rounds.host_start_round(nxt)).call_deferred()
 
@@ -127,8 +136,6 @@ func _on_spawned(actor: ZombieActor) -> void:
 					% [Match.current.rounds.current_round, hp, _base_hp(Match.current.rounds.current_round)]
 				)
 			)
-	if actor.behavior is WardenBehavior:
-		_warden_hp = hp
 
 
 func _on_died(actor: ZombieActor, _peer: int) -> void:
@@ -144,24 +151,26 @@ func _report(m: Match) -> void:
 	result["kills"] = m.zombies.deaths_total
 	result["max_alive"] = _max_alive
 	result["requeues"] = m.zombies.crowd.requeues
-	result["warden_hp_r60"] = _warden_hp
+	result["warden_hp_last_round"] = _warden_hp
 	result["points"] = m.points.summary()
 	result["sim_seconds"] = snappedf(elapsed(), 1.0)
 	result["hitches"] = m.hitches.stats() if m.hitches != null else {}
 	check("no_logged_errors", _errors == 0, _error_lines)
-	check("all_planned_rounds_played", _rounds_ended == PLAN, _rounds_ended)
+	check("all_planned_rounds_played", _rounds_ended == plan, _rounds_ended)
 	check("zombie_health_matches_curve", _bad_health.is_empty(), _bad_health)
 	check("alive_cap_respected", _max_alive <= m.rounds.curve.alive_cap(4) + 2 + 1, _max_alive)
-	check("warden_spawned_r60", _warden_hp > 0.0 and is_finite(_warden_hp), _warden_hp)
+	check("warden_spawned_last_round", _warden_hp > 0.0 and is_finite(_warden_hp), _warden_hp)
 	var pts_ok: bool = true
 	for id: int in m.points.points:
 		var v: int = int(m.points.points[id])
 		pts_ok = pts_ok and v >= 0 and v < 1000000000
 	check("points_finite", pts_ok, m.points.points)
-	if _mem.has(10) and _mem.has(60):
-		var drift: float = (float(_mem[60]) - float(_mem[10])) / maxf(float(_mem[10]), 1.0)
+	var first: int = plan[mini(3, plan.size() - 1)]
+	var last: int = plan[plan.size() - 1]
+	if _mem.has(first) and _mem.has(last) and first != last:
+		var drift: float = (float(_mem[last]) - float(_mem[first])) / maxf(float(_mem[first]), 1.0)
 		result["memory_drift"] = snappedf(drift, 0.001)
-		result["orphans"] = [int(_orphans[10]), int(_orphans[60])]
-		check("memory_within_10pct", absf(drift) <= 0.10, [_mem[10], _mem[60]])
-		check("orphans_flat", int(_orphans[60]) <= int(_orphans[10]) + 2, [_orphans[10], _orphans[60]])
+		result["orphans"] = [int(_orphans[first]), int(_orphans[last])]
+		check("memory_within_10pct", absf(drift) <= 0.10, [_mem[first], _mem[last]])
+		check("orphans_flat", int(_orphans[last]) <= int(_orphans[first]) + 2, [_orphans[first], _orphans[last]])
 	finish(true)

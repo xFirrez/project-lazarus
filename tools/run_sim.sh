@@ -32,7 +32,7 @@ for arg in "$@"; do
   case "$arg" in
     --map=*) MAP="${arg#--map=}" ;;
     --duration=*) DURATION="${arg#--duration=}" ;;
-    --rounds=*|--god=*|--bot_damage=*|--quick=*) EXTRA+=("$arg") ;;
+    --rounds=*|--god=*|--bot_damage=*|--quick=*|--plan=*) EXTRA+=("$arg") ;;
     *) echo "unknown arg $arg" >&2; exit 2 ;;
   esac
 done
