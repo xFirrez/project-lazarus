@@ -54,6 +54,8 @@ var _pongs_received: int = 0
 var _bytes_out_acc: int = 0
 var _bytes_in_acc: int = 0
 var _stats_timer: float = 0.0
+var _paused_at: float = -1.0  # session clock frozen at this value (solo pause)
+var _pause_total: float = 0.0
 
 
 func _ready() -> void:
@@ -177,7 +179,27 @@ func peer_ids() -> Array[int]:
 
 
 func now() -> float:
-	return Time.get_ticks_usec() / 1_000_000.0
+	var t: float = Time.get_ticks_usec() / 1_000_000.0 - _pause_total
+	return _paused_at if _paused_at >= 0.0 else t
+
+
+# Solo pause (GAME_DESIGN §15): the session clock stops while the tree is paused so host-time
+# timers (power-ups, relays, rounds) resume exactly where they were. Refused with remote peers
+# (co-op never pauses).
+func can_pause() -> bool:
+	return not _has_remote_peers()
+
+
+func set_clock_paused(on: bool) -> void:
+	if on and _paused_at < 0.0 and can_pause():
+		_paused_at = now()
+	elif not on and _paused_at >= 0.0:
+		_pause_total = Time.get_ticks_usec() / 1_000_000.0 - _paused_at
+		_paused_at = -1.0
+
+
+func is_clock_paused() -> bool:
+	return _paused_at >= 0.0
 
 
 # Host clock estimate; on the host this is the local clock.

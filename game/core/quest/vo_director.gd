@@ -1,7 +1,8 @@
 # VoDirector — quest voice-over and reel playback with mandatory subtitles (DEVELOPMENT_PLAN Step 14
 # scope 2 / 6). `host_play(entry, at)` broadcasts `_vo`; every peer queues the entry's lines
-# (LoreLibrary), plays a placeholder voice per line (pitched babble per speaker, radio-filtered;
-# recorded / licensed VO replaces the `vo_voice` events in Step 15) at `at` (positional) or map-wide
+# (LoreLibrary), plays each line's recorded take when one is delivered (content/audio/vo/
+# <entry>_<line>.ogg|wav), otherwise the synthesized voice (pitched per speaker, radio-filtered;
+# an accepted asset, see content/audio/audio_manifest.json) at `at` (positional) or map-wide
 # (`at` = INF, e.g. the radio broadcast), and shows each line as a subtitle. One entry at a time:
 # a new entry replaces the current one (story beats outrank ambient reels).
 # Authority: HOST triggers quest VO; reels are triggered through LoreItem (QuestSystem `_reel`).
@@ -16,6 +17,7 @@ var playing_id: StringName = &""
 var lines_played: int = 0  # every peer (tests)
 var played_ids: Array[StringName] = []
 var current_text: String = ""  # the subtitle on screen ("" = none)
+var lines_played_in_entry: int = 0
 
 var _queue: Array = []
 var _line_left: float = 0.0
@@ -37,7 +39,8 @@ func _ready() -> void:
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_label.custom_minimum_size = Vector2(900, 0)
 	_label.position = Vector2(-450, -170)
-	_label.add_theme_font_size_override(&"font_size", 20)
+	_label.add_theme_font_override(&"font", UiTheme.font(&"type"))
+	_label.add_theme_font_size_override(&"font_size", 22)
 	_label.add_theme_color_override(&"font_outline_color", Color(0, 0, 0, 0.9))
 	_label.add_theme_constant_override(&"outline_size", 6)
 	_layer.add_child(_label)
@@ -72,9 +75,19 @@ func play_local(entry_id: StringName, at: Vector3 = Vector3.INF) -> void:
 	played_ids.append(entry_id)
 	_at = at
 	_line_left = 0.0
+	lines_played_in_entry = 0
 	if lore.kind_of(entry_id) == "reel" and at.is_finite():
 		Audio.play_event_3d(&"reel_click", at)
 	_next_line()
+
+
+# A delivered recording for one line (the asset request list in docs/PROGRESS.md names them).
+static func recorded_line(entry_id: StringName, index: int) -> AudioStream:
+	for ext: String in ["ogg", "wav"]:
+		var path: String = "res://content/audio/vo/%s_%d.%s" % [entry_id, index, ext]
+		if ResourceLoader.exists(path):
+			return load(path) as AudioStream
+	return null
 
 
 func stop() -> void:
@@ -97,9 +110,20 @@ func _next_line() -> void:
 	lines_played += 1
 	if _label != null:
 		_label.text = current_text
+		_label.visible = Captions.enabled()
 		_label.modulate = Color(0.75, 1.0, 0.8) if speaker == "VARGA" else Color(1, 1, 1)
 	var pitch: float = lore.speaker_pitch(speaker)
-	if _at.is_finite():
+	# Recorded VO (when delivered): content/audio/vo/<entry>_<line>.ogg|wav, else the voice synth.
+	var recorded: AudioStream = recorded_line(playing_id, lines_played_in_entry)
+	lines_played_in_entry += 1
+	if recorded != null:
+		var ev: StringName = StringName("vo_rec_%s_%d" % [playing_id, lines_played_in_entry - 1])
+		Audio.register_event(ev, recorded, &"VO", 0.0)
+		if _at.is_finite():
+			Audio.play_event_3d(ev, _at)
+		else:
+			Audio.play_event(ev)
+	elif _at.is_finite():
 		Audio.play_event_3d(&"vo_voice", _at, pitch)
 	else:
 		Audio.play_event(&"vo_voice_radio")

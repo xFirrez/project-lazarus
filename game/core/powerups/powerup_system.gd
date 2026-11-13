@@ -343,6 +343,8 @@ func _present_pick(type: StringName, _peer: int, pos: Vector3) -> void:
 	announce_at = Time.get_ticks_msec() / 1000.0
 	Audio.play_event_3d(&"pu_pickup", pos)
 	Audio.play_event(StringName("pu_vo_%s" % type))
+	if match_node != null and match_node.captions != null:
+		match_node.captions.push(Announcer.SPEAKER, String(NAMES.get(type, String(type))) + "!", Announcer.COLOR, 2.2)
 	if type == &"nuke":
 		flash_at = announce_at
 		Audio.play_event(&"pu_nuke")

@@ -27,6 +27,10 @@ var rounds: RoundDirector = null
 var spawns: SpawnDirector = null
 var rules: MapRules = null
 var hud: MatchHud = null
+var pause_menu: PauseMenu = null
+var captions: Captions = null
+var music: MusicDirector = null
+var quips: QuipDirector = null
 var session: MatchSession = null
 var pings: PingSystem = null
 var box: RelicBoxSystem = null
@@ -41,11 +45,13 @@ var wonder_fx: WonderFx = null
 var buildables: BuildableSystem = null
 var specials: SpecialRoundDirector = null
 var quest: QuestSystem = null
+var started_at: float = 0.0  # Net.now() at setup (game-over "time played")
 var session_joined_at: float = -1.0  # client: Net.now() at the session welcome (join timing)
 
 
 func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -> Error:
 	definition = def
+	started_at = Net.now()
 	name = "Match"
 	var packed: PackedScene = load(def.scene_path) as PackedScene
 	if packed == null:
@@ -193,6 +199,24 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	layer.add_to_group(&"hide_for_shots")
 	add_child(layer)
 	layer.add_child(hud)
+	captions = Captions.new()
+	layer.add_child(captions)
+	music = MusicDirector.new()
+	music.match_node = self
+	add_child(music)
+	quips = QuipDirector.new()
+	quips.match_node = self
+	add_child(quips)
+	var pause_layer: CanvasLayer = CanvasLayer.new()
+	pause_layer.name = "PauseLayer"
+	pause_layer.layer = PauseMenu.LAYER
+	pause_layer.add_to_group(&"hide_for_shots")
+	add_child(pause_layer)
+	pause_menu = PauseMenu.new()
+	pause_menu.match_node = self
+	pause_menu.leave_requested.connect(func() -> void: Game.leave_game(""))
+	pause_menu.quit_requested.connect(func() -> void: get_tree().quit())
+	pause_layer.add_child(pause_menu)
 	session.on_match_ready(from_lobby)
 	if Net.is_host() or not Net.is_active():
 		rules.on_match_start()

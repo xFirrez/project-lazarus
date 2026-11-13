@@ -50,20 +50,15 @@ static func is_open() -> bool:
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var center: CenterContainer = CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	var panel: PanelContainer = PanelContainer.new()
-	var sb: StyleBoxFlat = StyleBoxFlat.new()
-	sb.bg_color = Color(0.86, 0.81, 0.68)
-	sb.set_corner_radius_all(2)
-	sb.set_content_margin_all(28)
-	sb.shadow_size = 12
-	sb.shadow_color = Color(0, 0, 0, 0.5)
-	panel.add_theme_stylebox_override(&"panel", sb)
+	panel.add_theme_stylebox_override(&"panel", UiTheme.paper_box())  # dossier paper (Step 15)
+	panel.rotation_degrees = -0.8
 	panel.custom_minimum_size = Vector2(560, 0)
 	center.add_child(panel)
 	var box: VBoxContainer = VBoxContainer.new()
@@ -73,7 +68,8 @@ func _ready() -> void:
 	title.name = "Title"
 	title.text = String(entry.get("title", ""))
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.add_theme_font_size_override(&"font_size", 22)
+	title.add_theme_font_override(&"font", UiTheme.font(&"type"))
+	title.add_theme_font_size_override(&"font_size", 24)
 	title.add_theme_color_override(&"font_color", Color(0.15, 0.12, 0.1))
 	box.add_child(title)
 	var body: Label = Label.new()
@@ -81,7 +77,8 @@ func _ready() -> void:
 	body.text = String(entry.get("body", ""))
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.custom_minimum_size = Vector2(540, 0)
-	body.add_theme_font_size_override(&"font_size", 16)
+	body.add_theme_font_override(&"font", UiTheme.font(&"type"))
+	body.add_theme_font_size_override(&"font_size", 17)
 	body.add_theme_color_override(&"font_color", Color(0.2, 0.17, 0.14))
 	box.add_child(body)
 	if annotation != "":
@@ -89,11 +86,13 @@ func _ready() -> void:
 		note.name = "Annotation"
 		note.text = annotation
 		note.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		note.add_theme_font_override(&"font", UiTheme.font(&"display"))
 		note.add_theme_font_size_override(&"font_size", 26)
 		note.add_theme_color_override(&"font_color", Color(0.72, 0.08, 0.06))
 		box.add_child(note)
 	var hint: Label = Label.new()
-	hint.text = "[F] close"
+	hint.add_theme_font_override(&"font", UiTheme.font(&"type"))
+	hint.text = "[F] / [Esc] close"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	hint.add_theme_font_size_override(&"font_size", 12)
 	hint.add_theme_color_override(&"font_color", Color(0.4, 0.35, 0.3))

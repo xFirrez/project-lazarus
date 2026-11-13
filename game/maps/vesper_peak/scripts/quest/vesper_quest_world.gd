@@ -622,7 +622,7 @@ func _begin_ending() -> void:
 			bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			_ending_layer.add_child(bar)
 		_ending_flash = ColorRect.new()
-		_ending_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_ending_flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_ending_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_ending_layer.add_child(_ending_flash)
 	_ending_layer.visible = true

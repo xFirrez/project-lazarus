@@ -140,6 +140,25 @@ func graph_done(graph_id: StringName) -> bool:
 	return bool(flag("quest.%s.done" % graph_id, false))
 
 
+# Game-over line (Step 15): "Requiem 4/9 steps" per graph with a badge (main quests only).
+func progress_text() -> String:
+	var parts: PackedStringArray = []
+	for g: QuestGraph in graphs:
+		if g.badge == &"" or g.steps.is_empty():
+			continue
+		var done: int = 0
+		for s: QuestStep in g.steps:
+			if is_done(s.id):
+				done += 1
+		parts.append(
+			(
+				"%s %d/%d%s"
+				% [g.title if g.title != "" else String(g.id), done, g.steps.size(), " ★" if graph_done(g.id) else ""]
+			)
+		)
+	return ", ".join(parts)
+
+
 func active_steps() -> Array[StringName]:
 	var out: Array[StringName] = []
 	for g: QuestGraph in graphs:

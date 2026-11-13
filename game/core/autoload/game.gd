@@ -22,6 +22,7 @@ var state: State = State.BOOT
 var current_match: Match = null
 var menu_message: String = ""
 var selected_map: StringName = &""
+var last_match_info: Dictionary = {}  # set at game over: map, players, seconds, quest progress
 
 var _screen_layer: CanvasLayer = null
 var _screen: Control = null
@@ -37,6 +38,7 @@ func _ready() -> void:
 		Engine.max_fps = 120
 	_world = Node.new()
 	_world.name = "World"
+	_world.process_mode = Node.PROCESS_MODE_PAUSABLE  # the solo pause menu pauses the match
 	add_child(_world)
 	_screen_layer = CanvasLayer.new()
 	_screen_layer.layer = 10
@@ -154,6 +156,12 @@ func show_journal() -> void:
 	_set_screen(screen)
 
 
+func show_credits() -> void:
+	var screen: CreditsScreen = CreditsScreen.new()
+	screen.back_pressed.connect(func() -> void: go_to_main_menu(""))
+	_set_screen(screen)
+
+
 func show_lobby() -> void:
 	_set_state(State.LOBBY)
 	if _screen is LobbyScreen:
@@ -205,6 +213,7 @@ func go_to_main_menu(message: String) -> void:
 	menu.steam_requested.connect(host_steam_game)
 	menu.settings_requested.connect(show_settings)
 	menu.journal_requested.connect(show_journal)
+	menu.credits_requested.connect(show_credits)
 	menu.quit_requested.connect(func() -> void: get_tree().quit())
 	_set_screen(menu)
 	menu.set_status(message)
@@ -232,6 +241,10 @@ func show_match_summary(round_reached: int, rows: Array, subtitle: String = "") 
 	screen.round_reached = round_reached
 	screen.rows = rows
 	screen.subtitle = subtitle
+	screen.info = last_match_info
+	var map_id: StringName = StringName(last_match_info.get("map", selected_map))
+	screen.new_best = Journal.record_round(map_id, maxi(rows.size(), 1), round_reached)
+	screen.best_round = Journal.best_round(map_id, maxi(rows.size(), 1))
 	screen.local_peer = Net.local_id() if Net.is_active() else 1
 	screen.show_lobby_button = Net.is_host()
 	if Net.transport != null and not Net.transport.supports_clients():
@@ -258,6 +271,7 @@ func _start_match(map_id: StringName, from_lobby: bool = false, first_round: int
 		Log.error(&"game", "Unknown map '%s'" % map_id)
 		leave_game("Unknown map '%s'" % map_id)
 		return
+	last_match_info = {}
 	_set_state(State.LOADING)
 	_show_message("Loading %s ..." % def.display_name)
 	current_match = Match.new()
@@ -278,6 +292,7 @@ func _end_match(reason: String) -> void:
 	current_match.queue_free()
 	_world.remove_child(current_match)
 	current_match = null
+	Engine.time_scale = 1.0
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	EventBus.match_ended.emit(reason)
 
@@ -305,7 +320,41 @@ func _set_screen(screen: Control) -> void:
 		_screen = null
 	if screen != null:
 		_screen = screen
+		UiTheme.apply(screen)
 		_screen_layer.add_child(screen)
+		Audio.play_event(&"ui_page")
+	_update_menu_backdrop()
+
+
+# The animated 3D menu background (MapDefinition.menu_scene_path of the default map) runs behind
+# every out-of-match screen; it is freed while a match loads / runs. Skipped headless (tests) and
+# with --no-menu-3d.
+func _update_menu_backdrop() -> void:
+	var want: bool = (
+		current_match == null
+		and state != State.LOADING
+		and state != State.IN_MATCH
+		and DisplayServer.get_name() != "headless"
+		and not CommandLine.has_flag("no-menu-3d")
+		and CommandLine.get_value("screenshot", "") == ""
+	)
+	var existing: Node = _world.get_node_or_null(^"MenuBackdrop")
+	if want and existing == null:
+		var def: MapDefinition = Content.get_map(default_map_id())
+		if def == null or def.menu_scene_path == "":
+			return
+		var res: Resource = load(def.menu_scene_path)
+		var node: Node = null
+		if res is PackedScene:
+			node = (res as PackedScene).instantiate()
+		elif res is GDScript:
+			node = (res as GDScript).new()
+		if node != null:
+			node.name = "MenuBackdrop"
+			_world.add_child(node)
+	elif not want and existing != null:
+		_world.remove_child(existing)
+		existing.queue_free()
 
 
 func _show_message(text: String) -> void:

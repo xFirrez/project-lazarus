@@ -5,10 +5,15 @@
 class_name PlayerInputSource
 extends RefCounted
 
+# Menus over a running match (the co-op pause menu, Step 15) block gameplay input: gather() returns
+# an idle frame and look input is dropped.
+static var ui_blocked: bool = false
+
 var tuning: PlayerTuning = null
 var mouse_captured_required: bool = true
 
 var _mouse_accum: Vector2 = Vector2.ZERO
+var _ads_toggled: bool = false
 var _sprint_toggled: bool = false
 var _crouch_toggled: bool = false
 var _aiming: bool = false
@@ -40,6 +45,9 @@ func set_crouch_toggle(on: bool) -> void:
 
 func gather() -> PlayerInputFrame:
 	var f: PlayerInputFrame = PlayerInputFrame.new()
+	if ui_blocked:
+		_switch_delta = 0
+		return f
 	f.move = Input.get_vector(&"move_left", &"move_right", &"move_forward", &"move_back")
 	f.aim = Input.is_action_pressed(&"aim")
 	f.fire = Input.is_action_pressed(&"fire")
@@ -74,12 +82,21 @@ func gather() -> PlayerInputFrame:
 		f.crouch = _crouch_toggled
 	else:
 		f.crouch = Input.is_action_pressed(&"crouch")
+	if bool(Config.get_value(&"input", &"toggle_ads", false)):
+		if Input.is_action_just_pressed(&"aim"):
+			_ads_toggled = not _ads_toggled
+		if f.reload_pressed or f.sprint:
+			_ads_toggled = false
+		f.aim = _ads_toggled
 	_aiming = f.aim
 	return f
 
 
 # Look is consumed every render frame (not per physics tick) for minimum latency.
 func consume_look(delta: float) -> Vector2:
+	if ui_blocked:
+		_mouse_accum = Vector2.ZERO
+		return Vector2.ZERO
 	var aiming: bool = _aiming
 	var sens: float = float(Config.get_value(&"input", &"mouse_sensitivity", 1.0))
 	if aiming:

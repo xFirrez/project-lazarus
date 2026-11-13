@@ -81,3 +81,20 @@ static func badges(map_id: StringName) -> Dictionary:
 		if k.begins_with("%s." % map_id):
 			out[StringName(k.substr(String(map_id).length() + 1))] = f.get_value("badges", k, [])
 	return out
+
+
+# Local best round per map and player count (GAME_DESIGN §15 game over, Step 15). Returns true when
+# `round_reached` is a new best (shown highlighted on the game-over screen and on the map card).
+static func record_round(map_id: StringName, players: int, round_reached: int) -> bool:
+	var f: ConfigFile = _file()
+	var k: String = "%s.%dp" % [map_id, players]
+	var best: int = int(f.get_value("records", k, 0))
+	if round_reached <= best:
+		return false
+	f.set_value("records", k, round_reached)
+	f.save(_loaded_path)
+	return true
+
+
+static func best_round(map_id: StringName, players: int) -> int:
+	return int(_file().get_value("records", "%s.%dp" % [map_id, players], 0))

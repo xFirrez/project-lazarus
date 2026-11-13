@@ -33,6 +33,10 @@ if grep -rn --include='*.gd' -E '^\s*print(err)?\(' game/core game/maps | grep -
 fi
 echo "no bare prints"
 
+step "generated data current"
+python3 "$ROOT/tools/gen_credits.py" --check
+echo "credits ok"
+
 step "unit tests"
 "$ROOT/tools/run_tests.sh" unit
 

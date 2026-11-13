@@ -8,6 +8,9 @@ class_name InputDefaults
 extends RefCounted
 
 const DEADZONE: float = 0.2
+# Menus on a gamepad (AC-15.1): Godot's built-in ui_accept / ui_cancel have no pad buttons, so A
+# accepts and B goes back (the D-pad and left stick already navigate).
+const UI_PAD: Dictionary = {"ui_accept": JOY_BUTTON_A, "ui_cancel": JOY_BUTTON_B}
 
 # action -> Array of binding strings
 const ACTIONS: Dictionary = {
@@ -104,8 +107,20 @@ static func event_to_binding(event: InputEvent) -> String:
 	return ""
 
 
+static func ensure_ui_pad() -> void:
+	for action: String in UI_PAD:
+		if not InputMap.has_action(action):
+			continue
+		var ev: InputEventJoypadButton = InputEventJoypadButton.new()
+		ev.button_index = UI_PAD[action]
+		ev.device = -1
+		if not InputMap.action_has_event(action, ev):
+			InputMap.action_add_event(action, ev)
+
+
 # Replaces the bindings of every known action in the live InputMap.
 static func apply(bindings: Dictionary) -> void:
+	ensure_ui_pad()
 	for action: String in ACTIONS:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action, DEADZONE)

@@ -158,6 +158,8 @@ func host_begin_purchase(peer_id: int, perk_id: StringName) -> bool:
 	if not is_authority() or host_check(peer_id, perk_id) != "":
 		return false
 	purchases += 1
+	if Match.current != null and Match.current.points != null:
+		Match.current.points.host_add_stat(peer_id, &"perks")
 	drinking[peer_id] = [perk_id, Net.host_time() + DRINK_TIME]
 	Net.send_reliable(0, &"_perk_drink", [peer_id, String(perk_id), DRINK_TIME])
 	_present_drink(peer_id, perk_id, DRINK_TIME)

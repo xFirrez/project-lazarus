@@ -24,26 +24,20 @@ var _map_ids: Array[StringName] = []
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	var bg: ColorRect = ColorRect.new()
-	bg.color = Color(0.05, 0.06, 0.08)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+	UiTheme.apply(self)
+	add_child(UiTheme.backdrop(0.82))
 	var margin: MarginContainer = MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side: String in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 40)
 	add_child(margin)
 	var root: VBoxContainer = VBoxContainer.new()
 	root.add_theme_constant_override(&"separation", 14)
 	margin.add_child(root)
-	var title: Label = Label.new()
-	title.text = "LOBBY"
-	title.add_theme_font_size_override(&"font_size", 34)
-	root.add_child(title)
-	_status = Label.new()
-	_status.add_theme_color_override(&"font_color", Color(0.7, 0.75, 0.8))
+	root.add_child(UiTheme.title_label("LOBBY", 44))
+	_status = UiTheme.type_label("", 17, UiTheme.TEXT_DIM)
 	root.add_child(_status)
 	var columns: HBoxContainer = HBoxContainer.new()
 	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -103,6 +97,9 @@ func _ready() -> void:
 	bottom.add_child(_start_button)
 	Session.lobby_changed.connect(_refresh)
 	_refresh()
+	_countdown.add_theme_font_override(&"font", UiTheme.font(&"display"))
+	UiTheme.intro(root)
+	_ready_button.grab_focus.call_deferred()
 
 
 func _build_host_settings(parent: VBoxContainer) -> void:
@@ -181,6 +178,7 @@ func _refresh() -> void:
 	var mine: StringName = lobby.character_of(Net.local_id())
 	for cdef: CharacterDefinition in CharacterDefinition.all_sorted():
 		var b: Button = Button.new()
+		b.focus_mode = Control.FOCUS_ALL
 		b.name = "Char_%s" % cdef.id
 		b.text = "%s\n%s" % [cdef.display_name, cdef.nationality]
 		b.tooltip_text = "%s — %s" % [cdef.full_name, cdef.bio]
@@ -221,9 +219,6 @@ func _on_chat_submitted(text: String) -> void:
 
 
 func _button(text: String, on_press: Callable) -> Button:
-	var b: Button = Button.new()
-	b.text = text
-	b.custom_minimum_size = Vector2(120, 40)
-	b.pressed.connect(func() -> void: Audio.play_event(&"ui_click"))
-	b.pressed.connect(on_press)
+	var b: Button = UiTheme.button(text, on_press)
+	b.custom_minimum_size = Vector2(140, 44)
 	return b

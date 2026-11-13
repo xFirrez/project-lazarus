@@ -11,10 +11,10 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | **M5 Visually complete map** + Step 14 content (the full Easter egg "Requiem for Lazarus", lore / Journal, secrets; AC-14.6 human run open). M5 (automated criteria; Step 13: zone dressing for all 12 zones + S1 shell, 10 + 2 vignettes, night sky / storm / searchlights / per-zone grading, reverb + ambience in every zone, static batching + viewer-local shadow budget, marker diff + nav_validate + sightlines green; AC-13.3 GPU FPS and AC-13.6 visual review = human checks). Previous: **M4 Gameplay complete** (automated criteria; Step 12: wonder weapons, Conduit buildable, Galvanic special rounds, Warden archetype in its arena; AC-12.6 GPU + AC-12.7 feel = human checks). Previous: **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
-| Next step to start | **Step 15 — Presentation & audio finalization (→ M6)** |
+| Current milestone | **M6 Content complete** (automated criteria; Step 15: final UI theme + menus over a 3D backdrop, settings with rebinding, pause, game over, credits, final HUD with scale / colorblind palettes, score + dynamic music + jingles + announcer + quips + captions, final mix, audio manifest audit; AC-15.6 review and VO intelligibility = human checks). Previous: **M5 Visually complete map** + Step 14 content (the full Easter egg "Requiem for Lazarus", lore / Journal, secrets; AC-14.6 human run open). M5 (automated criteria; Step 13: zone dressing for all 12 zones + S1 shell, 10 + 2 vignettes, night sky / storm / searchlights / per-zone grading, reverb + ambience in every zone, static batching + viewer-local shadow budget, marker diff + nav_validate + sightlines green; AC-13.3 GPU FPS and AC-13.6 visual review = human checks). Previous: **M4 Gameplay complete** (automated criteria; Step 12: wonder weapons, Conduit buildable, Galvanic special rounds, Warden archetype in its arena; AC-12.6 GPU + AC-12.7 feel = human checks). Previous: **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
+| Next step to start | **Step 16 — Balance, optimization, QA & release candidate (→ M7 1.0)** |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-13 (Step 14 session) |
+| Last updated | 2026-11-13 (Step 15 session) |
 | Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**art-passed** (Step 13: dressed zones, sky, storm, fog, lighting, decals, reverb / ambience; debug `atmos`, `gust`, `art_pulse`, `markers_visible`, `art_stats`) over the full greybox: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **7 Vigor Tonic machines** (cap 4, loss on down, Second Wind solo self-revive ×3), **6 power-ups** (drops, timers, `powerup <id>`), **Resonance Relays R1–R3 → Reactor Bridge → Lazarus Forge** (23 upgraded weapons with camo, alt-fire key B), **traps T1–T3**, **hazards** (fuel drums, icicles, lab breaker), **wonder weapons** (Mk.I Ray Pistol / Nova Mk.II, Lazarus Conduit / Lazarus Requiem with pulse; box + Forge; `give raygun` / `give conduit`), the **Conduit buildable** (3 parts + Lab Workbench), **Galvanic special rounds** (rifts, warning build-up, Max Ammo; `special_round`), the **Warden** (`spawn_warden`, test map `warden_arena`; rare late-round rule on), the **Easter egg "Requiem for Lazarus"** (stages 0–6: radio frequency, three shards, Soul Pod, Heart escort, calibration nodes, pylon + Warden finale, Lazarus Blessing; debug `quest`, `ee_stage`, `ee_skip`), **lore** (14 documents, 9 reels, reader, subtitled VO, main-menu **Journal**, badge on the map card), **secrets** (S1 Director's Office, S2 Ice Grotto, Snowblind music boxes, ravens, mirror, departures board), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
@@ -38,7 +38,7 @@
 | 12 | Wonder weapons & special enemies (→ M4) | **Complete (with deferrals)** (AC-12.6 GPU + AC-12.7 awaiting human; authored wonder-weapon / Galvanic / Warden models deferred to Step 13) | 12A + 12B | 2026-11-12 |
 | 13 | Vesper Peak art & atmosphere (→ M5) | **Complete (with deferrals)** (AC-13.3 GPU + AC-13.6 review awaiting human; authored character / weapon / machine models and hand-authored textures re-deferred) | 13A + 13B + 13C + 13D (one session) | 2026-11-12 |
 | 14 | Easter egg, lore & secrets | **Complete** (AC-14.6 awaiting human; VO / song placeholders until Step 15) | 14A + 14B (one session) | 2026-11-13 |
-| 15 | Presentation & audio finalization (→ M6) | Not started | 15A / 15B | — |
+| 15 | Presentation & audio finalization (→ M6) | **Complete (with deferrals)** (AC-15.6 + VO intelligibility awaiting human; recorded VO / produced EE song are human asset requests) | 15A + 15B (one session) | 2026-11-13 |
 | 16 | Balance, optimization, QA & release (→ M7 1.0) | Not started | 16A / 16B | — |
 
 ---
@@ -181,13 +181,13 @@
 - [H] AC-14.6 [HUMAN] Full EE run without debug — steps in `docs/sessions/2026-11-13_step-14.md`
 
 ### Step 15 — Presentation & audio
-- [ ] AC-15.1 All screens navigable (M/KB/gamepad), rebinding persists
-- [ ] AC-15.2 HUD resolution/scale matrix
-- [ ] AC-15.3 No unaccepted placeholder audio
-- [ ] AC-15.4 Mix: no clipping; VO intelligible
-- [ ] AC-15.5 Credits complete
-- [ ] AC-15.6 [HUMAN] Presentation review
-- [ ] **M6 reached**
+- [x] AC-15.1 All screens navigable (M/KB/gamepad), rebinding persists — unit `test_ui_navigation` (focus on open + neighbour, `ui_cancel` back on every screen, pad A/B on ui_accept/ui_cancel, key + pad rebinding → live InputMap → save / load, conflicts moved, apply / revert); `visual_tests.sh ui_showcase`
+- [x] AC-15.2 HUD resolution/scale matrix — `visual_tests.sh hud_matrix` (1280×720…3840×2160 × 75/100/150 %, fit checks) + unit layout matrix; frames in `docs/screenshots/step15/`
+- [x] AC-15.3 No unaccepted placeholder audio — `run_sim.sh presentation`: 806 events all in `content/audio/audio_manifest.json` (final or accepted + reason), no `placeholder_` asset references
+- [x] / [H] AC-15.4 Mix: no clipping (32-zombie Ray Pistol fight: Master peak −4.0 dBFS, limiter −1 dB; `mix_peaks.csv`); VO intelligibility over combat = human check (VO ducks music / ambience)
+- [x] AC-15.5 Credits complete — `credits.json` generated from ASSET_LICENSES (check.sh verifies), unit test counts every row
+- [H] AC-15.6 [HUMAN] Presentation review
+- [x] **M6 reached** (automated criteria)
 
 ### Step 16 — Balance, optimization, QA, release
 - [ ] AC-16.1 No S1/S2 bugs
@@ -207,6 +207,10 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-13 | 15 | `tools/check.sh` (+ credits freshness) / `run_tests.sh integration` | Pass | 38 / 214 unit (new `test_ui_navigation`), 20 / 92 integration |
+| 2026-11-13 | 15 | `tools/run_sim.sh presentation` | Pass | 806 audio events audited; 32-zombie Ray Pistol mix: Master peak −4.0 dBFS, output RMS −14.8 dBFS (~−15.5 LUFS) |
+| 2026-11-13 | 15 | `tools/visual_tests.sh ui_showcase hud_matrix` | Pass | `docs/screenshots/step15/` (menus, settings tabs, credits, journal, 12 HUD frames 720p–4K × 75/100/150 %, pause, game over) |
+| 2026-11-13 | 15 | `tools/net_tests.sh lobby survival late_join reconnect quest`, `run_sim.sh smoke` | Pass | client_survival wait made time-scale independent |
 | 2026-11-13 | 14 | `tools/check.sh` | Pass | 37 unit scripts / 204 tests (new `test_journal`, `test_quest_graph`), lint, format, boundary |
 | 2026-11-13 | 14 | `tools/run_sim.sh quest` | Pass | 151 checks, ~57 s: every stage + failure rules + rewards + lore + secrets + 4-player scaling |
 | 2026-11-13 | 14 | `tools/net_tests.sh quest` | Pass | host 16 / client 26 checks at NetSim 100/20/2 %: late join at stage 4, Heart pass, SIGKILL while carrying → auto-drop + reconnect, finale + victory replicated |
@@ -347,7 +351,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 | I-025 | S4 | 11 | Dual wield (Gemini, Black Scorpions): the left gun is a static mirrored child of the right one (no own reload clip / arms); third person shows one gun | Step 13 (authored weapons) |
 | I-026 | S4 | 11 | Zombies lured by a charging relay crowd it but never attack it (GAME_DESIGN §9.1 has no relay damage); a player in the zone stays the real target when nearer | Step 16 balance (decide whether relays take damage) |
 | I-027 | S4 | 11 | Coolant Purge shatter is the normal gib death (forced limb gibs), no ice-shard VFX / frozen corpse material beyond the overlay | Step 13 / 15 VFX |
-| I-033 | S4 | 14 | Quest VO is placeholder babble (pitched per speaker) + mandatory subtitles; "Snowblind" and the music box are synthesized placeholders on the Choir motif | Step 15 (recorded / TTS VO, final song under the same event names) |
+| I-033 | S4 | 14 | Quest VO is a synthesized voice (pitched per speaker) + subtitles; "Snowblind" and the music box are synthesized on the Choir motif | Step 15: accepted in the audio manifest; recorded takes load automatically (asset request list) |
 | I-034 | S4 | 14 | No automated 4-player end-to-end Easter-egg run with bots walking the map (stages are completed by scripted actions; 4 players check scaling + the 2-peer flow) | AC-14.6 human run; optional Step 16 bot run |
 | I-035 | S4 | 14 | Calibration nodes orbit with the rings; the hit volume follows the host-time orbit on every peer, so at high latency a shot at the edge of a node can miss on the host | Watch in AC-14.6; slow the orbit if needed |
 | I-001 | S4 | 1 | `tools/net_tests.sh` failed once (output not captured) while it was being tuned; 21 later consecutive runs passed. Possible rare timing flake in the multi-process tests | Watch CI; logs are kept in `.test-results/net/` and uploaded by CI on failure |
@@ -397,7 +401,8 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Wall-buy "weapon appears on the rack once bought" (VESPER_PEAK §5.1) and the wall-buy pickup animation beyond the draw clip | Step 13 / 15 | Stencil-on-canvas tarp + crate are in; the bought weapon raises with its draw clip |
 | ~~Box Fire Sale *power-up*~~ | — | Done in Step 10 (PowerUpSystem) |
 | Authored perk machine models (Step 10 scope 2 "final-quality models") and an animated first-person hand on the bottle | Step 13 (art pass) | Step 10 uses the **greybox+** path like Step 9: procedural machines (`PerkMachine._build_visual`) with a unique silhouette piece per perk (keg, bolts, double barrels, runner, cross, dial, mule), neon outline + sign + light in the perk colour, bottle window idle bob, vend drop, power-off state; the drink is a bottle tilted in the viewmodel. An authored GLB replaces `_build_visual` |
-| Final jingles / stingers / announcer VO | Step 15 | Original placeholder melodies per perk (`PerkAudio`) and a formant "voice" per power-up (`PowerUpAudio`) under the final event names |
+| Final jingles / stingers / announcer VO | Step 15 → done / human | Jingles arranged to 30–45 s (final); announcer = synthesized layered voice + subtitles (accepted); recorded VO = human asset request |
+| Motion blur setting, gamepad aim slowdown (GAME_DESIGN §18) | Step 16 | No renderer motion blur / aim assist exists; not exposed in Settings rather than shipping dead options |
 
 ## Proposed design changes (awaiting human decision)
 
@@ -441,7 +446,8 @@ Severity: **S1** crash / data loss / progress-blocking · **S2** major feature b
 | Step 10 | **AC-10.5** machine visual review (`docs/screenshots/step10/` or in game) and **AC-10.6** solo playtest (steps in `docs/sessions/2026-11-12_step-10.md`); decide on the drop-threshold tuning | Open |
 | Step 11 | **AC-11.6** Forge / upgraded-weapon feel playtest + relay / trap / hazard review (`docs/screenshots/step11/`, steps in `docs/sessions/2026-11-12_step-11.md`) | Open |
 | Step 13 | Optional: LightmapGI bakes on a desktop GPU | Open |
-| Step 15 | Provide or approve music (jingles, EE song), VO approach (recorded vs. TTS), and fonts | Open |
+| Step 15 | **AC-15.6** presentation review + AC-15.4 VO intelligibility (steps in `docs/sessions/2026-11-13_step-15.md`); approve fonts (Black Ops One / Special Elite / Barlow) and the synthesized score / jingles | Open |
+| Step 15 | **Asset request list (optional, drop-in, no code):** recorded VO for the 25 quest beats + 14 reels (`content/audio/vo/<entry>_<line>.ogg`), the 4 survivors' quips (`quips.json` lines → `content/audio/vo/quip_<char>_<category>_<n>.ogg`), the Voice of the Mountain (power-ups, `ann_round_one`, `ann_special`), a produced rock/industrial "Snowblind" (event `snowblind`), map-card art (`MapDefinition.card_image_path`) | Open |
 | Any | Monitor Git LFS storage/bandwidth quota | Recurring |
 | Step 1 | Quick desktop check: `godot --path game`, Solo, press `~` (console: try `help`, `net_status`, Tab completion, Up/Down history), F3 overlay; then `tools/run_coop_local.sh 2 --windowed` and walk both capsules | Open |
 | Step 1 | Confirm the first GitHub Actions run of `.github/workflows/ci.yml` is green (Actions tab) | Open |
@@ -458,6 +464,7 @@ Each session adds a row and a report file `docs/sessions/YYYY-MM-DD_step-N[-chec
 
 | Date | Step | Summary | Report |
 |---|---|---|---|
+| 2026-11-13 | 15 | Presentation & audio (15A + 15B) → M6: UiTheme / UiScreen, main menu over the 3D Vesper backdrop, map cards, full settings with rebinding + apply / revert, pause menu (solo pause clock) + facility map, game over v2 (slow-mo, records), credits from ASSET_LICENSES, final HUD (scale, colorblind, numerals), ScoreAudio (rendered), MusicDirector, jingle arrangements, announcer + captions, quips, mix (levels, ducking, limiter, attenuation), audio manifest audit, pre-existing full-rect layout bug fixed (D-087…D-091) | [2026-11-13_step-15.md](sessions/2026-11-13_step-15.md) |
 | 2026-11-12 | 13 | Vesper Peak art & atmosphere (13A–13D) → M5: VesperZoneArt dressing pass for all 12 zones (VesperProps procedural props, GLB props, decals, signage, AtmosFx, fog volumes, fixtures + animated PoweredLights, reverb zones, ambience beds, 10 + 2 vignettes, S1 shell), automatic trims, per-zone static batching (MeshBatch), VesperArt (night sky, mountain ring, cloud sea, storm gusts, searchlights, per-zone grading, energy pulse), ShadowBudget, Z12 reactor observation window, gameplay baseline diff + sightline tests, `vesper_art` visual/perf test, teleport-ack validator fix (I-031) (D-076…D-081) | [2026-11-12_step-13.md](sessions/2026-11-12_step-13.md) |
 | 2026-11-12 | 12 | Wonder weapons & special enemies (12A + 12B) → M4: Ray Pistol (plasma projectile, disintegrate) + Nova Mk.II (bounce), Lazarus Conduit (ChainLightning, electrocution stun, hold-to-pulse) + Lazarus Requiem (kill arcs), WonderFx (arcs / bursts / rings / rifts, capped), BuildableSystem (parts, shared inventory, workbench, box unlock), Galvanics (ZombieBehavior leap + burst), special-round flow (schedule, rifts, warning atmosphere, Max Ammo), Warden (plates, core, slam / charge / summon, phases, coolant, late-round rule gated), warden_arena test map, debug commands, unit / integration / sim / net tests (D-071…D-075) | [2026-11-12_step-12.md](sessions/2026-11-12_step-12.md) |
 | 2026-11-12 | 11 | Relays, Forge, traps & hazards (11A + 11B): RelaySystem / ResonanceRelay (hold, defend, zone pause, weak lure) → MapRules.on_relays_complete (bridge, Forge wake, ReactorState); ForgeSystem / LazarusForge (5000 / Free Upgrade, 5 s, 15 s owner offer); 23 generated upgrades + Skullcrusher launcher, behavior fields, vesperite camo, upgraded sound layer; StatusEffects (slow / burn / freeze); TrapSystem T1–T3; HazardSystem H1–H3; upgraded wall ammo 4500; debug commands; progression sim / net / visual tests (D-066…D-070) | [2026-11-12_step-11.md](sessions/2026-11-12_step-11.md) |

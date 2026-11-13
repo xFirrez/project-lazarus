@@ -18,25 +18,19 @@ var _vo: VoDirector = null
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
-	var bg: ColorRect = ColorRect.new()
-	bg.color = Color(0.06, 0.07, 0.09)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(bg)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	UiTheme.apply(self)
+	add_child(UiTheme.backdrop(0.8))
 	var margin: MarginContainer = MarginContainer.new()
-	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side: String in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_%s" % side, 40)
 	add_child(margin)
 	var col: VBoxContainer = VBoxContainer.new()
 	col.add_theme_constant_override(&"separation", 10)
 	margin.add_child(col)
-	var title: Label = Label.new()
-	title.text = "JOURNAL"
-	title.add_theme_font_size_override(&"font_size", 30)
-	col.add_child(title)
-	_badges = Label.new()
-	_badges.add_theme_color_override(&"font_color", Color(1.0, 0.85, 0.4))
+	col.add_child(UiTheme.title_label("JOURNAL", 44))
+	_badges = UiTheme.type_label("", 18, Color(1.0, 0.8, 0.4))
 	col.add_child(_badges)
 	var row: HBoxContainer = HBoxContainer.new()
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -46,29 +40,41 @@ func _ready() -> void:
 	_list.custom_minimum_size = Vector2(360, 0)
 	_list.item_selected.connect(_show)
 	row.add_child(_list)
+	var paper: PanelContainer = PanelContainer.new()
+	paper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(paper)
 	var right: VBoxContainer = VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(right)
-	_title = Label.new()
-	_title.add_theme_font_size_override(&"font_size", 22)
+	paper.add_child(right)
+	_title = UiTheme.type_label("", 24, UiTheme.RED_INK)
 	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	right.add_child(_title)
 	var scroll: ScrollContainer = ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right.add_child(scroll)
-	_body = Label.new()
+	_body = UiTheme.type_label("", 17, UiTheme.INK)
 	_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body.custom_minimum_size = Vector2(560, 0)
 	scroll.add_child(_body)
-	var back: Button = Button.new()
-	back.text = "Back"
-	back.custom_minimum_size = Vector2(120, 40)
-	back.pressed.connect(func() -> void: back_pressed.emit())
+	var back: Button = UiTheme.button("Back", func() -> void: back_pressed.emit())
+	back.name = "BackButton"
+	back.custom_minimum_size = Vector2(180, 44)
+	back.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	col.add_child(back)
+	_list.focus_mode = Control.FOCUS_ALL
 	_vo = VoDirector.new()
 	add_child(_vo)
 	_fill()
+	UiTheme.intro(col)
+	UiTheme.focus_first(col)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"ui_cancel"):
+		get_viewport().set_input_as_handled()
+		Audio.play_event(&"ui_back")
+		back_pressed.emit()
 
 
 func _fill() -> void:

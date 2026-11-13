@@ -1,6 +1,7 @@
 # WeaponHud — local weapon HUD (Step 3 scope 6): crosshair whose gap visualizes the current spread
 # cone (bloom), hit markers (hit / headshot / kill variants), ammo counter, weapon name, lethal
-# count and reload / no-ammo hints. Final HUD art comes in Step 15 (GAME_DESIGN §15).
+# count and reload / no-ammo hints. Step 15: final fonts, the colorblind palette for markers and the
+# low-ammo red shift (< 20 % of the magazine), and the HUD scale (UiTheme.fit_hud).
 # Authority: local presentation, driven by the local WeaponController.
 class_name WeaponHud
 extends Control
@@ -8,7 +9,6 @@ extends Control
 enum Marker { NONE, HIT, HEAD, KILL }
 
 const MARKER_TIME: float = 0.28
-const MARKER_COLORS: Array[Color] = [Color.WHITE, Color(1, 1, 1, 0.95), Color(1.0, 0.85, 0.2), Color(1.0, 0.2, 0.15)]
 
 var controller: WeaponController = null
 var marker: Marker = Marker.NONE
@@ -38,6 +38,7 @@ static func spread_to_pixels(spread_deg: float, hfov_deg: float, width: float) -
 
 
 func _process(delta: float) -> void:
+	UiTheme.fit_hud(self)
 	marker_age += delta
 	queue_redraw()
 
@@ -60,7 +61,7 @@ func _draw() -> void:
 			draw_line(c + Vector2(0, -g - l), c + Vector2(0, -g), col, 2.0)
 			draw_line(c + Vector2(0, g), c + Vector2(0, g + l), col, 2.0)
 	if marker != Marker.NONE and marker_age < MARKER_TIME:
-		var mc: Color = MARKER_COLORS[marker]
+		var mc: Color = UiTheme.color([&"hit", &"hit", &"headshot", &"kill"][marker])
 		mc.a = 1.0 - marker_age / MARKER_TIME
 		var r0: float = 6.0
 		var r1: float = 14.0 if marker == Marker.KILL else 11.0
@@ -71,13 +72,18 @@ func _draw() -> void:
 
 
 func _draw_ammo(rt: WeaponRuntime) -> void:
-	var font: Font = ThemeDB.fallback_font
+	var font: Font = UiTheme.font(&"bold")
 	var right: float = size.x - 40.0
 	var bottom: float = size.y - 40.0
 	if rt != null:
 		var ammo: String = "%d / %d" % [rt.mag, rt.reserve]
 		var w: float = font.get_string_size(ammo, HORIZONTAL_ALIGNMENT_LEFT, -1, 40).x
-		draw_string(font, Vector2(right - w, bottom), ammo, HORIZONTAL_ALIGNMENT_LEFT, -1, 40, Color(1, 1, 1, 0.92))
+		var low: bool = rt.def.mag_size > 0 and float(rt.mag) < float(rt.def.mag_size) * 0.2
+		var ammo_col: Color = UiTheme.color(&"ammo_low") if low else Color(1, 1, 1, 0.92)
+		draw_string(
+			font, Vector2(right - w + 2, bottom + 2), ammo, HORIZONTAL_ALIGNMENT_LEFT, -1, 40, Color(0, 0, 0, 0.5)
+		)
+		draw_string(font, Vector2(right - w, bottom), ammo, HORIZONTAL_ALIGNMENT_LEFT, -1, 40, ammo_col)
 		var nm: String = rt.def.display_name
 		var w2: float = font.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x
 		draw_string(

@@ -439,7 +439,20 @@ func _present_game_over(round_reached: int, rows: Array) -> void:
 	game_over.emit(round_reached, rows)
 	if not show_screen:
 		return
-	await get_tree().create_timer(GAME_OVER_SCREEN_DELAY).timeout
+	var m: Match = Match.current
+	var info: Dictionary = {"players": rows.size()}
+	if m != null:
+		info["map"] = m.definition.id if m.definition != null else &""
+		info["seconds"] = Net.now() - m.started_at
+		info["quest"] = m.quest.progress_text() if m.quest != null else ""
+		if m.hud != null:
+			m.hud.begin_game_over()
+	Game.last_match_info = info
+	# Slow-motion fade (GAME_DESIGN §15): the world slows to 25 % while the HUD fades to black.
+	var tw: Tween = get_tree().create_tween().set_ignore_time_scale(true)
+	tw.tween_method(func(v: float) -> void: Engine.time_scale = v, 1.0, 0.25, GAME_OVER_SCREEN_DELAY * 0.6)
+	await get_tree().create_timer(GAME_OVER_SCREEN_DELAY, true, false, true).timeout
+	Engine.time_scale = 1.0
 	if is_inside_tree() and show_screen:
 		Game.show_match_summary(round_reached, rows)
 

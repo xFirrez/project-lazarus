@@ -15,7 +15,7 @@ signal points_changed(peer_id: int, total: int, delta: int)
 signal zombie_points(peer_id: int, points: int, target: HitTarget, killed: bool, kind: int)
 
 const STAT_KEYS: Array[StringName] = [
-	&"kills", &"headshots", &"downs", &"revives", &"points_earned", &"doors", &"repairs"
+	&"kills", &"headshots", &"downs", &"revives", &"points_earned", &"doors", &"repairs", &"perks", &"box_spins"
 ]
 
 var points: Dictionary = {}  # peer -> int

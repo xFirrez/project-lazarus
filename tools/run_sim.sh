@@ -17,6 +17,9 @@
 # AI cost is measured in wall-clock microseconds either way).
 #   quest       vesper_peak solo: every Easter-egg stage + failure rules, rewards, lore, secrets,
 #               4-player scaling (AC-14.1, 14.2, 14.4, 14.5)
+#   presentation  vesper_peak solo: audio audit vs. the manifest, 32-zombie Ray Pistol mix peak meter,
+#               dynamic music, quips / announcer captions, solo pause clock, HUD scale / palettes
+#               (AC-15.3, AC-15.4)
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT/tools/_common.sh"
@@ -82,7 +85,7 @@ case "$SCENARIO" in
     fi
     echo "[sim:perks] PASS"
     ;;
-  progression|specials|quest)
+  progression|specials|quest|presentation)
     LOG="$OUT/$SCENARIO.log"; JSON="$OUT/$SCENARIO.json"; rm -f "$JSON"
     set +e
     "$GODOT" --headless --path "$GAME_DIR" -- --solo --map="${MAP:-vesper_peak}" --profile=sim \

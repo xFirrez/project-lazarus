@@ -77,6 +77,6 @@ func _run() -> void:
 	check("respawned", ok and not me.health.is_downed and m.downed.state_of(me.peer_id) == DownedSystem.State.ALIVE)
 	ok = await _until(func() -> bool: return _game_over_round > 0, 20.0)
 	check("game_over_received", ok and _game_over_rows.size() == 2, _game_over_rows)
-	await get_tree().create_timer(DownedSystem.GAME_OVER_SCREEN_DELAY + 0.5).timeout
+	await get_tree().create_timer(DownedSystem.GAME_OVER_SCREEN_DELAY + 0.5, true, false, true).timeout
 	check("game_over_screen", Game.state == Game.State.GAME_OVER, Game.state_name())
 	finish(true)

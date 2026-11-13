@@ -27,6 +27,11 @@ extends Resource
 # (documents, reels, VO lines; LoreLibrary) read by the reader, the VoDirector and the Journal.
 @export var quests: Array[QuestGraph] = []
 @export_file("*.json") var lore_path: String = ""
+# Presentation (Step 15): the animated 3D main-menu background scene and the map-select card art
+# (a Texture2D path; empty = a drawn placeholder card). Optional.
+@export_file("*.tscn", "*.gd") var menu_scene_path: String = ""
+@export_file("*.png") var card_image_path: String = ""
+@export_multiline var card_blurb: String = ""
 
 
 func zone_def(zone_id: StringName) -> ZoneDef:

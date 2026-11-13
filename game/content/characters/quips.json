@@ -1,0 +1,66 @@
+{
+ "_comment": "Character quips (DEVELOPMENT_PLAN Step 15 scope 6). Original lines. Categories are fired by QuipDirector with per-category cooldowns and priorities; one line is picked at random without immediate repeats. Recorded takes go to content/audio/vo/quip_<character>_<category>_<index>.ogg.",
+ "pitch": {"ashcombe": 1.05, "brandt": 1.32, "calloway": 1.22, "orlov": 0.86},
+ "categories": {
+  "box_wonder": {"priority": 6, "cooldown": 20},
+  "box_good": {"priority": 3, "cooldown": 35},
+  "box_bad": {"priority": 4, "cooldown": 30},
+  "perk": {"priority": 3, "cooldown": 40},
+  "low_ammo": {"priority": 2, "cooldown": 45},
+  "downed": {"priority": 9, "cooldown": 8},
+  "revived": {"priority": 7, "cooldown": 15},
+  "revive_given": {"priority": 5, "cooldown": 25},
+  "multi_kill": {"priority": 2, "cooldown": 30},
+  "powerup": {"priority": 1, "cooldown": 40}
+ },
+ "lines": {
+  "ashcombe": {
+   "box_wonder": ["Oh, now that is a breakthrough.", "Science, at last, on our side!", "I may weep. Professionally."],
+   "box_good": ["A sensible choice, given the circumstances.", "This will do nicely."],
+   "box_bad": ["How disappointingly Freudian.", "The box has a sense of humour. Dreadful one."],
+   "perk": ["Tastes of iron and regret.", "Delightful. I can feel my pupils."],
+   "low_ammo": ["I appear to be running out of argument.", "Ammunition, please. Anyone."],
+   "downed": ["I'm afraid I've had a small collapse!", "Help! Clinically speaking, this is bad!"],
+   "revived": ["Splendid bedside manner.", "Back from the brink. Fascinating."],
+   "revive_given": ["Up you get. Doctor's orders.", "Breathe. There's a good patient."],
+   "multi_kill": ["Textbook.", "Do take notes, everyone."],
+   "powerup": ["A gift from the mountain. How ominous."]
+  },
+  "brandt": {
+   "box_wonder": ["Ja! Now we climb out of this.", "This one bites back. Good."],
+   "box_good": ["That works.", "Fine. I can carry it."],
+   "box_bad": ["Useless. Like a rope with no anchor.", "Of course."],
+   "perk": ["Bitter. Like the summit wind.", "One more for the climb."],
+   "low_ammo": ["Almost empty!", "I need ammunition, now!"],
+   "downed": ["I'm down! Get to me!", "Help me up — quickly!"],
+   "revived": ["Thanks. I owe you a rope.", "On my feet. Let's go."],
+   "revive_given": ["Grab my hand. Up.", "I have you. Stand."],
+   "multi_kill": ["Stay down.", "The mountain takes you back."],
+   "powerup": ["Take it, before the snow does."]
+  },
+  "calloway": {
+   "box_wonder": ["Well, that's above my clearance.", "Now we're talking."],
+   "box_good": ["Standard issue. I'll take it.", "Serviceable."],
+   "box_bad": ["Somebody file a complaint.", "This goes in the report."],
+   "perk": ["Tastes like government coffee.", "Strictly medicinal."],
+   "low_ammo": ["Running dry here!", "Low on rounds — cover me."],
+   "downed": ["Officer down! Move it!", "I'm hit — somebody earn their pay!"],
+   "revived": ["Appreciated. Don't make it a habit.", "Back in the fight."],
+   "revive_given": ["On your feet, soldier.", "You're not getting out of this that easy."],
+   "multi_kill": ["Clean.", "Paperwork just got shorter."],
+   "powerup": ["Gift horse. Check its teeth later."]
+  },
+  "orlov": {
+   "box_wonder": ["I built the heart of this. Now I hold it.", "God forgive me, I like this."],
+   "box_good": ["Is good. Is fine.", "Reliable. Like a tractor."],
+   "box_bad": ["Bad omen. Very bad.", "The box hates me. I knew."],
+   "perk": ["Like vodka, but with sorrow.", "Za zdorovye. Ugh."],
+   "low_ammo": ["Bullets! Who has bullets?", "Almost nothing left!"],
+   "downed": ["Comrades! I am down!", "Help! This is not my day!"],
+   "revived": ["Spasibo. I live again.", "I am back. Do not tell my mother."],
+   "revive_given": ["Up, up! The dead do not rest here.", "Stand, friend. Quickly."],
+   "multi_kill": ["Like the old days.", "The reactor feeds you no more."],
+   "powerup": ["Gift from mountain. Never free."]
+  }
+ }
+}

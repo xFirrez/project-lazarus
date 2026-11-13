@@ -34,3 +34,7 @@ game/content/weapons/m1911/*.glb -filter -diff -merge -text
 
 # Script-generated decal textures (tools/art/gen_decals.py, Step 13): normal git blobs
 game/content/decals/*.png -filter -diff -merge -text
+# Step 15: generated score audio and the open-license UI fonts are stored as plain git blobs
+# (the cloud git proxy refuses LFS uploads).
+game/content/audio/score/*.wav -filter -diff -merge -text
+game/content/ui/fonts/*.ttf -filter -diff -merge -text

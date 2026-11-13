@@ -152,7 +152,7 @@ func _s1() -> void:
 	_flash_layer.layer = 6
 	add_child(_flash_layer)
 	_flash_rect = ColorRect.new()
-	_flash_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_flash_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_flash_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_flash_rect.color = Color(0.35, 0.6, 0.3, 0.0)
 	_flash_layer.add_child(_flash_rect)

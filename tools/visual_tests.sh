@@ -7,6 +7,8 @@
 #   survivor_showcase the four survivors: weapon-class holds, full-body states, tinted first-person arms (Step 7)
 #   lobby_ui          lobby (characters, chat, ready), main menu v1, map select (Step 7)
 #   perk_showcase     the 7 Vigor Tonic machines power off / on, the 6 power-up drops (Step 10)
+#   hud_matrix        final HUD at 720p..4K x HUD scale 75/100/150 % (AC-15.2), pause menu, game over (Step 15)
+#   ui_showcase       main menu (3D backdrop), multiplayer, map select, settings tabs, journal, credits (Step 15)
 #   forge_showcase    relays idle / charging / active, reactor + bridge, Lazarus Forge forging / offer,
 #                     traps active, breaker puddles, upgraded weapons with the vesperite camo (Step 11)
 # Same renderer selection as screenshot.sh: Vulkan if an ICD exists, otherwise opengl3 (D-013).
@@ -58,6 +60,8 @@ for t in "${TESTS[@]}"; do
     forge_showcase) run_visual forge_showcase vesper_peak 1280x720 || fail=1 ;;
     vesper_art) run_visual vesper_art vesper_peak 1280x720 --solo ${VESPER_SHOTS:+--shots=$VESPER_SHOTS} || fail=1 ;;
     lobby_ui) run_visual lobby_ui vesper_peak 1280x720 --host=24599 --lobby || fail=1 ;;
+    hud_matrix) run_visual hud_matrix vesper_peak 3840x2160 --solo || fail=1 ;;
+    ui_showcase) run_visual ui_showcase vesper_peak 1280x720 --menu || fail=1 ;;
     *) echo "unknown visual test $t" >&2; fail=1 ;;
   esac
 done

@@ -10,7 +10,9 @@
 class_name MatchHud
 extends Control
 
-const RED: Color = Color(0.78, 0.1, 0.08)
+const RED: Color = Color(0.78, 0.1, 0.08)  # default round colour (palette "round" overrides)
+const ROUND_FX_TIME: float = 2.4  # numeral bleed / flicker after a round change
+const GAME_OVER_FADE: float = 2.2
 const POPUP_TIME: float = 1.2
 const BANNER_TIME: float = 3.0
 
@@ -21,14 +23,20 @@ var banner: String = ""
 var banner_age: float = 100.0
 var round_pulse: float = 100.0
 
+var hud_factor: float = 1.0  # effective HUD scale (setting x resolution), see UiTheme.fit_hud
+var game_over_fade: float = -1.0  # >= 0: seconds since the game-over slow-motion started
+
 var _font: Font = null
+var _round_font: Font = null
 
 
 func _ready() -> void:
 	name = "MatchHud"
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_font = ThemeDB.fallback_font
+	_font = UiTheme.font(&"bold")
+	_round_font = UiTheme.font(&"display")
+	UiTheme.fit_hud(self)
 	if match_node == null:
 		return
 	match_node.points.points_changed.connect(_on_points_changed)
@@ -39,7 +47,7 @@ func _ready() -> void:
 func _on_points_changed(peer_id: int, _total: int, delta: int) -> void:
 	if delta == 0 or peer_id != _local_id():
 		return
-	var col: Color = Color(1.0, 0.9, 0.45) if delta > 0 else Color(0.95, 0.2, 0.15)
+	var col: Color = UiTheme.color(&"gain") if delta > 0 else UiTheme.color(&"loss")
 	popups.append(["%+d" % delta, col, 0.0])
 	popups_shown += 1
 	if popups.size() > 8:
@@ -64,7 +72,21 @@ func _local_id() -> int:
 	return Net.local_id() if Net.is_active() else 1
 
 
+# GAME_DESIGN §15 game over: the HUD fades to black during the slow-motion beat.
+func begin_game_over() -> void:
+	game_over_fade = 0.0
+
+
+# Viewport pixels (Camera3D.unproject_position) -> HUD logical pixels.
+func _vp(p: Vector2) -> Vector2:
+	return p / maxf(hud_factor, 0.01)
+
+
 func _process(delta: float) -> void:
+	UiTheme.fit_hud(self)
+	hud_factor = scale.x
+	if game_over_fade >= 0.0:
+		game_over_fade += delta
 	banner_age += delta
 	round_pulse += delta
 	for p: Variant in popups:
@@ -90,6 +112,9 @@ func _draw() -> void:
 	_draw_teammate_markers(me)
 	_draw_pings(me)
 	_draw_session_notice()
+	if game_over_fade >= 0.0:
+		var k: float = clampf(game_over_fade / GAME_OVER_FADE, 0.0, 1.0)
+		draw_rect(Rect2(Vector2.ZERO, size), Color(0.04, 0.0, 0.0, 0.85 * k))
 
 
 func _text(pos: Vector2, text: String, font_size: int, col: Color, align_right: bool = false) -> void:
@@ -110,28 +135,53 @@ func _draw_round() -> void:
 		return
 	var r: int = rd.current_round
 	var base: Vector2 = Vector2(40, size.y - 40)
+	var red: Color = UiTheme.color(&"round")
 	var t: float = clampf(round_pulse / 2.0, 0.0, 1.0)
-	var col: Color = Color.WHITE.lerp(RED, t) if round_pulse < 2.0 else RED
+	var col: Color = Color.WHITE.lerp(red, t) if round_pulse < 2.0 else red
+	# Bleed / flicker after a round change: the fresh paint shivers, then settles.
+	var fx: float = clampf(1.0 - round_pulse / ROUND_FX_TIME, 0.0, 1.0)
+	if fx > 0.0:
+		col.a = 1.0 - fx * 0.5 * absf(sin(round_pulse * 31.0) * sin(round_pulse * 7.0))
 	var override: String = match_node.quest.round_display() if match_node.quest != null else ""
 	if override != "":
 		# Scripted event (the Easter-egg finale): a flickering symbol replaces the counter.
 		var flick: float = 0.65 + 0.35 * sin(round_pulse * 23.0) * sin(round_pulse * 3.1)
-		_text(base, override, 84, Color(RED.r, RED.g, RED.b, flick))
+		draw_string(_round_font, base, override, HORIZONTAL_ALIGNMENT_LEFT, -1, 84, Color(red.r, red.g, red.b, flick))
 		return
 	if r <= 0:
 		if rd.phase == RoundDirector.Phase.INTRO:
 			_text_centered(size.y * 0.3, "VESPER PEAK", 54, Color(0.85, 0.85, 0.9, 0.9))
 		return
 	if r <= 5:
+		# Chalky tally strokes: a solid core with a ragged, lighter edge pass.
 		for i: int in mini(r, 4):
 			var x: float = base.x + i * 18.0
-			draw_line(Vector2(x, base.y), Vector2(x + 3, base.y - 70), col, 7.0)
+			_chalk(Vector2(x, base.y), Vector2(x + 3, base.y - 70), col, 7.0, i)
 		if r == 5:
-			draw_line(Vector2(base.x - 8, base.y - 12), Vector2(base.x + 66, base.y - 58), col, 7.0)
+			_chalk(Vector2(base.x - 8, base.y - 12), Vector2(base.x + 66, base.y - 58), col, 7.0, 4)
 	else:
-		_text(base, str(r), 84, col)
+		var digits: String = str(r)
+		if fx > 0.0:
+			# Paint bleed: offset ghosts that run down and fade.
+			for k: int in 3:
+				var g: Color = Color(col.r, col.g, col.b, 0.22 * fx)
+				var off: Vector2 = Vector2(sin(round_pulse * 13.0 + k) * 3.0, fx * (6.0 + k * 7.0))
+				draw_string(_round_font, base + off, digits, HORIZONTAL_ALIGNMENT_LEFT, -1, 90, g)
+		draw_string(_round_font, base + Vector2(2, 3), digits, HORIZONTAL_ALIGNMENT_LEFT, -1, 90, Color(0, 0, 0, 0.5))
+		draw_string(_round_font, base, digits, HORIZONTAL_ALIGNMENT_LEFT, -1, 90, col)
 	if rd.phase == RoundDirector.Phase.INTERMISSION:
 		_text(Vector2(base.x, base.y - 96), "next round %.0f" % ceilf(rd.time_left), 18, Color(0.8, 0.8, 0.8))
+
+
+func _chalk(a: Vector2, b: Vector2, col: Color, width: float, seed_i: int) -> void:
+	draw_line(a, b, col, width)
+	var n: Vector2 = (b - a).orthogonal().normalized()
+	for k: int in 4:
+		var j: float = sin(seed_i * 12.9898 + k * 78.233) * 43758.5453
+		j = (j - floorf(j)) * 2.0 - 1.0
+		var off: Vector2 = n * j * width * 0.55
+		var t0: float = 0.08 * k
+		draw_line(a.lerp(b, t0) + off, a.lerp(b, 0.92 - t0 * 0.5) + off, Color(col.r, col.g, col.b, col.a * 0.35), 2.0)
 
 
 func _draw_points() -> void:
@@ -171,7 +221,17 @@ func _draw_banner() -> void:
 	if banner_age >= BANNER_TIME or banner == "":
 		return
 	var a: float = clampf(minf(banner_age * 3.0, (BANNER_TIME - banner_age) * 1.5), 0.0, 1.0)
-	_text_centered(size.y * 0.28, banner, 46, Color(RED.r, RED.g, RED.b, a))
+	var red: Color = UiTheme.color(&"round")
+	var w: float = _round_font.get_string_size(banner, HORIZONTAL_ALIGNMENT_LEFT, -1, 50).x
+	draw_string(
+		_round_font,
+		Vector2(size.x * 0.5 - w * 0.5, size.y * 0.28),
+		banner,
+		HORIZONTAL_ALIGNMENT_LEFT,
+		-1,
+		50,
+		Color(red.r, red.g, red.b, a)
+	)
 
 
 func _draw_prompt(me: PlayerCharacter) -> void:
@@ -195,7 +255,7 @@ func _draw_prompt(me: PlayerCharacter) -> void:
 	if progress > 0.0:
 		_bar(Vector2(size.x * 0.5, y + 14.0), clampf(progress, 0.0, 1.0), Color(0.9, 0.9, 0.9))
 	if ia != null and Time.get_ticks_msec() / 1000.0 - ia.last_denied_time < 1.5:
-		_text_centered(y + 44.0, ia.last_denied, 22, Color(0.95, 0.25, 0.2))
+		_text_centered(y + 44.0, ia.last_denied, 22, UiTheme.color(&"danger"))
 
 
 # Bottle caps (coloured disc, serrated rim, letter) in acquisition order, plus the drink bar.
@@ -311,7 +371,7 @@ func _draw_downed(me: PlayerCharacter) -> void:
 		_bar(Vector2(size.x * 0.5, size.y * 0.5 - 70.0), clampf(f, 0.0, 1.0), Color(0.45, 0.8, 1.0))
 	elif st == DownedSystem.State.DOWNED:
 		var left: float = float(ds.bleed_left.get(me.peer_id, 0.0))
-		_text_centered(size.y * 0.5 - 120.0, "YOU ARE DOWN", 40, RED)
+		_text_centered(size.y * 0.5 - 120.0, "YOU ARE DOWN", 40, UiTheme.color(&"danger"))
 		_text_centered(size.y * 0.5 - 86.0, "bleeding out %.0f" % ceilf(left), 22, Color(1, 0.8, 0.8))
 		var prog: float = ds.progress_of(me.peer_id)
 		if prog > 0.0:
@@ -350,9 +410,9 @@ func _edge_point(cam: Camera3D, wp: Vector3) -> Vector2:
 	var sp: Vector2 = Vector2(size.x * 0.5, size.y - 40.0)
 	var local_z: float = (cam.global_transform.affine_inverse() * wp).z
 	if local_z < -0.05:
-		sp = cam.unproject_position(wp)
+		sp = _vp(cam.unproject_position(wp))
 	elif local_z > 0.05:
-		sp = size - cam.unproject_position(wp)
+		sp = size - _vp(cam.unproject_position(wp))
 		sp.y = size.y - 40.0
 	return sp.clamp(Vector2(30, 30), size - Vector2(30, 30))
 
@@ -360,7 +420,7 @@ func _edge_point(cam: Camera3D, wp: Vector3) -> Vector2:
 func _on_screen(cam: Camera3D, wp: Vector3) -> bool:
 	if (cam.global_transform.affine_inverse() * wp).z >= -0.05:
 		return false
-	return Rect2(Vector2.ZERO, size).has_point(cam.unproject_position(wp))
+	return Rect2(Vector2.ZERO, size).has_point(_vp(cam.unproject_position(wp)))
 
 
 # Off-screen pings: a coloured diamond at the edge with the label and distance.
@@ -376,7 +436,7 @@ func _draw_pings(me: PlayerCharacter) -> void:
 		var col: Color = who.player_color() if who != null else Color.WHITE
 		var dist: int = roundi(wp.distance_to(me.global_position))
 		if _on_screen(cam, wp):
-			_text(cam.unproject_position(wp) + Vector2(14, 22), "%dm" % dist, 15, col)
+			_text(_vp(cam.unproject_position(wp)) + Vector2(14, 22), "%dm" % dist, 15, col)
 			continue
 		var sp: Vector2 = _edge_point(cam, wp)
 		var pts: PackedVector2Array = [

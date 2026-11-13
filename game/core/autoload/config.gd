@@ -18,6 +18,13 @@ const DEFAULTS: Dictionary = {
 		"quality_preset": "high",
 		"camera_bob_scale": 1.0,
 		"screen_shake_scale": 1.0,
+		"render_scale": 0.0,
+		"max_shadow_lights": -1,
+		"ssao": "preset",
+		"glow": "preset",
+		"volumetric_fog": "preset",
+		"particle_density": -1.0,
+		"view_distance": 0.0,
 	},
 	"audio":
 	{
@@ -97,6 +104,31 @@ func set_bindings(action: StringName, bindings: PackedStringArray) -> void:
 	_bindings[String(action)] = Array(bindings)
 	InputDefaults.apply(_bindings)
 	setting_changed.emit(&"bindings", action, bindings)
+
+
+# Apply / revert support for the settings screen: a deep copy of every value and binding.
+func snapshot() -> Dictionary:
+	return {"values": _values.duplicate(true), "bindings": _bindings.duplicate(true)}
+
+
+func restore(snap: Dictionary) -> void:
+	var old: Dictionary = _values
+	_values = (snap.get("values", {}) as Dictionary).duplicate(true)
+	_bindings = (snap.get("bindings", {}) as Dictionary).duplicate(true)
+	InputDefaults.apply(_bindings)
+	# Re-emit every changed value so live systems (audio buses, graphics, HUD) follow.
+	for section: String in _values:
+		var sec: Dictionary = _values[section]
+		var before: Dictionary = old.get(section, {})
+		for key: String in sec:
+			if before.get(key) != sec[key]:
+				setting_changed.emit(StringName(section), StringName(key), sec[key])
+
+
+func reset_bindings() -> void:
+	_bindings = InputDefaults.ACTIONS.duplicate(true)
+	InputDefaults.apply(_bindings)
+	setting_changed.emit(&"bindings", &"", null)
 
 
 func save_settings(to_path: String = "") -> Error:

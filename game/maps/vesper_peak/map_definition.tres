@@ -83,6 +83,8 @@ adjacent = Array[StringName]([&"Z09", &"Z11"])
 
 [resource]
 script = ExtResource("1")
+menu_scene_path = "res://maps/vesper_peak/menu/vesper_menu_backdrop.gd"
+card_blurb = "A Cold War sanatorium on a storm-locked Alpine summit. Group Vesper's reactor still beats beneath the ice."
 box_start = &"Box_Z03"
 id = &"vesper_peak"
 display_name = "Vesper Peak"

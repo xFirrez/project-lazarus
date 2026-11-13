@@ -361,8 +361,11 @@ func _payload() -> Array:
 func _play_sting(p: Phase) -> void:
 	if p == Phase.ACTIVE and special_id != &"":
 		Audio.play_event(&"special_round_start")
+		Announcer.say(&"ann_special")
 	elif p == Phase.ACTIVE:
 		Audio.play_event(&"round_start")
+		if current_round == 1:
+			Announcer.say(&"ann_round_one", 4.0)
 	elif p == Phase.INTERMISSION:
 		Audio.play_event(&"round_end")
 	elif p == Phase.INTRO:

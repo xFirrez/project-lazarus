@@ -1,7 +1,16 @@
-# Audio — bus layout, named audio events and pooled one-shot players.
-# Authority: local presentation. Every interaction must play a named event (placeholder at
-# minimum); unknown events are logged once so silence is caught early.
+# Audio — bus layout, the mix, named audio events and pooled one-shot players.
+# Authority: local presentation. Every interaction must play a named event; unknown events are
+# logged once so silence is caught early. The status of every event (final / accepted) is audited
+# against content/audio/audio_manifest.json (AC-15.3).
+# Mix (Step 15, GAME_DESIGN §16 priorities): per-bus base levels (MIX_DB, added to the player's
+# volume sliders), VO ducks Music and Ambience (sidechain compressors), a hard limiter on Master
+# (ceiling MASTER_CEILING_DB, so the master never clips), distance attenuation per bus for the 3D
+# pool (ATTENUATION) and the low-health muffle low-pass. Loudness target ≈ −16 LUFS integrated for
+# gameplay capture (measured by `run_sim.sh mix`, logged in GAME_DESIGN §19).
 extends Node
+
+signal event_played(event: StringName)
+signal event_registered(event: StringName)
 
 const BUSES: PackedStringArray = ["Music", "SFX", "Weapons", "Zombies", "UI", "VO", "Ambience"]
 const PLAYER_POOL: int = 32
@@ -10,6 +19,29 @@ const MUFFLED_BUSES: PackedStringArray = ["SFX", "Weapons", "Zombies"]
 const MUFFLE_OPEN_HZ: float = 20000.0
 const MUFFLE_CLOSED_HZ: float = 900.0
 const AUDIO_ZONE_LAYER: int = 1 << 9  # physics layer 10 "audio_zone" (ReverbZone areas)
+# Base mix per bus in dB (own weapon > nearby zombie attacks > feedback > VO > ambience).
+const MIX_DB: Dictionary = {
+	"Master": -3.0,  # loudness target ≈ −16 LUFS (measured in run_sim.sh presentation)
+	"Music": -7.0,
+	"SFX": -3.0,
+	"Weapons": -1.0,
+	"Zombies": -3.0,
+	"UI": -6.0,
+	"VO": 0.0,
+	"Ambience": -9.0,
+}
+const MASTER_CEILING_DB: float = -1.0
+const DUCKED_BUSES: PackedStringArray = ["Music", "Ambience"]
+# 3D attenuation per bus: [unit_size, max_distance, attenuation filter cutoff Hz].
+const ATTENUATION: Dictionary = {
+	"Weapons": [11.0, 95.0, 9000.0],
+	"Zombies": [5.0, 42.0, 6500.0],
+	"SFX": [6.0, 48.0, 8000.0],
+	"VO": [7.0, 50.0, 9000.0],
+	"Ambience": [8.0, 60.0, 7000.0],
+	"Music": [9.0, 60.0, 9000.0],
+	"UI": [6.0, 45.0, 9000.0],
+}
 # Reverb presets for ReverbZone areas: name -> [room size, damping, wet, pre-delay ms, spread].
 const REVERBS: Dictionary = {
 	&"Reverb_Room": [0.35, 0.6, 0.18, 15.0, 0.6],
@@ -25,6 +57,7 @@ var muffle_amount: float = 0.0
 
 var _tasks: Array[int] = []
 var _events: Dictionary = {}  # StringName -> {stream, bus, volume_db}
+var _final: Dictionary = {}  # events registered with register_final
 var _warned: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
 var _next_player: int = 0
@@ -48,6 +81,7 @@ func _ready() -> void:
 		add_child(p3)
 		_players_3d.append(p3)
 	_setup_muffle()
+	_setup_mix()
 	register_event(&"ui_click", make_tone(880.0, 0.05), &"UI")
 	register_event(&"player_hurt", make_tone(140.0, 0.12), &"SFX", -4.0)
 	register_event(&"player_heartbeat", _make_heartbeat(), &"UI", -2.0)
@@ -55,6 +89,7 @@ func _ready() -> void:
 	register_event(&"ui_error", make_tone(220.0, 0.15), &"UI")
 	register_event(&"net_peer_joined", make_tone(660.0, 0.12), &"UI")
 	register_event(&"net_peer_left", make_tone(330.0, 0.12), &"UI")
+	ScoreAudio.ensure()
 	_apply_volumes()
 	Config.setting_changed.connect(_on_setting_changed)
 
@@ -110,7 +145,24 @@ func wait_for_synthesis() -> void:
 
 
 func register_event(event: StringName, stream: AudioStream, bus: StringName, volume_db: float = 0.0) -> void:
+	if _final.has(event):
+		return  # the final asset (ScoreAudio etc.) wins over an earlier system's stand-in
 	_events[event] = {"stream": stream, "bus": bus, "volume_db": volume_db}
+
+
+# Registers the final version of an event; later plain register_event calls for it are ignored.
+func register_final(event: StringName, stream: AudioStream, bus: StringName, volume_db: float = 0.0) -> void:
+	_final[event] = true
+	_events[event] = {"stream": stream, "bus": bus, "volume_db": volume_db}
+	event_registered.emit(event)
+
+
+func event_stream(event: StringName) -> AudioStream:
+	return (_events[event] as Dictionary)["stream"] if _events.has(event) else null
+
+
+func is_final(event: StringName) -> bool:
+	return _final.has(event)
 
 
 func has_event(event: StringName) -> bool:
@@ -126,6 +178,7 @@ func play_event(event: StringName) -> void:
 			Log.warn(&"audio", "Unregistered audio event '%s'" % event)
 		return
 	var def: Dictionary = _events[event]
+	event_played.emit(event)
 	var player: AudioStreamPlayer = _players[_next_player]
 	_next_player = (_next_player + 1) % _players.size()
 	player.stream = def["stream"]
@@ -142,6 +195,7 @@ func play_event_3d(event: StringName, position: Vector3, pitch: float = 1.0) -> 
 		play_event(event)  # logs the missing event once
 		return
 	var def: Dictionary = _events[event]
+	event_played.emit(event)
 	var player: AudioStreamPlayer3D = _players_3d[_next_player_3d]
 	_next_player_3d = (_next_player_3d + 1) % _players_3d.size()
 	player.stream = def["stream"]
@@ -149,6 +203,10 @@ func play_event_3d(event: StringName, position: Vector3, pitch: float = 1.0) -> 
 	player.volume_db = def["volume_db"]
 	player.global_position = position
 	player.pitch_scale = pitch
+	var att: Array = ATTENUATION.get(String(def["bus"]), ATTENUATION["SFX"])
+	player.unit_size = float(att[0])
+	player.max_distance = float(att[1])
+	player.attenuation_filter_cutoff_hz = float(att[2])
 	player.play()
 
 
@@ -196,8 +254,52 @@ func _make_heartbeat() -> AudioStreamWAV:
 func _apply_volumes() -> void:
 	for i: int in AudioServer.bus_count:
 		var bus_name: String = AudioServer.get_bus_name(i)
+		if REVERBS.has(StringName(bus_name)):
+			continue
 		var linear: float = float(Config.get_value(&"audio", StringName(bus_name), 1.0))
-		AudioServer.set_bus_volume_db(i, linear_to_db(maxf(linear, 0.0001)))
+		AudioServer.set_bus_volume_db(i, linear_to_db(maxf(linear, 0.0001)) + float(MIX_DB.get(bus_name, 0.0)))
+
+
+# Master limiter + VO ducking. Effects are appended after the muffle filters (index 0 there).
+func _setup_mix() -> void:
+	var master: int = AudioServer.get_bus_index(&"Master")
+	if not _has_effect(master, "AudioEffectHardLimiter"):
+		var lim: AudioEffectHardLimiter = AudioEffectHardLimiter.new()
+		lim.ceiling_db = MASTER_CEILING_DB
+		lim.release = 0.12
+		AudioServer.add_bus_effect(master, lim)
+	for bus_name: String in DUCKED_BUSES:
+		var idx: int = AudioServer.get_bus_index(bus_name)
+		if idx < 0 or _has_effect(idx, "AudioEffectCompressor"):
+			continue
+		var duck: AudioEffectCompressor = AudioEffectCompressor.new()
+		duck.sidechain = &"VO"
+		duck.threshold = -32.0
+		duck.ratio = 6.0
+		duck.attack_us = 8000.0
+		duck.release_ms = 450.0
+		duck.gain = 0.0
+		AudioServer.add_bus_effect(idx, duck)
+
+
+func _has_effect(bus: int, cls: String) -> bool:
+	for i: int in AudioServer.get_bus_effect_count(bus):
+		if AudioServer.get_bus_effect(bus, i).get_class() == cls:
+			return true
+	return false
+
+
+# Current master peak (dBFS, max of both channels) — the mix test logs it every frame.
+func master_peak_db() -> float:
+	var m: int = AudioServer.get_bus_index(&"Master")
+	return maxf(AudioServer.get_bus_peak_volume_left_db(m, 0), AudioServer.get_bus_peak_volume_right_db(m, 0))
+
+
+func registered_events() -> Dictionary:
+	var out: Dictionary = {}
+	for e: StringName in _events:
+		out[e] = String((_events[e] as Dictionary)["bus"])
+	return out
 
 
 func _on_setting_changed(section: StringName, _key: StringName, _value: Variant) -> void:
@@ -224,6 +326,14 @@ func make_tone(freq: float, seconds: float) -> AudioStreamWAV:
 
 func _exit_tree() -> void:
 	shutdown()
+
+
+# Stops every pooled one-shot (tests: no playback may outlive the run).
+func stop_all() -> void:
+	for p: AudioStreamPlayer in _players:
+		p.stop()
+	for p3: AudioStreamPlayer3D in _players_3d:
+		p3.stop()
 
 
 # Stops all playback and ignores further events. Call before quitting in the same frame as a

@@ -217,6 +217,8 @@ func host_spin(loc: int, peer_id: int, paid: int = 0) -> bool:
 	if loc == current_index():
 		spins_here += 1
 	total_spins += 1
+	if Match.current != null and Match.current.points != null:
+		Match.current.points.host_add_stat(peer_id, &"box_spins")
 	if result == RelicBoxRoller.DOLL:
 		total_dolls += 1
 	elif pool.wonder_ids.has(result):

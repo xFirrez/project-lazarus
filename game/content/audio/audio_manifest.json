@@ -1,0 +1,367 @@
+{
+ "_comment": "Audio status manifest (DEVELOPMENT_PLAN Step 15, AC-15.3). Every registered audio event must match an entry (exact name, or a prefix ending in *; the longest prefix wins) with status 'final' or 'accepted' + reason. Audited by tools/run_sim.sh presentation. 'optional' entries may be unused (recordings not yet delivered).",
+ "events": {
+  "round_start": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "round_end": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "match_intro": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "special_warning": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "special_music": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "game_over": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "game_over_sting": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "music_drone": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "music_pulse": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "music_tension": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "music_storm": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "ui_click": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "ui_error": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "ui_focus": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "ui_accept": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "ui_back": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "ui_page": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "ui_pause": {
+   "status": "final",
+   "note": "Step 15 score / presentation set, composed and synthesized by ScoreAudio and rendered to content/audio/score/*.wav (tools/gen_audio.sh)."
+  },
+  "ann_*": {
+   "status": "accepted",
+   "reason": "Voice of the Mountain announcer: synthesized layered whisper voice (ScoreAudio.announcer), always subtitled. Recorded VO is a human asset request; accepted for 1.0."
+  },
+  "pu_vo_*": {
+   "status": "accepted",
+   "reason": "Power-up callouts in the Voice of the Mountain synth voice (Step 15), always subtitled; recorded VO is a human asset request."
+  },
+  "perk_jingle_*": {
+   "status": "final",
+   "note": "Original perk jingles arranged as 30-45 s idle pieces (PerkAudio.arrangement, Step 15)."
+  },
+  "perk_sting_*": {
+   "status": "final",
+   "note": "Original purchase stingers derived from each perk jingle (PerkAudio)."
+  },
+  "vo_voice": {
+   "status": "accepted",
+   "reason": "Synthesized speaker voice for quest VO and quips (pitched per speaker), always subtitled; per-line recordings load automatically from content/audio/vo/ when delivered."
+  },
+  "vo_voice_radio": {
+   "status": "accepted",
+   "reason": "Radio-filtered synthesized speaker voice for quest broadcasts, always subtitled; per-line recordings load automatically when delivered."
+  },
+  "vo_rec_*": {
+   "status": "final",
+   "note": "Recorded quest VO lines (content/audio/vo/<entry>_<line>.*) when delivered.",
+   "optional": true
+  },
+  "quip_*": {
+   "status": "final",
+   "note": "Recorded character quips (content/audio/vo/quip_*.*) when delivered.",
+   "optional": true
+  },
+  "snowblind": {
+   "status": "accepted",
+   "reason": "Easter-egg song 'Snowblind': original motif synthesized in code (QuestAudio). A produced rock/industrial version is a human asset request."
+  },
+  "wpn_*": {
+   "status": "accepted",
+   "reason": "Layered weapon set (mechanical / body / tail, interior tails, reload foley, Forge zap layer) — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "impact_*": {
+   "status": "accepted",
+   "reason": "Surface impacts — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "footstep_*": {
+   "status": "accepted",
+   "reason": "Footsteps per surface — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "hit_*": {
+   "status": "accepted",
+   "reason": "Hit / headshot / kill feedback — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "melee_*": {
+   "status": "accepted",
+   "reason": "Melee — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "frag_*": {
+   "status": "accepted",
+   "reason": "Frag grenade — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "mine_*": {
+   "status": "accepted",
+   "reason": "Tripmines — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "decoy_drum": {
+   "status": "accepted",
+   "reason": "Drummer Decoy — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "bolt_stick": {
+   "status": "accepted",
+   "reason": "Crossbow bolt — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "zombie_*": {
+   "status": "accepted",
+   "reason": "Zombie voice / body set with voice priority — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "barricade_*": {
+   "status": "accepted",
+   "reason": "Barricades — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "door_*": {
+   "status": "accepted",
+   "reason": "Doors — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "galvanic_*": {
+   "status": "accepted",
+   "reason": "Galvanic specials — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "warden_*": {
+   "status": "accepted",
+   "reason": "Warden boss — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "rift_crackle": {
+   "status": "accepted",
+   "reason": "Special-round rifts — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "ray_*": {
+   "status": "accepted",
+   "reason": "Ray Pistol — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "conduit_*": {
+   "status": "accepted",
+   "reason": "Lazarus Conduit — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "box_*": {
+   "status": "accepted",
+   "reason": "Relic Box (music-box melody, chimes, doll laugh, lid) — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "perk_*": {
+   "status": "accepted",
+   "reason": "Vigor Tonic machine foley (drink, vend, power, loss, vanish) — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "pu_*": {
+   "status": "accepted",
+   "reason": "Power-up drop / pickup / nuke / carpenter — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "forge_*": {
+   "status": "accepted",
+   "reason": "Lazarus Forge — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "relay_*": {
+   "status": "accepted",
+   "reason": "Resonance Relays — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "trap_*": {
+   "status": "accepted",
+   "reason": "Traps — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "puddle_zap": {
+   "status": "accepted",
+   "reason": "Lab breaker puddles — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "icicle_crack": {
+   "status": "accepted",
+   "reason": "Icicle hazard — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "breaker_thunk": {
+   "status": "accepted",
+   "reason": "Lab breaker — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "shatter": {
+   "status": "accepted",
+   "reason": "Freeze shatter — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "build_done": {
+   "status": "accepted",
+   "reason": "Buildables — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "part_pickup": {
+   "status": "accepted",
+   "reason": "Buildable parts — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "player_*": {
+   "status": "accepted",
+   "reason": "Player body / state sounds (hurt, heartbeat, downed, revive, jump, slide, mantle) — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "revive_start": {
+   "status": "accepted",
+   "reason": "Revive — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "purchase": {
+   "status": "accepted",
+   "reason": "Purchase confirm — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "purchase_denied": {
+   "status": "accepted",
+   "reason": "Purchase denied — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "interact_ok": {
+   "status": "accepted",
+   "reason": "Interaction confirm — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "points_tick": {
+   "status": "accepted",
+   "reason": "Points tick — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "power_*": {
+   "status": "accepted",
+   "reason": "Power cascade / klaxon — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "machine_*": {
+   "status": "accepted",
+   "reason": "Gondola / freight lift — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "chute_slide": {
+   "status": "accepted",
+   "reason": "Laundry chute — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "bridge_extend": {
+   "status": "accepted",
+   "reason": "Reactor Bridge — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "reactor_pulse": {
+   "status": "accepted",
+   "reason": "Reactor pulse — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "ping_*": {
+   "status": "accepted",
+   "reason": "Co-op pings — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "lobby_*": {
+   "status": "accepted",
+   "reason": "Lobby cues — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "net_peer_*": {
+   "status": "accepted",
+   "reason": "Peer join / leave cues — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "special_round_start": {
+   "status": "accepted",
+   "reason": "Special-round start stab — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "quest_*": {
+   "status": "accepted",
+   "reason": "Quest step / alarm / failure cues — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "radio_*": {
+   "status": "accepted",
+   "reason": "Radio console — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "music_box": {
+   "status": "accepted",
+   "reason": "Easter-egg music boxes — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "bookcase_grind": {
+   "status": "accepted",
+   "reason": "Secret bookcase — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "ice_*": {
+   "status": "accepted",
+   "reason": "Ice block — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "drawer_*": {
+   "status": "accepted",
+   "reason": "Morgue drawers — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "pod_charge": {
+   "status": "accepted",
+   "reason": "Pod — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "cable_spark": {
+   "status": "accepted",
+   "reason": "Cable — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "node_break": {
+   "status": "accepted",
+   "reason": "Nodes — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "pylon_*": {
+   "status": "accepted",
+   "reason": "Pylons — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "finale_sting": {
+   "status": "accepted",
+   "reason": "Easter-egg finale sting — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "core_flare": {
+   "status": "accepted",
+   "reason": "Reactor core flare — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "raven_hit": {
+   "status": "accepted",
+   "reason": "Ravens — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "mirror_flash": {
+   "status": "accepted",
+   "reason": "Mirror — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "escort_warning": {
+   "status": "accepted",
+   "reason": "Escort warning — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "marked_whine": {
+   "status": "accepted",
+   "reason": "Marked whine — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "reel_click": {
+   "status": "accepted",
+   "reason": "Audio reels — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "page_turn": {
+   "status": "accepted",
+   "reason": "Documents — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  },
+  "carry_*": {
+   "status": "accepted",
+   "reason": "Carry items — Procedural, original, authored in code (no third-party audio); reviewed in the Step 15 mix and accepted for 1.0. Optional recorded replacement listed in the asset request list (docs/PROGRESS.md)."
+  }
+ }
+}

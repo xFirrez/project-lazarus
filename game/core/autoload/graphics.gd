@@ -15,6 +15,13 @@ const FALLBACK: StringName = &"high"
 # Settings that cannot change at runtime (shown with a "requires restart" note in the UI).
 const RESTART_ONLY: PackedStringArray = ["rendering_method"]
 
+# Individual video settings (GAME_DESIGN §18) on top of the chosen preset: render scale, shadow
+# lights, SSAO / glow / volumetric fog ("preset" / "on" / "off"), particle density and view distance
+# (<= 0 = the preset's value). The preset resource itself is never modified.
+const OVERRIDE_KEYS: PackedStringArray = [
+	"render_scale", "max_shadow_lights", "ssao", "glow", "volumetric_fog", "particle_density", "view_distance"
+]
+
 var preset: QualityPreset = null
 var applied_count: int = 0
 
@@ -23,6 +30,7 @@ func _ready() -> void:
 	Config.setting_changed.connect(_on_setting_changed)
 	get_tree().node_added.connect(_on_node_added)
 	apply_preset(StringName(str(Config.get_value(&"video", &"quality_preset", FALLBACK))))
+	apply_window()
 
 
 func presets() -> Array[QualityPreset]:
@@ -47,7 +55,7 @@ func apply_preset(preset_id: StringName) -> bool:
 		if preset == null and preset_id != FALLBACK:
 			return apply_preset(FALLBACK)
 		return false
-	preset = p
+	preset = _with_overrides(p)
 	_apply_global()
 	for env: Node in get_tree().root.find_children("*", "WorldEnvironment", true, false):
 		apply_environment(env as WorldEnvironment)
@@ -192,6 +200,49 @@ func _on_node_added(node: Node) -> void:
 		refresh_shadow_budget.call_deferred()
 
 
+func _with_overrides(p: QualityPreset) -> QualityPreset:
+	var q: QualityPreset = p.duplicate() as QualityPreset
+	q.id = p.id
+	var rs: float = float(Config.get_value(&"video", &"render_scale", 0.0))
+	if rs > 0.0:
+		q.render_scale = clampf(rs, 0.5, 2.0)
+	var sl: int = int(Config.get_value(&"video", &"max_shadow_lights", -1))
+	if sl >= 0:
+		q.max_shadow_lights = sl
+	for k: String in ["ssao", "glow", "volumetric_fog"]:
+		var v: String = String(Config.get_value(&"video", StringName(k), "preset"))
+		if v == "on" or v == "off":
+			q.set(k, v == "on")
+	var pd: float = float(Config.get_value(&"video", &"particle_density", -1.0))
+	if pd >= 0.0:
+		q.particle_density = clampf(pd, 0.0, 1.0)
+	var vd: float = float(Config.get_value(&"video", &"view_distance", 0.0))
+	if vd > 0.0:
+		q.view_distance = vd
+	return q
+
+
+# Window / frame pacing settings (fullscreen, V-sync, FPS cap); no-ops headless.
+func apply_window() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	var fs: bool = bool(Config.get_value(&"video", &"fullscreen", false))
+	var mode: DisplayServer.WindowMode = DisplayServer.window_get_mode()
+	if fs and mode != DisplayServer.WINDOW_MODE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	elif not fs and mode == DisplayServer.WINDOW_MODE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	var vs: bool = bool(Config.get_value(&"video", &"vsync", true))
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if vs else DisplayServer.VSYNC_DISABLED)
+	Engine.max_fps = int(Config.get_value(&"video", &"fps_cap", 0))
+
+
 func _on_setting_changed(section: StringName, key: StringName, value: Variant) -> void:
-	if section == &"video" and key == &"quality_preset":
+	if section != &"video":
+		return
+	if key == &"quality_preset":
 		apply_preset(StringName(str(value)))
+	elif OVERRIDE_KEYS.has(String(key)) and preset != null:
+		apply_preset(preset.id)
+	elif key in [&"fullscreen", &"vsync", &"fps_cap"]:
+		apply_window()
