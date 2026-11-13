@@ -11,10 +11,10 @@
 
 | Field | Value |
 |---|---|
-| Current milestone | **M6 Content complete** (automated criteria; Step 15: final UI theme + menus over a 3D backdrop, settings with rebinding, pause, game over, credits, final HUD with scale / colorblind palettes, score + dynamic music + jingles + announcer + quips + captions, final mix, audio manifest audit; AC-15.6 review and VO intelligibility = human checks). Previous: **M5 Visually complete map** + Step 14 content (the full Easter egg "Requiem for Lazarus", lore / Journal, secrets; AC-14.6 human run open). M5 (automated criteria; Step 13: zone dressing for all 12 zones + S1 shell, 10 + 2 vignettes, night sky / storm / searchlights / per-zone grading, reverb + ambience in every zone, static batching + viewer-local shadow budget, marker diff + nav_validate + sightlines green; AC-13.3 GPU FPS and AC-13.6 visual review = human checks). Previous: **M4 Gameplay complete** (automated criteria; Step 12: wonder weapons, Conduit buildable, Galvanic special rounds, Warden archetype in its arena; AC-12.6 GPU + AC-12.7 feel = human checks). Previous: **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
-| Next step to start | **Step 16 — Balance, optimization, QA & release candidate (→ M7 1.0)** |
+| Current milestone | **M7 Vesper Peak 1.0 — release candidate 1.0.0-rc1** (automated criteria; Step 16: balance model + tuning, QA plan 98.4 % pass, bug bash, high-round + network soaks, shader warm-up, hitch monitor, crash logs, versioned Linux / Windows release builds; AC-16.2 full-length, 16.3, 16.4 round-50 judgement, 16.5, 16.6 = human checks). Previous: **M6 Content complete** (automated criteria; Step 15: final UI theme + menus over a 3D backdrop, settings with rebinding, pause, game over, credits, final HUD with scale / colorblind palettes, score + dynamic music + jingles + announcer + quips + captions, final mix, audio manifest audit; AC-15.6 review and VO intelligibility = human checks). Previous: **M5 Visually complete map** + Step 14 content (the full Easter egg "Requiem for Lazarus", lore / Journal, secrets; AC-14.6 human run open). M5 (automated criteria; Step 13: zone dressing for all 12 zones + S1 shell, 10 + 2 vignettes, night sky / storm / searchlights / per-zone grading, reverb + ambience in every zone, static batching + viewer-local shadow budget, marker diff + nav_validate + sightlines green; AC-13.3 GPU FPS and AC-13.6 visual review = human checks). Previous: **M4 Gameplay complete** (automated criteria; Step 12: wonder weapons, Conduit buildable, Galvanic special rounds, Warden archetype in its arena; AC-12.6 GPU + AC-12.7 feel = human checks). Previous: **M3 Whole map playable** (automated criteria; Step 8: full Vesper Peak greybox — 12 zones, 14 doors, power, gondola / lift / chute / bridge, markers, nav + flow validation; AC-8.7 GPU perf and AC-8.8 flow playtest = human checks) |
+| Next step to start | **None — all 16 plan steps are implemented.** Remaining: the human tasks below, then tag 1.0.0 (bump `application/config/version`, `tools/export.sh all --channel=release`) |
 | Engine version | Godot **4.7.2-stable** (`tools/godot_version.txt`); GUT 9.7.1; gdtoolkit 4.5.0 |
-| Last updated | 2026-11-13 (Step 15 session) |
+| Last updated | 2026-11-13 (Step 16 session) |
 | Main branch playable? | **Yes** — `godot --path game` → main menu v1 (Solo / Host co-op → map select → **lobby** / Join ip / Settings); default map `vesper_peak` (**art-passed** (Step 13: dressed zones, sky, storm, fog, lighting, decals, reverb / ambience; debug `atmos`, `gust`, `art_pulse`, `markers_visible`, `art_stats`) over the full greybox: 12 zones from the Arrival Station down to the Reactor Lower Ring, 14 doors, main power switch in the Generator Hall, gondola, freight lift, laundry chute, debug-extendable Reactor Bridge, `minimap` debug overlay): 4 survivors (Calloway, Orlov, Brandt, Ashcombe), pings (middle mouse / Z), late join + reconnect; rounds, points, D01/D02, **all 10 wall-buys** (incl. Ice Axe + tripmines), the **Relic Box** (7 locations, doll relocation, `firesale`), **7 Vigor Tonic machines** (cap 4, loss on down, Second Wind solo self-revive ×3), **6 power-ups** (drops, timers, `powerup <id>`), **Resonance Relays R1–R3 → Reactor Bridge → Lazarus Forge** (23 upgraded weapons with camo, alt-fire key B), **traps T1–T3**, **hazards** (fuel drums, icicles, lab breaker), **wonder weapons** (Mk.I Ray Pistol / Nova Mk.II, Lazarus Conduit / Lazarus Requiem with pulse; box + Forge; `give raygun` / `give conduit`), the **Conduit buildable** (3 parts + Lab Workbench), **Galvanic special rounds** (rifts, warning build-up, Max Ammo; `special_round`), the **Warden** (`spawn_warden`, test map `warden_arena`; rare late-round rule on), the **Easter egg "Requiem for Lazarus"** (stages 0–6: radio frequency, three shards, Soul Pod, Heart escort, calibration nodes, pylon + Warden finale, Lazarus Blessing; debug `quest`, `ee_stage`, `ee_skip`), **lore** (14 documents, 9 reels, reader, subtitled VO, main-menu **Journal**, badge on the map card), **secrets** (S1 Director's Office, S2 Ice Grotto, Snowblind music boxes, ravens, mirror, departures board), **23 weapons** + Drummer Decoy (Q) + tripmines (4), barricade rebuild, downs/revives, game over. Test maps too (sandbox, movement course, gun range, lookdev courtyard, **nav_torture** with zombies via `spawn_zombie`; first-person movement + 4 weapons, knife, frags; solo + co-op); work lives on branch `claude/project-lazarus` |
 
 ---
@@ -190,14 +190,14 @@
 - [x] **M6 reached** (automated criteria)
 
 ### Step 16 — Balance, optimization, QA, release
-- [ ] AC-16.1 No S1/S2 bugs
-- [ ] AC-16.2 2-hour solo + 4p sessions stable
-- [ ] AC-16.3 [HUMAN] Performance targets; no hitches > 50 ms
-- [ ] AC-16.4 Round-60 bot soak; [HUMAN] round-50 beatable
-- [ ] AC-16.5 [HUMAN] Economy pacing within ±2 rounds
-- [ ] AC-16.6 [HUMAN] Clean-machine builds connect
-- [ ] AC-16.7 QA plan ≥ 95% pass
-- [ ] **M7 reached — Vesper Peak 1.0**
+- [x] AC-16.1 No S1/S2 bugs — bug bash fixed I-037 (S2, release builds) + I-019 / I-038…I-040; open issues are S3 / S4 only (QA_TEST_PLAN §5)
+- [H] AC-16.2 2-hour solo + 4p sessions stable — container: 60-round 4-peer soak at 150 ms / 3 % (1,160 s, 180 / 180 hashes, memory +5.6 % host / ≤ +3.5 % clients), high-round soak 4,420 simulated s (memory +1.8 %, 0 orphans, 0 errors), survival soak (+2.9 %); full 2 h desktop sessions = human task
+- [H] AC-16.3 [HUMAN] Performance targets; no hitches > 50 ms — ShaderWarmup + HitchMonitor (`hitches`): exported build headless 0 hitches / p99 12 ms, 0 draw-time compiles after the warm-up (rendered lavapipe run); GPU numbers = human
+- [x] / [H] AC-16.4 Round-60 bot soak — `run_sim.sh high_rounds` (god-mode upgraded bots, rounds to 60, Warden at 60) without errors; round 50 "beatable" = human judgement
+- [H] AC-16.5 [HUMAN] Economy pacing within ±2 rounds — the balance model meets every §6.3 milestone within ±2 (1–2 rounds early); 5 human runs open
+- [H] AC-16.6 [HUMAN] Clean-machine builds connect — Linux + Windows release builds export; the exported Linux binary plays a 4-player match and two exported binaries connect over ENet; clean machines = human
+- [x] AC-16.7 QA plan ≥ 95% pass — 62 / 63 executed cases (98.4 %), 1 triaged S3 flake (I-023), 9 human cases listed
+- [x] **M7 reached — Vesper Peak 1.0** (release candidate 1.0.0-rc1; automated criteria — human checks above)
 
 ---
 
@@ -207,6 +207,13 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Test / check | Result | Notes |
 |---|---|---|---|---|
+| 2026-11-13 | 16 | `tools/check.sh` | Pass | 41 scripts / 226 tests (new `test_balance`, `test_release`, `test_aim_slowdown`) |
+| 2026-11-13 | 16 | `tools/run_tests.sh integration` | Pass | 20 scripts / 92 tests |
+| 2026-11-13 | 16 | `tools/net_tests.sh` (all, after the I-019 fix) | 37 / 38 | `zombies_client smooth_motion` (I-023, environmental); lobby / coop4 hosts now clean (I-019 fixed) |
+| 2026-11-13 | 16 | `RECONNECT_CYCLES=5 net_tests.sh reconnect`; `COOP4_ROUNDS=60 net_tests.sh coop4` | Pass | 5 / 5 restores; 60 rounds, 180 / 180 hashes, host memory +5.6 %, clients +2.0–3.5 %, ≈ 12 KB/s per client |
+| 2026-11-13 | 16 | `run_sim.sh` smoke, round_flow, nav_validate, flow, perks, progression, specials, quest, presentation, survival (10 rounds god), balance | Pass | survival: 0 unfair spawns, memory +2.9 %; balance: all targets (`docs/BALANCE_REPORT.md`) |
+| 2026-11-13 | 16 | `run_sim.sh high_rounds` (r1–3, 10…50, 55–60, 4 upgraded god bots) | 13 / 14 (+ fixed check re-verified) | 8,756 spawns, 0 errors, health = curve, memory +1.8 %, 0 orphans, alive ≤ 33, Warden 9.28 M HP at r60; I-041 re-queues |
+| 2026-11-13 | 16 | `tools/export.sh all --channel=rc` | Pass | Linux 76 MB / Windows 110 MB archives; exported Linux binary: 4-player bot match + two binaries connected over ENet |
 | 2026-11-13 | 15 | `tools/check.sh` (+ credits freshness) / `run_tests.sh integration` | Pass | 38 / 214 unit (new `test_ui_navigation`), 20 / 92 integration |
 | 2026-11-13 | 15 | `tools/run_sim.sh presentation` | Pass | 806 audio events audited; 32-zombie Ray Pistol mix: Master peak −4.0 dBFS, output RMS −14.8 dBFS (~−15.5 LUFS) |
 | 2026-11-13 | 15 | `tools/visual_tests.sh ui_showcase hud_matrix` | Pass | `docs/screenshots/step15/` (menus, settings tabs, credits, journal, 12 HUD frames 720p–4K × 75/100/150 %, pause, game over) |
@@ -297,6 +304,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Scene | Preset | Hardware | Avg FPS | p99 frame ms | AI ms | Notes |
 |---|---|---|---|---|---|---|---|---|
+| 2026-11-13 | 16 | exported release build, vesper_peak, 4 players, round 1–2 | headless | container CPU | — | 12 (p50 9) | — | HitchMonitor: 0 frames > 50 ms after warm-up, 0 draw-time pipeline compiles; high-round soak p99 13 ms over 264 k frames (2 frames > 50 ms at round jumps). Rendered lavapipe warm-up: 581 materials / 51 particle systems. GPU = [HUMAN] AC-16.3 |
 | 2026-11-12 | 13 | vesper_peak art pass, 25 viewpoints (6 with 32 zombies + 4 players) | High / Medium | container (lavapipe, CPU) | not meaningful | — | — | Render proxies: scenery ≤ 1103 draw calls (Z03 mezzanine), crowd ≤ 1529 (Z01 hall); per-zone static batching cut the hall + crowd from 4050; shadow lights ≤ 8 / 4 per viewpoint. GPU FPS = [HUMAN] AC-13.3 |
 | 2026-11-12 | 8 | perf_arena (**vesper_peak** full greybox, all doors open, 32 zombies, 4 bots) | headless | container CPU | — | — | 1.29–1.42 avg / 2.7–3.2 p99 | 28 nav tiles / 2.26 k polys; tile-local snap (was 2.7 / 5.2 with map-wide snap) |
 | 2026-11-11 | 5 | perf_arena (nav_torture, 32 zombies, 4 bots) | headless | container CPU (4 vCPU) | — | — | 0.89 avg / 1.57 p99 | Host AI + navigation only (CrowdDirector accounting); visuals/animation not included. Desktop = [HUMAN] AC-5.5 (`ai_stats`, F3 overlay AI line) |
@@ -306,6 +314,7 @@ Record automated results (command, pass/fail counts, key numbers) and human veri
 
 | Date | Step | Peers | NetSim profile | KB/s per client | Desyncs | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-13 | 16 | 4 (loopback), 60 rounds | 150 ms ±30 ms, 3% loss | 11.9–12.3 avg / 13.0 peak | 0 (180 / 180 round-end hashes) | 19-minute soak; RTT ≈ 320 ms; reconnect stress 5 / 5 |
 | 2026-11-12 | 7 | 4 (loopback) | 150 ms ±30 ms, 3% loss | 12.4–12.5 avg / 13.4 peak (all downstream traffic) at 32 zombies + 4 players | 0 (30/30 round-end state hashes) | RTT ~310–330 ms; join snapshot 0.33 s at 100 ms; reliable lobby/session traffic negligible |
 | 2026-11-11 | 5 | 2 (loopback) | 100 ms ±20 ms, 2% loss | 9.4–9.5 for 32 zombies (stream 19 only; 489 B per 20 Hz packet) | 0 | Plus reliable spawn/death events; 100% of client hit claims on moving zombies accepted |
 | 2026-11-11 | 3 | 2 (loopback) | 100 ms ±20 ms, 2% loss | ~1–2 while firing (MP40: 9 reliable shot claims/s batched per frame, ≈60 B each + 41 B unreliable fire burst relayed per shot) | 0 | Claims carry no damage; host recomputes |
