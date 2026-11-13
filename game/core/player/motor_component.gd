@@ -165,6 +165,8 @@ func _update_sprint(f: PlayerInputFrame, delta: float, on_floor: bool) -> void:
 	var want: bool = (
 		f.sprint and forward_enough and not f.aim and not f.fire and stance == Stance.STAND and not _need_sprint_release
 	)
+	if want and stats != null and stats.flag(PlayerStats.NO_SPRINT):
+		want = false  # carrying a quest item (CarryItem)
 	var duration: float = sprint_duration()
 	stamina = minf(stamina, duration)
 	if want and not sprinting:

@@ -13,6 +13,10 @@ extends Resource
 @export var plate_reduction: float = 0.75  # body damage reduction while any plate holds
 @export var core_multiplier: float = 2.0  # exposed core: hits from behind
 @export var core_arc_deg: float = 70.0  # half-angle behind the Warden that counts as the core
+# Weapons whose ids start with this deal `core_weapon_multiplier` to the exposed core from any side
+# (Vesper Peak finale: the Lazarus Conduit / Requiem x3, VESPER_PEAK §7 stage 6). "" = none.
+@export var core_weapon_prefix: String = "lazarus_conduit"
+@export var core_weapon_multiplier: float = 3.0
 @export_group("Ground slam")
 @export var slam_range: float = 3.5  # starts a slam when the target is this close
 @export var slam_telegraph: float = 0.9

@@ -333,6 +333,8 @@ func host_owns(peer_id: int, weapon_id: StringName) -> bool:
 	var lo: Dictionary = _loadout(peer_id)
 	if (lo["ids"] as Array).has(weapon_id):
 		return true
+	if bool(lo.get("carry", false)) and (lo.get("carry_ids", []) as Array).has(weapon_id):
+		return true
 	var up: WeaponDefinition = WeaponCatalog.upgrade_of(weapon_id)
 	if up != null and (lo["ids"] as Array).has(up.id):
 		return true  # holding the Forge version counts (box eligibility, GAME_DESIGN §10.1)
@@ -492,6 +494,16 @@ func host_exit_last_stand(peer_id: int) -> void:
 	_broadcast_loadout(peer_id)
 
 
+# Carrying a quest item (CarryItem, Step 14 scope 5): only a pistol in hand (CarryLoadout).
+func host_set_carry(peer_id: int, on: bool) -> void:
+	if CarryLoadout.apply(self, _loadout(peer_id), peer_id, on):
+		_broadcast_loadout(peer_id)
+
+
+func is_carrying(peer_id: int) -> bool:
+	return loadouts.has(peer_id) and bool((loadouts[peer_id] as Dictionary).get("carry", false))
+
+
 # Bled out (GAME_DESIGN §3.3): weapons are lost; the player respawns with the starting loadout.
 func host_reset_loadout(peer_id: int) -> void:
 	if loadouts.has(peer_id):
@@ -514,6 +526,9 @@ func host_export(peer_id: int) -> Dictionary:
 	var lo: Dictionary = loadouts[peer_id]
 	var ids: Array = _id_strings(lo["ids"])
 	var current: String = String(lo["current"])
+	if bool(lo.get("carry", false)):
+		ids = _id_strings(lo.get("carry_ids", lo["ids"]))
+		current = String(lo.get("pre_carry", current))
 	if bool(lo.get("last_stand", false)):
 		ids.erase(String(lo.get("last_stand_added", "")))
 		current = String(lo.get("pre_down", current))

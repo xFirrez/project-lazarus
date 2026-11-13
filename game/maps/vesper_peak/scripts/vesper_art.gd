@@ -113,7 +113,10 @@ func _process(delta: float) -> void:
 	_t += delta
 	_pulse = maxf(_pulse - delta * 0.35, 0.0)
 	if sky_mat != null:
-		sky_mat.set_shader_parameter(&"aurora", 0.15 + _pulse * 1.2 + (storm.gust * 0.1 if storm != null else 0.0))
+		var calm: float = storm.calm_amount if storm != null else 0.0
+		sky_mat.set_shader_parameter(
+			&"aurora", 0.15 + _pulse * 1.2 + (storm.gust * 0.1 if storm != null else 0.0) + calm * 0.6
+		)
 	if atmosphere != null:
 		atmosphere.exposure_scale = 1.0 - 0.25 * sin(_pulse * PI)
 	for i: int in searchlights.size():

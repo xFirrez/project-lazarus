@@ -16,6 +16,8 @@ var _schedule_seed: int = -1
 
 
 func on_match_start() -> void:
+	# Step 14B: the rare late-round Warden (GAME_DESIGN §5.4) is enabled with the Easter egg.
+	warden_late_rounds = true
 	Log.info(&"vesper_peak", "Arrival Station: hold the windows, buy D01 / D02 to expand.")
 	if match_node.session.flag(SEED_FLAG, null) == null:
 		match_node.session.host_set_flag(SEED_FLAG, randi() % 1000000)

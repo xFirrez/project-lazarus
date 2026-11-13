@@ -1,10 +1,12 @@
-[gd_resource type="Resource" script_class="MapDefinition" load_steps=18 format=3]
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://core/world/map_definition.gd" id="1"]
 [ext_resource type="Script" path="res://core/world/zone_def.gd" id="2"]
 [ext_resource type="Resource" path="res://content/rounds/default_round_curve.tres" id="3"]
 [ext_resource type="Script" path="res://maps/vesper_peak/scripts/vesper_peak_rules.gd" id="4"]
 [ext_resource type="Resource" path="res://maps/vesper_peak/buildables/conduit.tres" id="5"]
+[ext_resource type="Resource" path="res://maps/vesper_peak/quest/requiem.tres" id="q1"]
+[ext_resource type="Resource" path="res://maps/vesper_peak/quest/vesper_secrets.tres" id="q2"]
 
 [sub_resource type="Resource" id="z01"]
 script = ExtResource("2")
@@ -95,3 +97,5 @@ zones = Array[ZoneDef]([SubResource("z01"), SubResource("z03"), SubResource("z04
 starting_zone = &"Z01"
 rules_script = ExtResource("4")
 buildables = Array[BuildableDef]([ExtResource("5")])
+quests = Array[QuestGraph]([ExtResource("q1"), ExtResource("q2")])
+lore_path = "res://maps/vesper_peak/lore/lore.json"

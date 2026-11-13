@@ -85,8 +85,17 @@ func free_pending() -> bool:
 	return match_node != null and match_node.powerups != null and match_node.powerups.free_upgrade_pending()
 
 
-func cost() -> int:
-	return 0 if free_pending() else COST
+func cost(peer_id: int = 0) -> int:
+	return 0 if free_pending() or has_token(peer_id) else COST
+
+
+func has_token(peer_id: int) -> bool:
+	return (
+		peer_id != 0
+		and match_node != null
+		and match_node.powerups != null
+		and match_node.powerups.free_tokens(peer_id) > 0
+	)
 
 
 func phase(forge: int) -> Phase:
@@ -139,6 +148,8 @@ func host_insert(forge: int, peer_id: int, base_id: StringName) -> bool:
 	if jobs.has(forge) or up == null or ws == null or not ws.host_take_weapon(peer_id, base_id):
 		return false
 	if match_node.powerups != null and match_node.powerups.host_consume_free_upgrade():
+		free_used += 1
+	elif match_node.powerups != null and match_node.powerups.host_consume_token(peer_id):
 		free_used += 1
 	var payload: Array = [forge, peer_id, String(base_id), String(up.id), now()]
 	jobs[forge] = [peer_id, base_id, up.id, float(payload[4])]

@@ -81,6 +81,8 @@ func filter_damage(info: DamageInfo) -> float:
 					_on_plate_broken(i)
 				break
 		return amount * (1.0 - tuning.plate_reduction)
+	if tuning.core_weapon_prefix != "" and String(info.weapon_id).begins_with(tuning.core_weapon_prefix):
+		return amount * tuning.core_weapon_multiplier
 	if _from_behind(info):
 		amount *= tuning.core_multiplier
 	return amount
@@ -293,13 +295,17 @@ func _summon() -> void:
 	var zs: ZombieSync = ZombieSync.instance(actor())
 	if zs == null:
 		return
-	var base: ZombieArchetype = zs.archetype(&"zombie")
+	# A scripted Warden (the Easter-egg finale) may summon another archetype (Galvanics).
+	var base: ZombieArchetype = zs.archetype(StringName(actor().get_meta(&"summon_archetype", &"zombie")))
+	if base == null:
+		base = zs.archetype(&"zombie")
+	var hp: float = base.health_for_round(round_number)
+	if base.id != &"zombie" and actor().has_meta(&"summon_health"):
+		hp = float(actor().get_meta(&"summon_health"))
 	for i: int in tuning.summon_count:
 		var a: float = TAU * float(i) / float(tuning.summon_count) + sim.yaw
 		var p: Vector3 = sim.director.snap(sim.pos + Vector3(cos(a), 0.0, sin(a)) * 3.0, sim.pos)
-		var z: ZombieActor = zs.host_spawn(
-			base, ZombieArchetype.Tier.RUN, p, a, ZombieSpawner.Kind.RISER, -1, base.health_for_round(round_number)
-		)
+		var z: ZombieActor = zs.host_spawn(base, ZombieArchetype.Tier.RUN, p, a, ZombieSpawner.Kind.RISER, -1, hp)
 		if z != null:
 			summoned.append(z)
 

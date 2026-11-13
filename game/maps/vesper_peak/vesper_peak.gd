@@ -13,6 +13,8 @@ const AGENT_HEIGHT: float = 1.8
 var nav: NavTiles = null
 var zones: Array[VesperZone] = []
 var art: VesperArt = null
+var quest_world: VesperQuestWorld = null
+var secrets_world: VesperSecretsWorld = null
 
 
 func _ready() -> void:
@@ -22,6 +24,13 @@ func _ready() -> void:
 		if c is VesperZone:
 			zones.append(c as VesperZone)
 	art.finish(self)
+	# Step 14 quest / secrets holders (built in _on_match_setup; the map root is busy then).
+	quest_world = VesperQuestWorld.new()
+	quest_world.name = "QuestWorld"
+	add_child(quest_world)
+	secrets_world = VesperSecretsWorld.new()
+	secrets_world.name = "SecretsWorld"
+	add_child(secrets_world)
 	nav = NavTiles.new()
 	nav.name = "Nav"
 	nav.template = make_navmesh()
@@ -45,6 +54,10 @@ func _ready() -> void:
 
 func _on_match_setup(m: Match) -> void:
 	art.on_match_setup(m)
+	# Step 14: Easter-egg objects, lore items and secrets (before the target / interaction scans).
+	if m.quest != null:
+		quest_world.setup(m)
+		secrets_world.setup(m)
 	if m.session != null:
 		m.session.flag_changed.connect(_on_flag)
 

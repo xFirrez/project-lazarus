@@ -85,10 +85,22 @@ func _fill() -> void:
 	_list.clear()
 	for id: StringName in _ids:
 		var d: MapDefinition = Content.get_map(id)
-		_list.add_item("%s%s" % [d.display_name, "  (test)" if d.is_test_map else ""])
+		_list.add_item("%s%s%s" % [d.display_name, "  (test)" if d.is_test_map else "", badge_text(id)])
 	var idx: int = maxi(_ids.find(selected), 0)
 	if not _ids.is_empty():
 		_list.select(idx)
+
+
+# Easter-egg badges earned on this map (Journal), e.g. "  ★ Requiem (1p, 4p)".
+static func badge_text(map_id: StringName) -> String:
+	var parts: PackedStringArray = []
+	var b: Dictionary = Journal.badges(map_id)
+	for k: Variant in b.keys():
+		var counts: PackedStringArray = []
+		for c: Variant in b[k]:
+			counts.append("%dp" % int(c))
+		parts.append("★ %s (%s)" % [String(k).capitalize(), ", ".join(counts)])
+	return "  " + "  ".join(parts) if not parts.is_empty() else ""
 
 
 func _confirm() -> void:

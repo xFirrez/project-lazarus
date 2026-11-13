@@ -58,7 +58,7 @@ func get_cost(player: PlayerCharacter) -> int:
 	if system == null or system.phase(index) != ForgeSystem.Phase.IDLE:
 		return 0
 	var held: StringName = _held(player)
-	return system.cost() if WeaponCatalog.can_upgrade(held) else 0
+	return system.cost(player.peer_id) if WeaponCatalog.can_upgrade(held) else 0
 
 
 func get_prompt(player: PlayerCharacter) -> String:
@@ -77,9 +77,9 @@ func get_prompt(player: PlayerCharacter) -> String:
 	var held: StringName = _held(player)
 	if not WeaponCatalog.can_upgrade(held):
 		return "This weapon cannot be upgraded"
-	if system.free_pending():
+	if system.cost(player.peer_id) == 0:
 		return "Hold [F] to upgrade your weapon [FREE]"
-	return "Hold [F] to upgrade your weapon [%d]" % system.cost()
+	return "Hold [F] to upgrade your weapon [%d]" % system.cost(player.peer_id)
 
 
 func host_check(peer_id: int, player: PlayerCharacter) -> String:

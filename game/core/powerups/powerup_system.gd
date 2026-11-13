@@ -233,6 +233,30 @@ func host_apply(type: StringName, pos: Vector3 = Vector3.ZERO) -> void:
 
 
 # HOST (Step 11 Forge): the free upgrade was used.
+# Personal Free Upgrade tokens (the Easter-egg reward, Step 14): "pu.token.<uid8>" = count. The next
+# Forge use by that player is free (after a pending team-wide Free Upgrade power-up).
+static func token_key(peer_id: int) -> String:
+	var info: Dictionary = Net.peers.get(peer_id, {})
+	return "pu.token.%s" % String(info.get("uid", str(peer_id))).substr(0, 8)
+
+
+func free_tokens(peer_id: int) -> int:
+	var s: MatchSession = session()
+	return int(s.flag(token_key(peer_id), 0)) if s != null else 0
+
+
+func host_give_token(peer_id: int) -> void:
+	if is_authority() and session() != null:
+		session().host_set_flag(token_key(peer_id), free_tokens(peer_id) + 1)
+
+
+func host_consume_token(peer_id: int) -> bool:
+	if not is_authority() or free_tokens(peer_id) <= 0:
+		return false
+	session().host_set_flag(token_key(peer_id), free_tokens(peer_id) - 1)
+	return true
+
+
 func host_consume_free_upgrade() -> bool:
 	if not is_authority() or not free_upgrade_pending():
 		return false

@@ -3,8 +3,8 @@
 # WeaponSync, WeaponFx, WorldSync, ZombieSync + CrowdDirector, ZoneManager, PointsLedger,
 # InteractionSystem, RelicBoxSystem, PerkSystem, DownedSystem, RoundDirector, SpawnDirector,
 # PowerUpSystem, StatusEffects, RelaySystem, ForgeSystem, TrapSystem, HazardSystem (Step 11),
-# WonderFx, BuildableSystem and SpecialRoundDirector (Step 12), the map's MapRules, PingSystem and
-# the match HUD. Reachable via Match.current.
+# WonderFx, BuildableSystem and SpecialRoundDirector (Step 12), QuestSystem (Step 14: quests, carry
+# items, lore, VO), the map's MapRules, PingSystem and the match HUD. Reachable via Match.current.
 # Authority: exists on every peer; host-only systems check Net.is_host().
 class_name Match
 extends Node
@@ -40,6 +40,7 @@ var hazards: HazardSystem = null
 var wonder_fx: WonderFx = null
 var buildables: BuildableSystem = null
 var specials: SpecialRoundDirector = null
+var quest: QuestSystem = null
 var session_joined_at: float = -1.0  # client: Net.now() at the session welcome (join timing)
 
 
@@ -58,6 +59,12 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	session.match_node = self
 	session.joined_at = session_joined_at
 	add_child(session)
+	# Quest engine before the map hooks: map nodes build quest interactables / carry items / lore on
+	# `_on_match_setup` (before the target and interaction scans, so ids match on every peer).
+	quest = QuestSystem.new()
+	quest.match_node = self
+	quest.setup(def)
+	add_child(quest)
 	# Map nodes that listen to shared state (power, machines) hook up now that the session exists.
 	map_root.propagate_call(&"_on_match_setup", [self])
 	if def.rules_script != null:
@@ -189,6 +196,7 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	session.on_match_ready(from_lobby)
 	if Net.is_host() or not Net.is_active():
 		rules.on_match_start()
+		quest.host_start()
 	Log.info(&"match", "Match started on '%s'" % def.id)
 	return OK
 

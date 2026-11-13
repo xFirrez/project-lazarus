@@ -23,6 +23,10 @@ extends Resource
 @export var box_pool: RelicBoxPool = null  # null -> res://content/box/relic_box_pool.tres
 # Buildables (Step 12): parts + workbench (Vesper Peak: the Lazarus Conduit).
 @export var buildables: Array[BuildableDef] = []
+# Quests (Step 14): Easter-egg / side-quest graphs run by QuestSystem, and the lore JSON
+# (documents, reels, VO lines; LoreLibrary) read by the reader, the VoDirector and the Journal.
+@export var quests: Array[QuestGraph] = []
+@export_file("*.json") var lore_path: String = ""
 
 
 func zone_def(zone_id: StringName) -> ZoneDef:

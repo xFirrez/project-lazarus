@@ -9,7 +9,7 @@
 #   fire_rate [1]  double_tap [0] (hitscan bullets hit twice)  move_speed [1]
 #   sprint_duration [tuning]  sprint_recharge [1] (recharge-rate multiplier)  revive_time [tuning]
 #   hip_spread [1]  aim_snap [0] (seconds; 0 = off)  headshot_bonus [1]  weapon_slots [0] (extra)
-#   self_revive [0]  equipment_speed [1]
+#   self_revive [0]  equipment_speed [1]  no_sprint [0] (flag: a CarryItem carrier, Step 14)
 # Authority: derived data; the host's copy decides, every peer computes the same.
 class_name PlayerStats
 extends RefCounted
@@ -30,6 +30,7 @@ const HEADSHOT_BONUS: StringName = &"headshot_bonus"
 const WEAPON_SLOTS: StringName = &"weapon_slots"
 const SELF_REVIVE: StringName = &"self_revive"
 const EQUIPMENT_SPEED: StringName = &"equipment_speed"
+const NO_SPRINT: StringName = &"no_sprint"
 
 var _sources: Dictionary = {}  # StringName source -> Array[StatModifier]
 var _order: Array[StringName] = []  # sources in the order they were added

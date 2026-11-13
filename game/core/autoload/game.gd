@@ -148,6 +148,12 @@ func show_settings() -> void:
 	_set_screen(screen)
 
 
+func show_journal() -> void:
+	var screen: JournalScreen = JournalScreen.new()
+	screen.back_pressed.connect(func() -> void: go_to_main_menu(""))
+	_set_screen(screen)
+
+
 func show_lobby() -> void:
 	_set_state(State.LOBBY)
 	if _screen is LobbyScreen:
@@ -198,6 +204,7 @@ func go_to_main_menu(message: String) -> void:
 	menu.join_requested.connect(join_game)
 	menu.steam_requested.connect(host_steam_game)
 	menu.settings_requested.connect(show_settings)
+	menu.journal_requested.connect(show_journal)
 	menu.quit_requested.connect(func() -> void: get_tree().quit())
 	_set_screen(menu)
 	menu.set_status(message)

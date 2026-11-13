@@ -1,5 +1,6 @@
 # MainMenu — main menu v1 (DEVELOPMENT_PLAN Step 7): Solo, Host co-op, Join <ip[:port]>, Steam
-# (only when GodotSteam is available), Settings, Quit, plus a status line (e.g. "Host
+# (only when GodotSteam is available), Journal (Step 14: lore unlocks + badges), Settings,
+# Quit, plus a status line (e.g. "Host
 # disconnected", "Join refused: lobby is full"). Final art in Step 15.
 # Authority: local presentation.
 class_name MainMenu
@@ -10,6 +11,7 @@ signal host_requested
 signal join_requested(address: String)
 signal steam_requested
 signal settings_requested
+signal journal_requested
 signal quit_requested
 
 var _status: Label = null
@@ -54,6 +56,7 @@ func _ready() -> void:
 	join_row.add_child(join)
 	if SteamTransport.is_available():
 		box.add_child(_button("Steam lobby (invite friends)", func() -> void: steam_requested.emit()))
+	box.add_child(_button("Journal", func() -> void: journal_requested.emit()))
 	box.add_child(_button("Settings", func() -> void: settings_requested.emit()))
 	box.add_child(_button("Quit", func() -> void: quit_requested.emit()))
 	var hint: Label = Label.new()

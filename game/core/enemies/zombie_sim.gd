@@ -198,6 +198,8 @@ func _select_target() -> void:
 		var l: float = director.path_length(self, pos, c.global_position)
 		if l < 0.0:
 			return  # budget exhausted this frame: retry next think
+		if l < INF and c.has_meta(&"target_bias"):
+			l = maxf(l - float(c.get_meta(&"target_bias")), 0.0)  # quest carrier: prioritised (CarryItem)
 		if c == target:
 			cur_len = l
 		if l < best_len:

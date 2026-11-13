@@ -68,8 +68,13 @@ func _process(delta: float) -> void:
 	_flash = maxf(_flash - delta * 0.4, 0.0)
 	var beat: float = heartbeat_beat()
 	var energy: float = [0.15, 0.8 + 0.5 * beat, 2.5 + 1.2 * beat][stage] + _flash * 6.0
+	# After the Easter-egg finale the core burns a calm white-blue for the rest of the match.
+	var calm: bool = s != null and bool(s.flag("ee.reactor_calm", false))
 	if _core_mat != null:
 		_core_mat.emission_energy_multiplier = energy
+		_core_mat.emission = Color(0.75, 0.88, 1.0) if calm else _core_mat.emission
+	if light != null and calm:
+		light.light_color = Color(0.75, 0.88, 1.0)
 	if core != null:
 		core.scale = Vector3.ONE * ([0.9, 1.0, 1.15][stage] + _flash * 0.3)
 	if light != null:

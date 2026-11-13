@@ -9,6 +9,8 @@ extends Interactable
 
 @export var enable_flag: String = ""
 @export var perk_id: StringName = &""
+# S1 (VESPER_PEAK §3): the Director's Office crate respects the perk cap.
+@export var respect_cap: bool = false
 
 
 func _ready() -> void:
@@ -43,7 +45,10 @@ func is_available(player: PlayerCharacter) -> bool:
 	return is_enabled() and not claimed(player.peer_id)
 
 
-func host_check(_peer_id: int, _player: PlayerCharacter) -> String:
+func host_check(peer_id: int, _player: PlayerCharacter) -> String:
+	var m: Match = Match.current
+	if respect_cap and m != null and m.perks != null and m.perks.ids_of(peer_id).size() >= m.perks.cap():
+		return "Too many tonics"
 	return ""
 
 

@@ -7,6 +7,11 @@ extends VesperZone
 
 const Y: float = -8.0
 const MEZZ: float = -4.0
+# S1 Director's Office (Step 14): x 33..37.8, z 2.6..8.2 at the mezzanine level, entered through the
+# rotating bookcase in the lobby's west wall (a NavDoor, opened by the room-7 mirror secret).
+const S1_LO: Vector3 = Vector3(33.0, -4.0, 2.6)
+const S1_HI: Vector3 = Vector3(37.8, -0.8, 8.2)
+const S1_DOOR_Z: float = 5.8
 
 
 func build() -> void:
@@ -18,7 +23,7 @@ func build() -> void:
 		Vector3(38, Y, -14),
 		Vector3(68, (Y) + (9.0), 8),
 		{
-			"W": [door_hole(-3, 3.2, 3.4), door_hole(-11, 2.4, 2.8), win_hole(-7)],
+			"W": [door_hole(-3, 3.2, 3.4), door_hole(-11, 2.4, 2.8), win_hole(-7), [S1_DOOR_Z, 1.6, 4.0, 6.4]],
 			"N": [win_hole(46), win_hole(54), [52.0 - 0.0, 1.4, 4.9, 6.1]],
 			"E": [[-11.0, 2.4, 6.0, 8.8]],
 			"S": [door_hole(52, 3.0, 3.0), [62.0, 1.6, 0.0, 2.6]],
@@ -52,11 +57,14 @@ func build() -> void:
 	buy_door(&"D04", "iced terrace doors", 1250, [&"Z06", &"Z03"], [d4], Vector3(52, Y + 1.5, -13.2))
 	var d8: NavDoor = nav_door("D08_ServiceDoor", Vector3(38, Y + 1.4, -11), Vector3(0.4, 2.8, 2.4))
 	buy_door(&"D08", "basement service door", 1250, [&"Z10", &"Z03"], [d8], Vector3(38.8, Y + 1.4, -11))
+	_office_shell()
 	area("Walkway", Vector3(13.2, -8.5, -4.6), Vector3(38, 4.0, -1.4))
 	area("Lobby", Vector3(38, -8.5, -14), Vector3(68, 1.0, 8))
+	area("DirectorsOffice", Vector3(S1_LO.x, MEZZ - 0.5, S1_LO.z), Vector3(37.8, MEZZ + 3.0, S1_HI.z))
 	nav_areas.clear()
 	nav_areas.append(AABB(Vector3(13.2, -9.5, -5.0), Vector3(24.8, 13.0, 17.0)))  # walkway + W_U2 bay
 	nav_areas.append(AABB(Vector3(38, -9.5, -20.0), Vector3(30.2, 9.0, 32.0)))  # lobby + terrace + office
+	nav_areas.append(AABB(Vector3(32.8, MEZZ - 1.5, 2.4), Vector3(5.2, 4.5, 6.0)))  # S1 Director's Office
 	mark(&"perk", "Perk_Quickdraw", Vector3(40, Y, 1.5), "Quickdraw Fizz", true)
 	wall_buy(&"mp40", Vector3(44, Y + 1.5, -13.8), 0.0).name = "WallBuy_MP40"  # VESPER_PEAK §5.1
 	mark(&"box", "Box_Z03", Vector3(49.5, Y, -6), "Relic Box START location")
@@ -73,6 +81,36 @@ func build() -> void:
 	lamp(Vector3(25, 2.0, -3), Color(0.9, 0.85, 0.7), 0.8, 9.0)
 	ambience(Vector3(53, -5, -3), &"interior_wind")
 	occluder("Occ_Floor", Vector3(53, Y - 1.5, -3), Vector3(30, 2, 22))
+
+
+# S1 (Step 14): collision for the office shell drawn in dress() (floor, walls, ceiling) and the
+# bookcase door in the lobby's west wall. Collision-only bodies: the visuals stay the Step 13 deco.
+func _office_shell() -> void:
+	var lo: Vector3 = S1_LO
+	var hi: Vector3 = S1_HI
+	var mid: Vector3 = (lo + hi) * 0.5
+	_solid("S1_FloorSolid", Vector3(mid.x + 0.1, MEZZ - 0.1, mid.z), Vector3(hi.x - lo.x + 0.2, 0.2, hi.z - lo.z))
+	_solid("S1_CeilingSolid", Vector3(mid.x, MEZZ + 3.2, mid.z), Vector3(hi.x - lo.x, 0.2, hi.z - lo.z))
+	_solid("S1_WallWSolid", Vector3(lo.x, MEZZ + 1.6, mid.z), Vector3(0.2, 3.2, hi.z - lo.z))
+	_solid("S1_WallNSolid", Vector3(mid.x, MEZZ + 1.6, hi.z), Vector3(hi.x - lo.x + 0.4, 3.2, 0.2))
+	_solid("S1_WallSSolid", Vector3(mid.x, MEZZ + 1.6, lo.z), Vector3(hi.x - lo.x + 0.4, 3.2, 0.2))
+	nav_door("S1_BookcaseDoor", Vector3(38.0, MEZZ + 1.2, S1_DOOR_Z), Vector3(0.45, 2.4, 1.6))
+
+
+func _solid(node_name: String, center: Vector3, size: Vector3) -> void:
+	var body: StaticBody3D = StaticBody3D.new()
+	body.name = node_name
+	body.position = center
+	body.collision_layer = 1
+	body.collision_mask = 0
+	body.physics_material_override = SurfaceTags.make_material(&"wood")
+	body.set_meta(&"surface", &"wood")
+	var col: CollisionShape3D = CollisionShape3D.new()
+	var bs: BoxShape3D = BoxShape3D.new()
+	bs.size = size
+	col.shape = bs
+	body.add_child(col)
+	geometry.add_child(body)
 
 
 # --- Step 13 art pass (13B): Belle Époque lobby, mezzanine, S1 office shell ----------------------

@@ -33,6 +33,10 @@ var log_spawns: bool = false  # Log every spawn (soak tests)
 var rifts: Array = []  # host: pending [position, seconds left, yaw]
 var rifts_opened: int = 0
 var rift_min_distance_seen: float = INF
+# Quest hooks (Step 14): spawn-interval divisor (escort ×1.5) and zones whose spawners are active
+# even when not unlocked ("every vent in Z09 / Z10 / Z13").
+var rate_scale: float = 1.0
+var extra_zones: Array[StringName] = []
 
 var _timer: float = 0.0
 var _special_timer: float = 0.0
@@ -56,6 +60,8 @@ func _physics_process(delta: float) -> void:
 	_tick_rifts(delta)
 	_tick_special(delta)
 	_timer -= delta
+	if rounds.event_hold:
+		return
 	if _timer > 0.0 or rounds.queue.is_empty():
 		return
 	if rounds.round_ids.size() >= curve.alive_cap(rounds.player_count()):
@@ -77,7 +83,7 @@ func _physics_process(delta: float) -> void:
 		return
 	rounds.host_register_spawn(a)
 	_record(sp)
-	_timer = curve.spawn_interval(rounds.current_round, rounds.player_count())
+	_timer = curve.spawn_interval(rounds.current_round, rounds.player_count()) / maxf(rate_scale, 0.1)
 
 
 # --- special enemies through rifts -------------------------------------------------------------
@@ -144,7 +150,7 @@ func pick_rift_position() -> Vector3:
 	_rr = (_rr + 1) % maxi(ws.size(), 1)
 	var focus: PlayerCharacter = ws[_rr] if not ws.is_empty() else null
 	for s: ZombieSpawner in zombies.spawners:
-		if zones != null and s.zone != &"" and not active.has(s.zone):
+		if zones != null and s.zone != &"" and not active.has(s.zone) and not extra_zones.has(s.zone):
 			continue
 		var p: Vector3 = s.global_position + Vector3(_rng.randf_range(-2, 2), 0, _rng.randf_range(-2, 2))
 		p = zombies.crowd.snap(p, s.global_position)

@@ -20,6 +20,9 @@ var gust: float = 0.0
 var wind: float = 0.35
 var gusts: int = 0
 var forced_until: float = -1.0
+# Calm (the Easter-egg reward round, Step 14): no gusts, almost no wind; `calm_amount` eases 0..1.
+var calm: bool = false
+var calm_amount: float = 0.0
 
 var _last_slot: int = -1
 
@@ -42,7 +45,8 @@ func force_gust() -> void:
 	forced_until = clock() + LENGTH
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	calm_amount = move_toward(calm_amount, 1.0 if calm else 0.0, delta * 0.25)
 	var t: float = clock()
 	var slot: int = int(floor(t / PERIOD))
 	var phase: float = t - float(slot) * PERIOD
@@ -54,11 +58,11 @@ func _process(_delta: float) -> void:
 		g = maxf(g, sin(PI * clampf(1.0 - (forced_until - t) / LENGTH, 0.0, 1.0)))
 	if slot != _last_slot:
 		_last_slot = slot
-		if s > 0.0:
+		if s > 0.0 and not calm:
 			gusts += 1
 			gust_started.emit(s)
 			if Audio.has_event(&"amb_gust"):
 				Audio.play_event(&"amb_gust")
-	gust = g
-	wind = base_wind + gust * 0.9
+	gust = g * (1.0 - calm_amount)
+	wind = lerpf(base_wind + gust * 0.9, 0.04, calm_amount)
 	RenderingServer.global_shader_parameter_set(&"wind_strength", wind)

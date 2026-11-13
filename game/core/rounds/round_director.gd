@@ -54,6 +54,8 @@ var special_health_value: float = 400.0  # host
 var special_rounds_played: int = 0  # host: k for the special count / health growth
 var forced_special: StringName = &""  # host debug `special_round`: the next round is special
 var special_log: Array[int] = []  # host: rounds that were special (tests, AC-12.4)
+# Host: a scripted event (the Easter-egg finale) holds the active round: no normal spawns, no end.
+var event_hold: bool = false
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
@@ -291,6 +293,8 @@ func _on_zombie_requeued(_arch: ZombieArchetype, tier: int, reason: String, net_
 
 
 func _check_end() -> void:
+	if event_hold:
+		return
 	if phase != Phase.ACTIVE or killed < total or not queue.is_empty() or not round_ids.is_empty():
 		return
 	if special_left > 0 or special_pending > 0:

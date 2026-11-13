@@ -10,6 +10,7 @@ extends VesperZone
 const Y: float = -8.0
 const LIFT_C: Vector3 = Vector3(65.5, -8.0, -31.5)
 const PROPS: String = "res://content/props/%s/%s.glb"
+const GROTTO_X0: float = -16.0
 
 
 func build() -> void:
@@ -23,7 +24,7 @@ func build() -> void:
 	box_mm("GroundLiftN", Vector3(63.0, Y - 1.0, -28.8), Vector3(66.2, Y, -19.8), &"snow")
 	# Boundary: north = sanatorium / station foundations (tall), others low (vaultable by zombies).
 	wall_z("WallN", -20, -10.2, 66.2, Y, 7.0, [[6.0, 2.8, 2.55, 6.2], door_hole(52, 3.0, 3.2)], &"facade")
-	wall_x("WallW", -10, -78, -20, Y, 2.6, [door_hole(-24, 2.4, 2.6)], &"stone")
+	wall_x("WallW", -10, -78, -20, Y, 2.6, [door_hole(-24, 2.4, 2.6), door_hole(-70, 3.0, 2.6)], &"stone")
 	wall_z("WallS", -78, -10.2, 66.2, Y, 2.6, [door_hole(-6, 3.0, 2.8), win_hole(44)], &"stone")
 	wall_x("WallE", 66, -78, -20, Y, 5.0, [[-31.5, 4.6, 0.0, 3.0], [-40.0, 12.0, 0.0, 5.0]], &"stone")
 	# Fountain (centre), motor pool, garage, greenhouse shed, sandbags, snowbank.
@@ -68,7 +69,9 @@ func build() -> void:
 	box_mm("Greenhouse", Vector3(30, Y, -74), Vector3(38, Y + 2.0, -66), &"plaster")
 	box_mm("Snowbank", Vector3(58, Y, -46), Vector3(66, -6.6, -34), &"snow")
 	ramp("SnowbankRamp", Vector3(62, -6.6, -46), Vector3(62, Y, -50), 8.0, &"snow")
-	box_mm("Waterfall", Vector3(-10, Y, -74), Vector3(-9.0, Y + 6.0, -66), &"ice")
+	# The frozen waterfall seals the S2 Ice Grotto (Step 14): a NavDoor shattered by the secret.
+	nav_door("S2_WaterfallIce", Vector3(-9.5, Y + 3.0, -70), Vector3(1.0, 6.0, 8.0))
+	room("Grotto", Vector3(GROTTO_X0, Y, -75), Vector3(-10.2, Y + 4.0, -65), {"E": false}, [&"stone", &"ice"])
 	# Spawners: risers (round 2+), wall climbs.
 	var risers: Array = [
 		Vector3(8, Y, -58),
@@ -90,8 +93,10 @@ func build() -> void:
 	area("Courtyard", Vector3(-10, -8.5, -78), Vector3(66, 0.0, -20))
 	area("CargoRamp", Vector3(4.6, -8.5, -20), Vector3(7.4, 3.0, -8.2))
 	area("LiftShed", Vector3(66, -8.5, -34), Vector3(68, -3.0, -29))
+	area("Grotto", Vector3(GROTTO_X0, -8.5, -75), Vector3(-10.2, -4.0, -65))
 	nav_areas.clear()
 	nav_areas.append(AABB(Vector3(-13.6, -9.5, -81.6), Vector3(83.6, 3.2, 61.6)))  # courtyard + climb pads
+	nav_areas.append(AABB(Vector3(GROTTO_X0 - 0.4, -9.5, -75.4), Vector3(-13.6 - GROTTO_X0 + 0.4, 3.2, 10.8)))  # S2
 	nav_areas.append(AABB(Vector3(4.0, -9.5, -20.0), Vector3(4.0, 8.0, 6.8)))  # cargo ramp (z -20..-13.2)
 	mark(&"perk", "Perk_Ironhide", Vector3(-8.4, Y, -32.5), "Ironhide Stout (garage)", true)
 	wall_buy(&"m16", Vector3(-9.75, Y + 1.5, -44), PI * 0.5).name = "WallBuy_M16"  # VESPER_PEAK §5.1
@@ -241,17 +246,20 @@ func dress() -> void:
 	)
 	# The collapsed greenhouse: iron ribs and broken panes over the low wall.
 	_greenhouse()
-	# Frozen waterfall against the cliff (S2 behind it).
-	hide_greybox("Waterfall")
+	# Frozen waterfall against the cliff (S2 behind it). The ice pieces shatter with the secret
+	# (VesperSecrets hides them), so they stay out of the static batch.
 	for i: int in 7:
-		deco(
+		var ice: MeshInstance3D = deco(
 			"IceFall_%d" % i,
 			Vector3(-9.4, Y + 3.0 + sin(i) * 0.4, -73.4 + i * 1.15),
 			Vector3(1.1 + (i % 3) * 0.25, 6.0 + (i % 2), 1.0),
 			&"ice",
 			Vector3(0, 0, 0.04 * (i - 3))
 		)
+		ice.set_meta(&"no_batch", true)
+		ice.add_to_group(&"s2_ice")
 	prop(&"icicles", Vector3(-9.0, Y + 6.2, -70), PI / 2.0)
+	_grotto()
 	fog(Vector3(-7.5, Y + 1.0, -70), Vector3(4, 2, 8), Color(0.7, 0.8, 0.95), 0.4)
 	# The sanatorium façade looming over the north wall, lit windows (contrast accent).
 	_facade()
@@ -326,3 +334,25 @@ func _facade() -> void:
 	art.add_child(b.instance("SanatoriumFacade", 400.0))
 	for p: Vector3 in [Vector3(46.4, 3.0, -14.4), Vector3(56.0, 5.8, -14.4)]:
 		fixture_light(&"", p, Color(1.0, 0.7, 0.4), 0.8, 8.0, PoweredLight.Pattern.NONE, false)
+
+
+# S2 Ice Grotto (Step 14): a low ice cave behind the waterfall, green vesperite glow in the ice,
+# Tomas Brandt's last camp (rope coil, bedroll, lantern) where L14 and the fourth music box lie.
+func _grotto() -> void:
+	var v: Node3D = vignette("S2_IceGrotto", Vector3(-13.0, Y, -70), "Tomas Brandt's last camp behind the falls")
+	for i: int in 6:
+		var a: float = float(i) * 1.7
+		deco(
+			"GrottoIce_%d" % i,
+			Vector3(GROTTO_X0 + 0.6 + (i % 3) * 2.2, Y + 0.6, -74.2 + i * 1.7),
+			Vector3(0.6, 1.2 + (i % 2) * 0.8, 0.6),
+			&"ice",
+			Vector3(0, a, 0.15)
+		)
+	deco("GrottoBedroll", Vector3(-13.6, Y + 0.08, -69.0), Vector3(0.8, 0.16, 1.9), &"olive")
+	deco("GrottoRope", Vector3(-12.2, Y + 0.1, -71.4), Vector3(0.5, 0.2, 0.5), &"wood")
+	prop(&"suitcase", Vector3(-12.6, Y, -68.4), 0.4, v)
+	fixture_light(
+		&"", Vector3(-14.5, Y + 2.6, -70), Color(0.45, 1.0, 0.6), 0.9, 7.0, PoweredLight.Pattern.FLICKER, false
+	)
+	fog(Vector3(-13.0, Y + 0.6, -70), Vector3(5, 1.2, 9), Color(0.6, 0.9, 0.8), 0.3)

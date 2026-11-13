@@ -112,6 +112,12 @@ func _draw_round() -> void:
 	var base: Vector2 = Vector2(40, size.y - 40)
 	var t: float = clampf(round_pulse / 2.0, 0.0, 1.0)
 	var col: Color = Color.WHITE.lerp(RED, t) if round_pulse < 2.0 else RED
+	var override: String = match_node.quest.round_display() if match_node.quest != null else ""
+	if override != "":
+		# Scripted event (the Easter-egg finale): a flickering symbol replaces the counter.
+		var flick: float = 0.65 + 0.35 * sin(round_pulse * 23.0) * sin(round_pulse * 3.1)
+		_text(base, override, 84, Color(RED.r, RED.g, RED.b, flick))
+		return
 	if r <= 0:
 		if rd.phase == RoundDirector.Phase.INTRO:
 			_text_centered(size.y * 0.3, "VESPER PEAK", 54, Color(0.85, 0.85, 0.9, 0.9))
@@ -280,6 +286,10 @@ func _draw_parts() -> void:
 	for line: String in match_node.buildables.hud_lines():
 		_text(Vector2(size.x - 40, y), line, 16, Color(0.6, 0.9, 1.0), true)
 		y -= 22.0
+	if match_node.quest != null:
+		for line: String in match_node.quest.hud_lines():
+			_text(Vector2(size.x - 40, y), line, 16, Color(0.6, 1.0, 0.7), true)
+			y -= 22.0
 	var rd: RoundDirector = match_node.rounds
 	if rd != null and rd.phase == RoundDirector.Phase.INTERMISSION and rd.next_special != &"":
 		if rd.time_left <= rd.curve.special_warning:
