@@ -44,6 +44,135 @@ const AMBIENCE: Dictionary = {
 
 const DECALS: String = "res://content/decals/%s.png"
 
+# kind -> [width, depth, height, wall-mounted (no floor footprint)]
+const FURNITURE: Dictionary = {
+	&"radiator": [1.05, 0.2, 0.85, false],
+	&"cabinet": [0.9, 0.45, 1.9, false],
+	&"chair": [0.5, 0.5, 1.0, false],
+	&"bench": [2.2, 0.5, 1.0, false],
+	&"filing_cabinet": [0.5, 0.62, 1.3, false],
+	&"bookcase": [1.8, 0.42, 2.6, false],
+	&"wheelchair": [0.7, 0.65, 1.0, false],
+	&"trolley": [0.85, 0.52, 1.1, false],
+	&"notice_board": [1.2, 0.06, 2.1, true],
+	&"extinguisher": [0.32, 0.16, 1.7, true],
+	&"sink": [0.6, 0.46, 1.75, false],
+	&"desk_cluttered": [1.5, 0.76, 1.2, false],
+	&"crate": [0.92, 0.82, 0.82, false],
+	&"locker": [0.92, 0.5, 1.95, false],
+	&"shelf": [1.6, 0.46, 2.1, false],
+	&"jar_shelf": [1.6, 0.46, 2.1, false],
+	&"pallet": [1.2, 1.2, 0.65, false],
+	&"barrel": [0.62, 0.62, 0.9, false],
+	&"barrel_cluster": [1.9, 1.3, 0.9, false],
+	&"pipe_stack": [2.25, 0.9, 0.5, false],
+	&"toolrack": [1.6, 0.06, 2.0, true],
+	&"wall_pipes": [0.85, 0.32, 3.2, true],
+	&"gas_tank": [0.3, 0.3, 1.5, false],
+	&"lab_bench": [2.5, 0.86, 1.3, false],
+	&"bed": [1.0, 2.05, 1.05, false],
+	&"rocks": [1.9, 1.4, 0.9, false],
+	&"scaffold": [2.1, 1.0, 4.0, false],
+	&"drum_rack": [1.95, 0.62, 0.95, false],
+	&"rubble": [1.4, 1.0, 0.35, false],
+	&"papers": [0.9, 0.8, 0.05, false],
+	&"book_pile": [0.5, 0.4, 0.3, false],
+	&"mop_bucket": [0.45, 0.45, 1.3, false],
+}
+# kit -> [[kind, weight], ...]
+const FURNISH_KITS: Dictionary = {
+	"sanatorium":
+	[
+		[&"radiator", 3],
+		[&"cabinet", 2],
+		[&"chair", 2],
+		[&"bench", 2],
+		[&"filing_cabinet", 1],
+		[&"bookcase", 1],
+		[&"wheelchair", 1],
+		[&"notice_board", 2],
+		[&"extinguisher", 1],
+		[&"desk_cluttered", 1],
+		[&"crate", 1],
+		[&"papers", 2],
+		[&"rubble", 1],
+		[&"book_pile", 1],
+	],
+	"ward":
+	[
+		[&"bed", 3],
+		[&"radiator", 2],
+		[&"trolley", 2],
+		[&"wheelchair", 2],
+		[&"cabinet", 2],
+		[&"sink", 2],
+		[&"locker", 1],
+		[&"notice_board", 1],
+		[&"extinguisher", 1],
+		[&"papers", 2],
+		[&"rubble", 1],
+		[&"mop_bucket", 1],
+		[&"chair", 1],
+	],
+	"military":
+	[
+		[&"locker", 3],
+		[&"crate", 3],
+		[&"filing_cabinet", 2],
+		[&"shelf", 1],
+		[&"notice_board", 2],
+		[&"extinguisher", 1],
+		[&"pallet", 2],
+		[&"barrel", 1],
+		[&"desk_cluttered", 1],
+		[&"papers", 2],
+		[&"rubble", 1],
+	],
+	"industrial":
+	[
+		[&"barrel_cluster", 2],
+		[&"barrel", 2],
+		[&"crate", 2],
+		[&"pipe_stack", 2],
+		[&"toolrack", 2],
+		[&"wall_pipes", 3],
+		[&"gas_tank", 1],
+		[&"shelf", 1],
+		[&"locker", 1],
+		[&"pallet", 2],
+		[&"extinguisher", 1],
+		[&"rubble", 2],
+		[&"drum_rack", 1],
+	],
+	"lab":
+	[
+		[&"lab_bench", 2],
+		[&"cabinet", 2],
+		[&"trolley", 2],
+		[&"sink", 2],
+		[&"gas_tank", 2],
+		[&"filing_cabinet", 1],
+		[&"notice_board", 1],
+		[&"extinguisher", 1],
+		[&"locker", 1],
+		[&"jar_shelf", 1],
+		[&"papers", 2],
+		[&"rubble", 1],
+		[&"mop_bucket", 1],
+	],
+	"cavern": [[&"rocks", 4], [&"rubble", 3], [&"crate", 1], [&"barrel", 1], [&"scaffold", 1], [&"pallet", 1]],
+	"exterior": [[&"crate", 3], [&"barrel_cluster", 2], [&"pallet", 2], [&"barrel", 2], [&"rocks", 2], [&"rubble", 2]],
+}
+const FURNISH_FILL: float = 0.62  # chance a free wall slot gets something
+const LIGHT_AREA: float = 55.0
+const AUTO_LIGHTS: Dictionary = {
+	"sanatorium": [&"pendant", Color(1.0, 0.8, 0.55), 1.2],
+	"military": [&"fluoro", Color(0.85, 0.95, 0.88), 0.5],
+	"lab": [&"fluoro", Color(0.85, 1.0, 1.0), 0.5],
+	"industrial": [&"caged_bulb", Color(1.0, 0.72, 0.42), 0.0],
+	"cavern": [&"caged_bulb", Color(1.0, 0.75, 0.5), 0.0],
+}
+
 static var _mats: Dictionary = {}
 static var _decal_tex: Dictionary = {}
 
@@ -54,6 +183,9 @@ static var _decal_tex: Dictionary = {}
 ## cable tray), "industrial" (pipes + soot band), "lab" (tile band + baseboard), "exterior" (snow
 ## drifts at wall feet), "cavern" (rock rubble at wall feet), "" = none.
 @export var trim: String = ""
+## Automatic furnishing kit placed along the walls after dressing (map quality pass): one of
+## FURNISH_KITS' keys; "" = use `trim`'s kit, "none" = no furnishing.
+@export var furnish: String = ""
 
 var geometry: Node3D = null
 var gameplay: Node3D = null
@@ -61,6 +193,8 @@ var lighting: Node3D = null
 var audio: Node3D = null
 var art: Node3D = null
 var vignettes: Array[Node3D] = []
+var furnished: int = 0
+var auto_lights: int = 0
 var _trim_batch: MeshBatch = null
 var _spinners: Array = []  # [Node3D, axis, rad/s]
 
@@ -340,6 +474,206 @@ func spot_light(
 	lighting.add_child(pl)
 	pl.look_at_from_position(pos, target, Vector3.UP if absf((target - pos).normalized().y) < 0.98 else Vector3.FORWARD)
 	return s
+
+
+# --- automatic furnishing (map quality pass) --------------------------------------------------------
+
+
+# Walks the zone's straight wall boxes (like the trim pass) and stands kit props against both
+# faces where: there is floor under the slot at the wall's base, the slot is inside one of the
+# zone's volumes, nothing gameplay (doors, windows, wall-buys, machines, spawners, links, clips)
+# or already-authored dressing is near, the prop intersects no collider, and 1.4 m in front of it
+# stays clear so passages keep their width. Visual only (D-076); deterministic per zone.
+func _auto_furnish() -> void:
+	var kit_name: String = furnish if furnish != "" else trim
+	if kit_name == "none" or not FURNISH_KITS.has(kit_name):
+		return
+	var kit: Array = FURNISH_KITS[kit_name]
+	var total_w: int = 0
+	for k: Array in kit:
+		total_w += int(k[1])
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = hash(String(zone_id)) + 7
+	var solids: Array[AABB] = []
+	var walls: Array[StaticBody3D] = []
+	for b: Node in geometry.find_children("*", "StaticBody3D", true, false):
+		var body: StaticBody3D = b as StaticBody3D
+		if body.collision_layer & 1 == 0:
+			continue
+		var bb: AABB = _collider_aabb(body)
+		if bb.size == Vector3.ZERO:
+			continue
+		solids.append(bb)
+		if body.get_parent() == geometry and body.basis.is_equal_approx(Basis.IDENTITY):
+			walls.append(body)
+	var volumes: Array[ZoneVolume] = []
+	var avoid: PackedVector3Array = PackedVector3Array()
+	for g: Node in gameplay.find_children("*", "Node3D", true, false):
+		if g is ZoneVolume:
+			volumes.append(g as ZoneVolume)
+		else:
+			avoid.append((g as Node3D).global_position)
+	for d: Node in geometry.find_children("*", "NavDoor", true, false):
+		avoid.append((d as Node3D).global_position)
+	var dressed: PackedVector3Array = PackedVector3Array()
+	for n: Node in art.find_children("*", "Node3D", true, false):
+		if n is MeshInstance3D or n is Label3D or n is Decal:
+			dressed.append((n as Node3D).global_position)
+	var holder: Node3D = _art_group("Furnish")
+	for body: StaticBody3D in walls:
+		var name_s: String = String(body.name)
+		if name_s.contains("Bay") or name_s.contains("Vent") or name_s.contains("Closet") or name_s.contains("Seal"):
+			continue
+		if body.get_meta(&"wall_part", &"") == &"lintel":
+			continue
+		var bb: AABB = _collider_aabb(body)
+		var sz: Vector3 = bb.size
+		var along_z: bool = sz.x <= 0.6 and sz.z >= 2.4
+		var along_x: bool = sz.z <= 0.6 and sz.x >= 2.4
+		if not (along_z or along_x) or sz.y < 2.2:
+			continue
+		var y0: float = bb.position.y
+		var a0: float = bb.position.z if along_z else bb.position.x
+		var a1: float = bb.end.z if along_z else bb.end.x
+		for side: float in [-1.0, 1.0]:
+			var nrm: Vector3 = Vector3(side, 0, 0) if along_z else Vector3(0, 0, side)
+			var face: float = (
+				(bb.get_center().x if along_z else bb.get_center().z) + side * (sz.x if along_z else sz.z) * 0.5
+			)
+			var t: float = a0 + rng.randf_range(0.5, 1.4)
+			while t < a1 - 0.5:
+				var pick: int = rng.randi_range(1, total_w)
+				var kind: StringName = kit[0][0]
+				for k: Array in kit:
+					pick -= int(k[1])
+					if pick <= 0:
+						kind = k[0]
+						break
+				var spec: Array = FURNITURE[kind]
+				var w: float = float(spec[0])
+				var dep: float = float(spec[1])
+				var hgt: float = float(spec[2])
+				var centre_a: float = t + w * 0.5
+				if centre_a + w * 0.5 > a1 - 0.3:
+					break
+				var place: bool = rng.randf() < FURNISH_FILL
+				var gap: float = rng.randf_range(0.3, 1.6)
+				if place:
+					var off: float = dep * 0.5 + 0.03
+					var base: Vector3 = Vector3(face, y0, centre_a) if along_z else Vector3(centre_a, y0, face)
+					var pos: Vector3 = base + nrm * off
+					if _furnish_ok(pos, nrm, w, dep, hgt, bool(spec[3]), y0, solids, volumes, avoid, dressed):
+						var mi: MeshInstance3D = prop(
+							kind, pos, atan2(nrm.x, nrm.z) + rng.randf_range(-0.04, 0.04), holder
+						)
+						mi.set_meta(&"furnish", true)
+						dressed.append(pos)
+						furnished += 1
+						t = centre_a + w * 0.5 + gap
+						continue
+				t += 0.8 + gap * 0.5
+
+
+# gdlint: ignore=function-arguments-number
+func _furnish_ok(
+	pos: Vector3,
+	nrm: Vector3,
+	w: float,
+	dep: float,
+	hgt: float,
+	mounted: bool,
+	y0: float,
+	solids: Array[AABB],
+	volumes: Array[ZoneVolume],
+	avoid: PackedVector3Array,
+	dressed: PackedVector3Array
+) -> bool:
+	var inside: bool = false
+	for v: ZoneVolume in volumes:
+		if v.contains(pos + Vector3(0, 0.5, 0)) and v.contains(pos + nrm * (dep * 0.5 + 1.2) + Vector3(0, 0.5, 0)):
+			inside = true
+			break
+	if not inside:
+		return false
+	var flat: Vector2 = Vector2(pos.x, pos.z)
+	for a: Vector3 in avoid:
+		if absf(a.y - pos.y) < 3.5 and Vector2(a.x, a.z).distance_to(flat) < 1.9 + w * 0.5:
+			return false
+	for dpos: Vector3 in dressed:
+		if absf(dpos.y - pos.y) < 3.0 and Vector2(dpos.x, dpos.z).distance_to(flat) < 1.0 + w * 0.5:
+			return false
+	var tangent: Vector3 = Vector3(nrm.z, 0, nrm.x).abs()
+	var half: Vector3 = tangent * (w * 0.5) + nrm.abs() * (dep * 0.5)
+	var body: AABB = AABB(pos - half + Vector3(0, 0.06, 0), half * 2.0 + Vector3(0, maxf(hgt - 0.1, 0.05), 0))
+	# the passage in front (shoulder height) and the prop itself must be free of colliders
+	var lane_c: Vector3 = pos + nrm * (dep * 0.5 + 0.75)
+	var lane_half: Vector3 = tangent * (w * 0.5) + nrm.abs() * 0.7
+	var lane: AABB = AABB(lane_c - lane_half + Vector3(0, 0.3, 0), lane_half * 2.0 + Vector3(0, 1.5, 0))
+	var floor_found: bool = mounted
+	for s: AABB in solids:
+		if s.intersects(body):
+			return false
+		if s.intersects(lane):
+			return false
+		if not floor_found and absf(s.end.y - y0) < 0.12 and s.has_point(Vector3(pos.x, s.get_center().y, pos.z)):
+			floor_found = true
+	return floor_found
+
+
+static func _collider_aabb(body: StaticBody3D) -> AABB:
+	for c: Node in body.get_children():
+		if c is CollisionShape3D and (c as CollisionShape3D).shape is BoxShape3D:
+			var sz: Vector3 = ((c as CollisionShape3D).shape as BoxShape3D).size
+			return body.global_transform * (c as CollisionShape3D).transform * AABB(-sz * 0.5, sz)
+	return AABB()
+
+
+# Ceiling fixtures per roofed room so no room is left in the dark (map quality pass): about one
+# light per LIGHT_AREA m² of floor, counting the lights the zone already has inside the room.
+# Unshadowed, powered (dim until the power is on), fixture style per trim.
+func _auto_light() -> void:
+	if not AUTO_LIGHTS.has(trim):
+		return
+	var spec: Array = AUTO_LIGHTS[trim]
+	var existing: PackedVector3Array = PackedVector3Array()
+	for l: Node in lighting.find_children("*", "Light3D", true, false):
+		existing.append((l as Node3D).global_position)
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = hash(String(zone_id)) + 31
+	for r: Array in get(&"rooms"):
+		var lo: Vector3 = r[0]
+		var hi: Vector3 = r[1]
+		var size: Vector3 = hi - lo
+		var area: float = size.x * size.z
+		var have: int = 0
+		for e: Vector3 in existing:
+			if e.x > lo.x and e.x < hi.x and e.z > lo.z and e.z < hi.z and e.y > lo.y - 0.5 and e.y < hi.y + 0.5:
+				have += 1
+		var want: int = maxi(1, roundi(area / LIGHT_AREA))
+		if have >= want:
+			continue
+		var nx: int = maxi(1, roundi(sqrt(float(want) * size.x / size.z)))
+		var nz: int = maxi(1, ceili(float(want) / nx))
+		var cell: Vector2 = Vector2(size.x / nx, size.z / nz)
+		var rng_len: float = clampf(cell.length() * 0.85, 7.0, 14.0)
+		for ix: int in nx:
+			for iz: int in nz:
+				var p: Vector3 = Vector3(
+					lo.x + cell.x * (ix + 0.5), hi.y - float(spec[2]) - 0.05, lo.z + cell.y * (iz + 0.5)
+				)
+				var crowded: bool = false
+				for e: Vector3 in existing:
+					if Vector2(e.x, e.z).distance_to(Vector2(p.x, p.z)) < 3.0 and absf(e.y - p.y) < 3.0:
+						crowded = true
+						break
+				if crowded:
+					continue
+				var pattern: PoweredLight.Pattern = (
+					PoweredLight.Pattern.FLICKER if rng.randf() < 0.18 else PoweredLight.Pattern.NONE
+				)
+				fixture_light(spec[0], p, spec[1], 0.9, rng_len, pattern, true, 0, 0.0 if size.x < size.z else PI / 2.0)
+				existing.append(p)
+				auto_lights += 1
 
 
 # --- automatic trims ------------------------------------------------------------------------------

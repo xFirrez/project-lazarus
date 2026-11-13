@@ -7,11 +7,11 @@
 # Run: tools/visual_tests.sh <out_dir> vesper_survey   (`--shots=Z04,Z10` limits the zones)
 extends "res://tests/net/autotest_base.gd"
 
-var SPACING: float = 7.0
-var MAX_SAMPLES: int = 8
-var RAYS: int = 400
 const OPEN_ZONES: Array[StringName] = [&"Z06", &"Z07"]
 
+var _spacing: float = 7.0
+var _max_samples: int = 8
+var _rays: int = 400
 var _out: String = ""
 var _only: PackedStringArray = PackedStringArray()
 var _render: bool = true
@@ -28,9 +28,9 @@ func _ready() -> void:
 		_only = only.split(",")
 	_render = CommandLine.get_value("survey-render", "1") == "1"
 	if not _render:  # leak-only: denser
-		SPACING = 4.0
-		MAX_SAMPLES = 40
-		RAYS = 1600
+		_spacing = 4.0
+		_max_samples = 40
+		_rays = 1600
 	DirAccess.make_dir_recursive_absolute(_out)
 	EventBus.match_started.connect(func(_m: StringName) -> void: _run.call_deferred())
 
@@ -104,7 +104,16 @@ func _run() -> void:
 			if not leaks.is_empty():
 				zl += leaks.size()
 				report.append(
-					"%s s%d %s: %d leak rays, e.g. %s" % [z.zone_id, i, str(eye.snapped(Vector3.ONE * 0.1)), leaks.size(), str(leaks[0].snapped(Vector3.ONE * 0.01))]
+					(
+						"%s s%d %s: %d leak rays, e.g. %s"
+						% [
+							z.zone_id,
+							i,
+							str(eye.snapped(Vector3.ONE * 0.1)),
+							leaks.size(),
+							str(leaks[0].snapped(Vector3.ONE * 0.01))
+						]
+					)
 				)
 			if not _render:
 				continue
@@ -140,9 +149,9 @@ func _run() -> void:
 func _samples(space: PhysicsDirectSpaceState3D, z: VesperZone) -> Array[Vector3]:
 	var pts: Array[Vector3] = []
 	for a: AABB in z.nav_areas:
-		var x: float = a.position.x + SPACING * 0.5
+		var x: float = a.position.x + _spacing * 0.5
 		while x < a.end.x:
-			var zz: float = a.position.z + SPACING * 0.5
+			var zz: float = a.position.z + _spacing * 0.5
 			while zz < a.end.z:
 				# every floor in the column; the lowest, plus any covered floor (roof tops skipped)
 				var top: float = a.end.y + 0.5
@@ -183,12 +192,12 @@ func _samples(space: PhysicsDirectSpaceState3D, z: VesperZone) -> Array[Vector3]
 						continue  # zombie-only pads / closets / vent bays
 					if np.distance_to(column[k]) < 0.6 and _in_zone(z, column[k]) and _reachable(np):
 						pts.append(column[k])
-				zz += SPACING
-			x += SPACING
-	if pts.size() <= MAX_SAMPLES:
+				zz += _spacing
+			x += _spacing
+	if pts.size() <= _max_samples:
 		return pts
 	var out: Array[Vector3] = [pts[0]]
-	while out.size() < MAX_SAMPLES:
+	while out.size() < _max_samples:
 		var best: Vector3 = pts[0]
 		var bd: float = -1.0
 		for p: Vector3 in pts:
@@ -245,7 +254,7 @@ func _in_zone(z: VesperZone, p: Vector3) -> bool:
 # Ray directions (Fibonacci sphere) from `eye` that hit nothing within 600 m.
 func _leaks(space: PhysicsDirectSpaceState3D, eye: Vector3, open_sky: bool) -> Array[Vector3]:
 	var out: Array[Vector3] = []
-	var n: int = RAYS
+	var n: int = _rays
 	for i: int in n:
 		var y: float = 1.0 - (float(i) + 0.5) / n * 2.0
 		if open_sky and y > -0.05:

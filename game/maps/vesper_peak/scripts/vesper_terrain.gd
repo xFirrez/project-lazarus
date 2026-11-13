@@ -84,7 +84,13 @@ func build(parent: Node3D, zones: Array) -> MeshInstance3D:
 				var flat: bool = body.global_basis.is_equal_approx(Basis.IDENTITY)
 				if flat and bb.size.y <= 1.05 and bb.size.x * bb.size.z >= 6.0:
 					_raster(bb, 6.0, MODE_MIN, base, -2.0)  # floors stand on the rock
-				if zid == &"Z06" and flat and bb.size.y >= 2.0 and minf(bb.size.x, bb.size.z) <= 0.6 and bb.end.y < -2.0:
+				if (
+					zid == &"Z06"
+					and flat
+					and bb.size.y >= 2.0
+					and minf(bb.size.x, bb.size.z) <= 0.6
+					and bb.end.y < -2.0
+				):
 					_raster(bb, 14.0, MODE_MIN, bb.end.y - 0.6, -0.12)  # snow berm behind the low walls
 	_gondola_line()
 	var mat: Material = _material()
@@ -94,7 +100,10 @@ func build(parent: Node3D, zones: Array) -> MeshInstance3D:
 	var outer: MeshInstance3D = _mesh_outer(mat)
 	outer.name = "TerrainFar"
 	parent.add_child(outer)
-	Log.info(&"map", "vesper terrain: %d + %d verts in %.0f ms" % [_nx * _nz, _outer_count(), (Time.get_ticks_usec() - t0) / 1000.0])
+	Log.info(
+		&"map",
+		"vesper terrain: %d + %d verts in %.0f ms" % [_nx * _nz, _outer_count(), (Time.get_ticks_usec() - t0) / 1000.0]
+	)
 	return fine
 
 
@@ -190,7 +199,9 @@ func _gondola_line() -> void:
 		var n: int = int(a.distance_to(b) / FINE) + 1
 		for s: int in n + 1:
 			var p: Vector3 = a.lerp(b, float(s) / n)
-			_raster(AABB(p + Vector3(-2.0, -3.5, -1.0), Vector3(4.0, 6.0, 2.0)), REACH, MODE_MAX, p.y - 3.5 - CLEAR, SLOPE)
+			_raster(
+				AABB(p + Vector3(-2.0, -3.5, -1.0), Vector3(4.0, 6.0, 2.0)), REACH, MODE_MAX, p.y - 3.5 - CLEAR, SLOPE
+			)
 
 
 # --- meshes -----------------------------------------------------------------------------------------

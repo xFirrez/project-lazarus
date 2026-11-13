@@ -189,48 +189,63 @@ func _environment(map_root: Node3D) -> void:
 	sky_mat.set_shader_parameter(&"moon_dir", moon.global_transform.basis.z.normalized())
 
 
-# Distant peaks: a ring of jagged ridges (snow above ~60 % height) 230–420 m from the map centre,
-# plus the near ridge masses behind the Comms Array and the Courtyard cliff. One mesh, vertex
-# colours, no collision.
+# Distant peaks (map quality pass): a polar heightfield range 290–720 m from the map centre —
+# ridged noise peaks with snow on the gentler faces and rock on the steep ones, shaded toward the
+# haze colour with distance (aerial perspective baked into vertex colours, so the scene fog can't
+# flatten it into a pale wall). It replaces the earlier ring of flat triangle "teeth". The valleys
+# between it and the massif (VesperTerrain) sink into the cloud sea. One mesh, no collision.
 func _backdrop() -> void:
-	var st: SurfaceTool = SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	rng.seed = 1952
-	var rock: Color = Color(0.035, 0.045, 0.06)
-	var snow: Color = Color(0.3, 0.34, 0.42)
-	var rock0: Color = rock
-	var snow0: Color = snow
-	for ring: int in 3:
-		var r0: float = 230.0 + ring * 85.0
-		# aerial perspective: farther ranges fade toward the haze colour
-		rock = rock0.lerp(Color(0.1, 0.13, 0.19), ring * 0.35)
-		snow = snow0.lerp(Color(0.22, 0.27, 0.36), ring * 0.35)
-		var segs: int = 72
-		var heights: PackedFloat32Array = PackedFloat32Array()
+	var n: FastNoiseLite = FastNoiseLite.new()
+	n.seed = 1952
+	n.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	n.fractal_type = FastNoiseLite.FRACTAL_RIDGED
+	n.fractal_octaves = 5
+	n.frequency = 0.0042
+	var segs: int = 200
+	var rings: int = 34
+	var r_in: float = 290.0
+	var r_out: float = 720.0
+	var rock: Color = Color(0.05, 0.06, 0.08)
+	var snow: Color = Color(0.36, 0.41, 0.5)
+	var haze: Color = Color(0.13, 0.16, 0.23)
+	var pts: PackedVector3Array = PackedVector3Array()
+	for j: int in rings + 1:
+		var t: float = float(j) / rings
+		var r: float = lerpf(r_in, r_out, t * t * 0.6 + t * 0.4)
 		for i: int in segs:
 			var a: float = TAU * float(i) / segs
-			var h: float = 40.0 + ring * 35.0 + rng.randf_range(0.0, 70.0 + ring * 30.0)
-			h += 50.0 * maxf(sin(a * 3.0 + ring), 0.0)
-			heights.append(h)
+			var x: float = CENTRE.x + cos(a) * r
+			var z: float = CENTRE.z + sin(a) * r
+			var ridge: float = n.get_noise_2d(x, z) * 0.5 + 0.5
+			var rise: float = smoothstep(r_in, r_in + 110.0, r) * (1.0 - smoothstep(560.0, r_out, r) * 0.55)
+			var h: float = -150.0 + rise * (150.0 + 60.0 + 230.0 * ridge * ridge)
+			pts.append(Vector3(x, h, z))
+	var st: SurfaceTool = SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for j: int in rings:
 		for i: int in segs:
-			var a0: float = TAU * float(i) / segs
-			var a1: float = TAU * float(i + 1) / segs
-			var am: float = (a0 + a1) * 0.5
-			var h0: float = heights[i]
-			var h1: float = heights[(i + 1) % segs]
-			var hm: float = maxf(h0, h1) + rng.randf_range(5.0, 30.0)
-			var base_y: float = -160.0
-			var p0: Vector3 = CENTRE + Vector3(cos(a0) * r0, base_y, sin(a0) * r0)
-			var p1: Vector3 = CENTRE + Vector3(cos(a1) * r0, base_y, sin(a1) * r0)
-			var q0: Vector3 = CENTRE + Vector3(cos(a0) * r0, h0, sin(a0) * r0)
-			var q1: Vector3 = CENTRE + Vector3(cos(a1) * r0, h1, sin(a1) * r0)
-			var peak: Vector3 = CENTRE + Vector3(cos(am) * (r0 + 12.0), hm, sin(am) * (r0 + 12.0))
-			var c0: Color = snow if h0 > 95.0 else rock
-			var c1: Color = snow if h1 > 95.0 else rock
-			_tri(st, p0, q0, p1, rock, c0, rock)
-			_tri(st, p1, q0, q1, rock, c0, c1)
-			_tri(st, q0, peak, q1, c0, snow if hm > 85.0 else rock, c1)
+			var i1: int = (i + 1) % segs
+			var a: Vector3 = pts[j * segs + i]
+			var b: Vector3 = pts[j * segs + i1]
+			var c: Vector3 = pts[(j + 1) * segs + i]
+			var d: Vector3 = pts[(j + 1) * segs + i1]
+			for tri: Array in [[a, c, b], [b, c, d]]:
+				var nrm: Vector3 = (
+					((tri[1] as Vector3) - (tri[0] as Vector3))
+					. cross((tri[2] as Vector3) - (tri[0] as Vector3))
+					. normalized()
+				)
+				if nrm.y < 0.0:
+					nrm = -nrm
+				for v: Vector3 in tri:
+					var snowy: float = smoothstep(0.45, 0.7, nrm.y) * smoothstep(20.0, 90.0, v.y)
+					var col: Color = rock.lerp(snow, snowy)
+					var far: float = clampf(
+						(Vector2(v.x, v.z).distance_to(Vector2(CENTRE.x, CENTRE.z)) - r_in) / (r_out - r_in), 0.0, 1.0
+					)
+					st.set_color(col.lerp(haze, 0.25 + far * 0.55))
+					st.add_vertex(v)
+	st.index()
 	st.generate_normals()
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.name = "MountainRing"
@@ -239,22 +254,11 @@ func _backdrop() -> void:
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	# Distance haze is baked into the vertex colours; scene fog would flatten the ridges into a
-	# pale wall (map quality pass).
 	mat.disable_fog = true
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.extra_cull_margin = 50.0
 	add_child(mi)
-
-
-static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color) -> void:
-	st.set_color(ca)
-	st.add_vertex(a)
-	st.set_color(cb)
-	st.add_vertex(b)
-	st.set_color(cc)
-	st.add_vertex(c)
 
 
 func _cloud_sea() -> void:

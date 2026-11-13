@@ -17,8 +17,9 @@ const SLAB_T: float = 0.5
 const CORRIDOR_LAP: float = 0.25
 
 var nav_areas: Array[AABB] = []
-var _corridor_ends: Array = []  # [point, basis] of every corridor() end (joint fillers)
+var rooms: Array = []  # [lo, hi, prefix] of every roofed room() (auto lighting)
 var occluders: int = 0
+var _corridor_ends: Array = []  # [point, basis] of every corridor() end (joint fillers)
 
 
 func _ready() -> void:
@@ -33,6 +34,8 @@ func _ready() -> void:
 	art = $Art
 	build()
 	dress()
+	_auto_furnish()
+	_auto_light()
 	if trim != "":
 		_auto_trim()
 	batch_static()
@@ -276,6 +279,7 @@ func room(
 	if with_floor:
 		box_mm("%s_Floor" % prefix, Vector3(lo.x - t, y - SLAB_T, lo.z - t), Vector3(hi.x + t, y, hi.z + t), fs)
 	if with_roof:
+		rooms.append([lo, hi, prefix])
 		box_mm("%s_Roof" % prefix, Vector3(lo.x - t, hi.y, lo.z - t), Vector3(hi.x + t, hi.y + SLAB_T, hi.z + t), ws)
 	for side: String in ["N", "S", "E", "W"]:
 		var o: Variant = open.get(side, [])
