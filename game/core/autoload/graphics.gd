@@ -168,13 +168,24 @@ func _apply_global() -> void:
 	RenderingServer.environment_set_volumetric_fog_volume_size(preset.volumetric_fog_size, preset.volumetric_fog_depth)
 
 
+func _deferred_apply(node: Variant) -> void:
+	if not is_instance_valid(node):
+		return
+	if node is WorldEnvironment:
+		apply_environment(node as WorldEnvironment)
+	elif node is Camera3D:
+		apply_camera(node as Camera3D)
+
+
 func _on_node_added(node: Node) -> void:
 	if preset == null:
 		return
+	# Deferred through a lambda that re-checks validity: a node freed in the same frame (e.g. a map
+	# torn down right after it was added) must not reach the typed apply_* call.
 	if node is WorldEnvironment:
-		apply_environment.call_deferred(node as WorldEnvironment)
+		_deferred_apply.call_deferred(node)
 	elif node is Camera3D:
-		apply_camera.call_deferred(node as Camera3D)
+		_deferred_apply.call_deferred(node)
 	elif node is GPUParticles3D and node.is_in_group(DENSITY_GROUP):
 		apply_particles(node as GPUParticles3D)
 	elif node is Light3D and node.is_in_group(SHADOW_GROUP):

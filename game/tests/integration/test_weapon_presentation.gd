@@ -105,6 +105,9 @@ func test_mp40_60s_pools_capped_no_growth() -> void:
 		await Helper.step(self, 30)
 		warm += 30
 	gut.p("warm-up %.1f s" % (warm / 60.0))
+	# Placeholder audio sets synthesize on worker threads; finish them so they don't count as growth.
+	Audio.wait_for_synthesis()
+	await Helper.step(self, 2)
 	var census0: Dictionary = _census(get_tree().root)
 	var nodes0: float = Performance.get_monitor(Performance.OBJECT_NODE_COUNT)
 	var objects0: float = Performance.get_monitor(Performance.OBJECT_COUNT)
