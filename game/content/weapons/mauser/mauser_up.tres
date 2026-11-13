@@ -1,0 +1,74 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.000, 0.550, 0, 0, 0, 0, -0.138, 0.528, 0, 0, 0, 0, 0.156, 0.506, 0, 0, 0, 0, -0.174, 0.484, 0, 0, 0, 0, 0.192, 0.462, 0, 0, 0, 0, -0.210, 0.440, 0, 0, 0, 0, 0.228, 0.418, 0, 0, 0, 0, -0.246, 0.396)
+}
+point_count = 8
+
+[resource]
+script = ExtResource("1")
+id = &"mauser_up"
+display_name = "\"Kaiser's Fury\""
+weapon_class = 0
+cost = 0
+behavior = &"hitscan"
+fire_mode = 1
+rpm = 600.0
+burst_count = 3
+damage = 100.0
+pellets = 1
+pellet_spread_deg = 0.0
+max_range = 100.0
+head_multiplier = 3.0
+neck_multiplier = 2.0
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 12.0
+range_max = 30.0
+min_damage_fraction = 0.6
+penetration = 1
+penetration_loss = 0.25
+mag_size = 30
+reserve_max = 160
+reload_partial_time = 2.0
+reload_empty_time = 2.4
+ammo_in_partial = 1.4
+ammo_in_empty = 1.7
+raise_time = 0.35
+lower_time = 0.25
+ads_time = 0.18
+sprint_out_time = 0.15
+ads_fov_multiplier = 0.88
+move_speed_multiplier = 1.0
+spread_hip = 1.6
+spread_ads = 0.12
+spread_move = 1.4
+spread_per_shot = 0.4
+spread_max = 4.0
+spread_recovery = 8.0
+recoil_random = 0.12
+recoil_ads_multiplier = 0.65
+recoil_recovery = 0.6
+recoil_recovery_speed = 6.0
+view_kick = 0.5
+vm_kick_back = 0.03
+vm_kick_rot = 2.5
+viewmodel_style = &"pistol"
+viewmodel_color = Color(0.18, 0.17, 0.16, 1)
+viewmodel_offset = Vector3(0.16, -0.16, -0.32)
+sight_height = 0.05
+viewmodel_fov = 65.0
+scope_sway = 0.0
+tracer_every = 1
+shell_size = 0.01
+muzzle_flash_scale = 1.0
+sound_body_hz = 210.0
+sound_mech_hz = 3200.0
+sound_tail_s = 0.45
+sound_volume_db = -3.0
+recoil_pattern = SubResource("recoil")
+base_id = &"mauser"
+camo = &"vesperite"

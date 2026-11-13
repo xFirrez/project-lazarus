@@ -1,0 +1,14 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://core/enemies/zombie_model.gd" id="1"]
+[ext_resource type="PackedScene" path="res://content/enemies/zombie/zombie_orderly.glb" id="2"]
+[ext_resource type="AnimationLibrary" path="res://content/characters/animations/zombie_anims.glb" id="3"]
+[ext_resource type="Resource" path="res://content/enemies/zombie/zombie_hitboxes.tres" id="4"]
+[ext_resource type="Material" path="res://content/materials/zombie_skin_frostbitten.tres" id="5"]
+
+[node name="Zombie_orderly_frostbitten" type="Node3D"]
+script = ExtResource("1")
+model_scene = ExtResource("2")
+animations = ExtResource("3")
+hitboxes = ExtResource("4")
+skin_material = ExtResource("5")

@@ -1,0 +1,213 @@
+[gd_resource type="Resource" script_class="AtmosphereSet" load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://core/render/atmosphere_profile.gd" id="1"]
+[ext_resource type="Script" path="res://core/render/atmosphere_set.gd" id="2"]
+
+[sub_resource type="Resource" id="p_Z01"]
+script = ExtResource("1")
+fog_color = Color(0.12, 0.15, 0.2, 1)
+fog_density = 0.008
+ambient_color = Color(0.25, 0.28, 0.36, 1)
+ambient_energy = 0.55
+brightness = 1.0
+contrast = 1.1
+saturation = 0.85
+vol_fog_density = 0.03
+vol_fog_albedo = Color(0.6, 0.7, 0.85, 1)
+vol_fog_emission = Color(0.006, 0.01, 0.018, 1)
+moon_energy = 1.0
+snow = 0.25
+exposure = 1.25
+note = "Z01: cold moon shafts through frosted panes; warm swinging tungsten accent"
+
+[sub_resource type="Resource" id="p_Z03"]
+script = ExtResource("1")
+fog_color = Color(0.22, 0.17, 0.12, 1)
+fog_density = 0.009
+ambient_color = Color(0.42, 0.32, 0.24, 1)
+ambient_energy = 0.5
+brightness = 1.0
+contrast = 1.06
+saturation = 0.92
+vol_fog_density = 0.02
+vol_fog_albedo = Color(0.9, 0.8, 0.65, 1)
+vol_fog_emission = Color(0.012, 0.008, 0.004, 1)
+moon_energy = 0.55
+snow = 0.0
+exposure = 1.25
+note = "Z03: warm dusty amber lobby; blue moon shafts from the terrace windows"
+
+[sub_resource type="Resource" id="p_Z04"]
+script = ExtResource("1")
+fog_color = Color(0.15, 0.17, 0.15, 1)
+fog_density = 0.01
+ambient_color = Color(0.28, 0.32, 0.3, 1)
+ambient_energy = 0.45
+brightness = 0.98
+contrast = 1.1
+saturation = 0.78
+vol_fog_density = 0.02
+vol_fog_albedo = Color(0.75, 0.8, 0.75, 1)
+vol_fog_emission = Color(0.004, 0.006, 0.004, 1)
+moon_energy = 0.4
+snow = 0.05
+exposure = 1.2
+note = "Z04: military fluorescents over Victorian fittings: sickly cold-green"
+
+[sub_resource type="Resource" id="p_Z05"]
+script = ExtResource("1")
+fog_color = Color(0.16, 0.2, 0.24, 1)
+fog_density = 0.009
+ambient_color = Color(0.3, 0.36, 0.42, 1)
+ambient_energy = 0.5
+brightness = 1.0
+contrast = 1.1
+saturation = 0.82
+vol_fog_density = 0.025
+vol_fog_albedo = Color(0.75, 0.85, 0.95, 1)
+vol_fog_emission = Color(0.006, 0.008, 0.012, 1)
+moon_energy = 0.9
+snow = 0.2
+exposure = 1.25
+note = "Z05: cold surgical light under the dome; green arcs"
+
+[sub_resource type="Resource" id="p_Z06"]
+script = ExtResource("1")
+fog_color = Color(0.16, 0.22, 0.3, 1)
+fog_density = 0.007
+ambient_color = Color(0.22, 0.3, 0.42, 1)
+ambient_energy = 0.75
+brightness = 1.0
+contrast = 1.08
+saturation = 0.88
+vol_fog_density = 0.018
+vol_fog_albedo = Color(0.55, 0.65, 0.8, 1)
+vol_fog_emission = Color(0.012, 0.02, 0.035, 1)
+moon_energy = 1.0
+snow = 0.85
+exposure = 1.25
+note = "Z06: the storm at its strongest; warm sanatorium windows as the accent"
+
+[sub_resource type="Resource" id="p_Z07"]
+script = ExtResource("1")
+fog_color = Color(0.15, 0.22, 0.27, 1)
+fog_density = 0.008
+ambient_color = Color(0.22, 0.32, 0.4, 1)
+ambient_energy = 0.75
+brightness = 1.0
+contrast = 1.08
+saturation = 0.85
+vol_fog_density = 0.02
+vol_fog_albedo = Color(0.55, 0.7, 0.8, 1)
+vol_fog_emission = Color(0.01, 0.024, 0.03, 1)
+moon_energy = 1.0
+snow = 0.8
+exposure = 1.25
+note = "Z07: ridge-top storm, aurora-green cloud glow, red aircraft lights"
+
+[sub_resource type="Resource" id="p_Z08"]
+script = ExtResource("1")
+fog_color = Color(0.2, 0.12, 0.07, 1)
+fog_density = 0.015
+ambient_color = Color(0.32, 0.2, 0.12, 1)
+ambient_energy = 0.45
+brightness = 1.0
+contrast = 1.12
+saturation = 0.95
+vol_fog_density = 0.035
+vol_fog_albedo = Color(0.8, 0.6, 0.45, 1)
+vol_fog_emission = Color(0.02, 0.008, 0.002, 1)
+moon_energy = 0.0
+snow = 0.0
+exposure = 1.2
+note = "Z08: furnace orange and soot; cold steam as the accent"
+
+[sub_resource type="Resource" id="p_Z09"]
+script = ExtResource("1")
+fog_color = Color(0.12, 0.11, 0.09, 1)
+fog_density = 0.011
+ambient_color = Color(0.22, 0.2, 0.16, 1)
+ambient_energy = 0.4
+brightness = 1.0
+contrast = 1.12
+saturation = 0.85
+vol_fog_density = 0.025
+vol_fog_albedo = Color(0.75, 0.7, 0.6, 1)
+vol_fog_emission = Color(0.006, 0.004, 0.002, 1)
+moon_energy = 0.0
+snow = 0.0
+exposure = 1.2
+note = "Z09: sodium lamps over the generators; green reactor light through the grates"
+
+[sub_resource type="Resource" id="p_Z10"]
+script = ExtResource("1")
+fog_color = Color(0.08, 0.13, 0.1, 1)
+fog_density = 0.012
+ambient_color = Color(0.16, 0.24, 0.18, 1)
+ambient_energy = 0.4
+brightness = 0.98
+contrast = 1.1
+saturation = 0.75
+vol_fog_density = 0.03
+vol_fog_albedo = Color(0.6, 0.75, 0.62, 1)
+vol_fog_emission = Color(0.002, 0.008, 0.004, 1)
+moon_energy = 0.0
+snow = 0.0
+exposure = 1.2
+note = "Z10: green emergency bulbs, damp, breath fog"
+
+[sub_resource type="Resource" id="p_Z11"]
+script = ExtResource("1")
+fog_color = Color(0.14, 0.19, 0.19, 1)
+fog_density = 0.01
+ambient_color = Color(0.3, 0.38, 0.38, 1)
+ambient_energy = 0.45
+brightness = 1.0
+contrast = 1.08
+saturation = 0.8
+vol_fog_density = 0.022
+vol_fog_albedo = Color(0.75, 0.85, 0.85, 1)
+vol_fog_emission = Color(0.004, 0.008, 0.008, 1)
+moon_energy = 0.0
+snow = 0.0
+exposure = 1.2
+note = "Z11: sterile teal tile; red alarm strobes and a green vesperite leak"
+
+[sub_resource type="Resource" id="p_Z12"]
+script = ExtResource("1")
+fog_color = Color(0.12, 0.18, 0.2, 1)
+fog_density = 0.012
+ambient_color = Color(0.24, 0.32, 0.36, 1)
+ambient_energy = 0.45
+brightness = 1.0
+contrast = 1.08
+saturation = 0.8
+vol_fog_density = 0.03
+vol_fog_albedo = Color(0.7, 0.85, 0.9, 1)
+vol_fog_emission = Color(0.004, 0.01, 0.012, 1)
+moon_energy = 0.0
+snow = 0.0
+exposure = 1.2
+note = "Z12: freezing cold storage; green reactor glow through the gallery glass"
+
+[sub_resource type="Resource" id="p_Z13"]
+script = ExtResource("1")
+fog_color = Color(0.06, 0.14, 0.09, 1)
+fog_density = 0.006
+ambient_color = Color(0.14, 0.22, 0.17, 1)
+ambient_energy = 0.55
+brightness = 1.0
+contrast = 1.12
+saturation = 0.9
+vol_fog_density = 0.014
+vol_fog_albedo = Color(0.4, 0.8, 0.5, 1)
+vol_fog_emission = Color(0, 0.02, 0.008, 1)
+moon_energy = 0.0
+snow = 0.0
+exposure = 1.25
+note = "Z13: black stone and brass; vesperite-green haze around the core"
+
+[resource]
+script = ExtResource("2")
+fallback = SubResource("p_Z06")
+profiles = {&"Z01": SubResource("p_Z01"), &"Z03": SubResource("p_Z03"), &"Z04": SubResource("p_Z04"), &"Z05": SubResource("p_Z05"), &"Z06": SubResource("p_Z06"), &"Z07": SubResource("p_Z07"), &"Z08": SubResource("p_Z08"), &"Z09": SubResource("p_Z09"), &"Z10": SubResource("p_Z10"), &"Z11": SubResource("p_Z11"), &"Z12": SubResource("p_Z12"), &"Z13": SubResource("p_Z13")}

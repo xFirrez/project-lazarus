@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/player/character_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"ashcombe"
+display_name = "Ashcombe"
+full_name = "Dr. Julian Ashcombe"
+nationality = "UK"
+bio = "Disgraced psychologist who corresponded with the Lazarus team. Unnervingly cheerful."
+color = Color(0.35, 0.82, 0.4, 1)
+sleeve_color = Color(0.3, 0.22, 0.16, 1)
+skin_color = Color(0.8, 0.62, 0.5, 1)
+order = 3
+model_scene = "res://content/characters/ashcombe/ashcombe_model.tscn"

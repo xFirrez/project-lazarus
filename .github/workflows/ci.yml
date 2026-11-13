@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache Godot
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/godot
+          key: godot-${{ hashFiles('tools/godot_version.txt') }}
+
+      - name: Install Godot + gdtoolkit
+        run: |
+          tools/install_godot.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          pip install gdtoolkit==4.5.0
+
+      - name: Import, lint, format, boundary, unit tests
+        run: tools/check.sh
+
+      - name: Integration tests
+        run: tools/run_tests.sh integration
+
+      - name: Net loopback tests (ENet + NetSim 100ms/20ms/2%)
+        run: tools/net_tests.sh
+
+      - name: Smoke simulation
+        run: tools/run_sim.sh smoke
+
+      - name: Upload test logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: .test-results/

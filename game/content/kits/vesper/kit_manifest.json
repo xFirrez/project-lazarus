@@ -1,0 +1,266 @@
+{
+ "grid": 2.0,
+ "pieces": {
+  "floor_2m": {
+   "bounds": [
+    [
+     -1,
+     -0.2,
+     -1
+    ],
+    [
+     1,
+     0,
+     1
+    ]
+   ],
+   "collision": true,
+   "tris": 12
+  },
+  "floor_2m_exterior": {
+   "bounds": [
+    [
+     -1,
+     -0.2,
+     -1
+    ],
+    [
+     1,
+     0,
+     1
+    ]
+   ],
+   "collision": true,
+   "tris": 12
+  },
+  "pillar_corner": {
+   "bounds": [
+    [
+     -0.3,
+     0,
+     -0.3
+    ],
+    [
+     0.3,
+     4.0,
+     0.3
+    ]
+   ],
+   "collision": true,
+   "tris": 68
+  },
+  "pipe_2m": {
+   "bounds": [
+    [
+     -1,
+     -0.11,
+     -0.11
+    ],
+    [
+     1,
+     0.11,
+     0.11
+    ]
+   ],
+   "collision": true,
+   "tris": 132
+  },
+  "pipe_elbow": {
+   "bounds": [
+    [
+     -0.576,
+     -0.08,
+     -0.576
+    ],
+    [
+     0.0232,
+     0.08,
+     0.0232
+    ]
+   ],
+   "collision": true,
+   "tris": 264
+  },
+  "railing_2m": {
+   "bounds": [
+    [
+     -1,
+     0,
+     -0.04
+    ],
+    [
+     1,
+     1.01,
+     0.04
+    ]
+   ],
+   "collision": true,
+   "tris": 196
+  },
+  "stairs_2m": {
+   "bounds": [
+    [
+     -1,
+     0,
+     -4.0
+    ],
+    [
+     1,
+     2.0,
+     0
+    ]
+   ],
+   "collision": true,
+   "tris": 352
+  },
+  "trim_baseboard_2m": {
+   "bounds": [
+    [
+     -1,
+     0,
+     -0.015
+    ],
+    [
+     1,
+     0.14,
+     0.015
+    ]
+   ],
+   "collision": false,
+   "tris": 12
+  },
+  "trim_crown_2m": {
+   "bounds": [
+    [
+     -1,
+     -0.12,
+     -0.04
+    ],
+    [
+     1,
+     0,
+     0.04
+    ]
+   ],
+   "collision": false,
+   "tris": 24
+  },
+  "wall_2m": {
+   "bounds": [
+    [
+     -1,
+     0,
+     -0.165
+    ],
+    [
+     1,
+     4.0,
+     0.165
+    ]
+   ],
+   "collision": true,
+   "tris": 72
+  },
+  "wall_2m_exterior": {
+   "bounds": [
+    [
+     -1,
+     0,
+     -0.165
+    ],
+    [
+     1,
+     4.0,
+     0.165
+    ]
+   ],
+   "collision": true,
+   "tris": 108
+  },
+  "wall_door_2m": {
+   "bounds": [
+    [
+     -1,
+     0,
+     -0.175
+    ],
+    [
+     1,
+     4.0,
+     0.175
+    ]
+   ],
+   "collision": true,
+   "sockets": 1,
+   "tris": 216
+  },
+  "wall_window_2m": {
+   "bounds": [
+    [
+     -1,
+     0,
+     -0.205
+    ],
+    [
+     1,
+     4.0,
+     0.205
+    ]
+   ],
+   "collision": true,
+   "sockets": 7,
+   "tris": 264
+  },
+  "wall_window_2m_exterior": {
+   "bounds": [
+    [
+     -1,
+     0,
+     -0.205
+    ],
+    [
+     1,
+     4.0,
+     0.235
+    ]
+   ],
+   "collision": true,
+   "sockets": 7,
+   "tris": 300
+  },
+  "window_glass_2m": {
+   "bounds": [
+    [
+     -0.52,
+     0.98,
+     -0.025
+    ],
+    [
+     0.52,
+     2.22,
+     0.025
+    ]
+   ],
+   "collision": false,
+   "tris": 36
+  },
+  "window_glass_2m_frosted": {
+   "bounds": [
+    [
+     -0.52,
+     0.98,
+     -0.025
+    ],
+    [
+     0.52,
+     2.22,
+     0.025
+    ]
+   ],
+   "collision": false,
+   "tris": 36
+  }
+ },
+ "storey": 4.0,
+ "sub_grid": 0.5
+}

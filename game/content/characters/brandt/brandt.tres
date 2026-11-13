@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/player/character_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"brandt"
+display_name = "Brandt"
+full_name = "Anneliese Brandt"
+nationality = "Switzerland"
+bio = "Mountain guide who knows every path on Vesper Peak; her brother vanished there. Fierce, practical."
+color = Color(0.97, 0.8, 0.22, 1)
+sleeve_color = Color(0.55, 0.16, 0.12, 1)
+skin_color = Color(0.9, 0.75, 0.62, 1)
+order = 2
+model_scene = "res://content/characters/brandt/brandt_model.tscn"

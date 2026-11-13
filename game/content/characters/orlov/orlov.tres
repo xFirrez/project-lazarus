@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="CharacterDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/player/character_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"orlov"
+display_name = "Orlov"
+full_name = "Pyotr \"Petya\" Orlov"
+nationality = "USSR"
+bio = "Defected Soviet engineer who helped build the reactor. Guilty, superstitious."
+color = Color(0.3, 0.55, 0.95, 1)
+sleeve_color = Color(0.22, 0.26, 0.32, 1)
+skin_color = Color(0.88, 0.74, 0.62, 1)
+order = 1
+model_scene = "res://content/characters/orlov/orlov_model.tscn"

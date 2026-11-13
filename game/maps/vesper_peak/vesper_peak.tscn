@@ -1,0 +1,42 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://maps/vesper_peak/vesper_peak.gd" id="1"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z01_arrival_station.tscn" id="z0"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z03_sanatorium_lobby.tscn" id="z1"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z04_east_wing.tscn" id="z2"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z05_operating_theater.tscn" id="z3"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z06_frozen_courtyard.tscn" id="z4"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z07_comms_array.tscn" id="z5"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z08_boiler_house.tscn" id="z6"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z09_generator_hall.tscn" id="z7"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z10_morgue_tunnels.tscn" id="z8"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z11_containment_labs.tscn" id="z9"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z12_specimen_storage.tscn" id="z10"]
+[ext_resource type="PackedScene" path="res://maps/vesper_peak/zones/Z13_reactor_chamber.tscn" id="z11"]
+
+[node name="VesperPeak" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Z01_ArrivalStation" parent="." instance=ExtResource("z0")]
+
+[node name="Z03_SanatoriumLobby" parent="." instance=ExtResource("z1")]
+
+[node name="Z04_EastWing" parent="." instance=ExtResource("z2")]
+
+[node name="Z05_OperatingTheater" parent="." instance=ExtResource("z3")]
+
+[node name="Z06_FrozenCourtyard" parent="." instance=ExtResource("z4")]
+
+[node name="Z07_CommsArray" parent="." instance=ExtResource("z5")]
+
+[node name="Z08_BoilerHouse" parent="." instance=ExtResource("z6")]
+
+[node name="Z09_GeneratorHall" parent="." instance=ExtResource("z7")]
+
+[node name="Z10_MorgueTunnels" parent="." instance=ExtResource("z8")]
+
+[node name="Z11_ContainmentLabs" parent="." instance=ExtResource("z9")]
+
+[node name="Z12_SpecimenStorage" parent="." instance=ExtResource("z10")]
+
+[node name="Z13_ReactorChamber" parent="." instance=ExtResource("z11")]

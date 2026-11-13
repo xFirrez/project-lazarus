@@ -1,0 +1,4765 @@
+{
+ "map": "vesper_peak",
+ "nodes": {
+  "Z01_ArrivalStation/Gameplay/D01_Buy": [
+   12.5,
+   1.3,
+   -3.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/D02_Buy": [
+   6.0,
+   1.3,
+   -7.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/EE_DeparturesBoard": [
+   -6.0,
+   4.5,
+   8.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Console_Z01": [
+   -2.6,
+   1.2,
+   -11.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Gondola": [
+   -4.5,
+   0.0,
+   -14.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Gondola/Floor": [
+   -4.5,
+   -0.15,
+   -14.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Gondola/GND_CabinPanel": [
+   -3.3,
+   1.2,
+   -14.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Gondola/GateN": [
+   -4.5,
+   1.2,
+   -13.15,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Gondola/GateS": [
+   -4.5,
+   1.2,
+   -16.05,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Gondola/Hanger": [
+   -4.5,
+   3.0,
+   -14.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Gondola/Roof": [
+   -4.5,
+   2.55,
+   -14.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Gondola/WallE": [
+   -3.05,
+   1.25,
+   -14.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/GND_Gondola/WallW": [
+   -5.95,
+   1.25,
+   -14.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Gondola_EdgeE": [
+   -2.5,
+   1.5,
+   -13.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Gondola_EdgeW": [
+   -6.5,
+   1.5,
+   -13.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Gondola_Gate0": [
+   -4.5,
+   1.5,
+   -13.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/L01": [
+   10.0,
+   2.6,
+   -6.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/MB1_Luggage": [
+   2.6,
+   0.0,
+   6.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Perk_SecondWind": [
+   8.0,
+   0.0,
+   7.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/PlayerSpawn0": [
+   -1.5,
+   0.05,
+   -3.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/PlayerSpawn1": [
+   -0.5,
+   0.05,
+   -3.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/PlayerSpawn2": [
+   0.5,
+   0.05,
+   -3.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/PlayerSpawn3": [
+   1.5,
+   0.05,
+   -3.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Raven_1_Z01Roof": [
+   0.0,
+   6.9,
+   -8.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Spawn_Z01_Vent": [
+   0.8,
+   0.0,
+   10.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Spawn_Z01_W_G1": [
+   -15.12,
+   0.0,
+   -1.9,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Spawn_Z01_W_G2": [
+   -11.1,
+   0.0,
+   -10.12,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Spawn_Z01_W_U1": [
+   -15.12,
+   2.5,
+   6.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Spawn_Z01_W_U2": [
+   15.12,
+   2.5,
+   4.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/WallBuy_Coachgun": [
+   -4.0,
+   4.0,
+   7.95,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/WallBuy_M14": [
+   -1.5,
+   1.5,
+   -7.95,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_Vent_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_Vent_PlayerClip": [
+   0.0,
+   0.6,
+   8.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_Barricade": [
+   -13.2,
+   1.5,
+   -3.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_Barricade/Plank0": [
+   -13.25,
+   1.0,
+   -3.0,
+   0.0,
+   -1.5708,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_Barricade/Plank1": [
+   -13.25,
+   1.2,
+   -3.0,
+   0.0,
+   -1.5708,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_Barricade/Plank2": [
+   -13.25,
+   1.4,
+   -3.0,
+   0.0,
+   -1.5708,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_Barricade/Plank3": [
+   -13.25,
+   1.6,
+   -3.0,
+   0.0,
+   -1.5708,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_Barricade/Plank4": [
+   -13.25,
+   1.8,
+   -3.0,
+   0.0,
+   -1.5708,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_Barricade/Plank5": [
+   -13.25,
+   2.0,
+   -3.0,
+   0.0,
+   -1.5708,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_Barricade/Repair": [
+   -12.6,
+   1.5,
+   -3.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G1_PlayerClip": [
+   -13.2,
+   1.5,
+   -3.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_Barricade": [
+   -10.0,
+   1.5,
+   -8.2,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_Barricade/Plank0": [
+   -10.0,
+   1.0,
+   -8.25,
+   0.0,
+   -3.1416,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_Barricade/Plank1": [
+   -10.0,
+   1.2,
+   -8.25,
+   0.0,
+   -3.1416,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_Barricade/Plank2": [
+   -10.0,
+   1.4,
+   -8.25,
+   0.0,
+   -3.1416,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_Barricade/Plank3": [
+   -10.0,
+   1.6,
+   -8.25,
+   0.0,
+   -3.1416,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_Barricade/Plank4": [
+   -10.0,
+   1.8,
+   -8.25,
+   0.0,
+   -3.1416,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_Barricade/Plank5": [
+   -10.0,
+   2.0,
+   -8.25,
+   0.0,
+   -3.1416,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_Barricade/Repair": [
+   -10.0,
+   1.5,
+   -7.6,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_G2_PlayerClip": [
+   -10.0,
+   1.5,
+   -8.2,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_Barricade": [
+   -13.2,
+   4.0,
+   5.5,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_Barricade/Plank0": [
+   -13.25,
+   3.5,
+   5.5,
+   0.0,
+   -1.5708,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_Barricade/Plank1": [
+   -13.25,
+   3.7,
+   5.5,
+   0.0,
+   -1.5708,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_Barricade/Plank2": [
+   -13.25,
+   3.9,
+   5.5,
+   0.0,
+   -1.5708,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_Barricade/Plank3": [
+   -13.25,
+   4.1,
+   5.5,
+   0.0,
+   -1.5708,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_Barricade/Plank4": [
+   -13.25,
+   4.3,
+   5.5,
+   0.0,
+   -1.5708,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_Barricade/Plank5": [
+   -13.25,
+   4.5,
+   5.5,
+   0.0,
+   -1.5708,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_Barricade/Repair": [
+   -12.6,
+   4.0,
+   5.5,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U1_PlayerClip": [
+   -13.2,
+   4.0,
+   5.5,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_Barricade": [
+   13.2,
+   4.0,
+   5.5,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_Barricade/Plank0": [
+   13.25,
+   3.5,
+   5.5,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_Barricade/Plank1": [
+   13.25,
+   3.7,
+   5.5,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_Barricade/Plank2": [
+   13.25,
+   3.9,
+   5.5,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_Barricade/Plank3": [
+   13.25,
+   4.1,
+   5.5,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_Barricade/Plank4": [
+   13.25,
+   4.3,
+   5.5,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_Barricade/Plank5": [
+   13.25,
+   4.5,
+   5.5,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_Barricade/Repair": [
+   12.6,
+   4.0,
+   5.5,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Z01_W_U2_PlayerClip": [
+   13.2,
+   4.0,
+   5.5,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Zone_Z01_Dock": [
+   -4.5,
+   2.25,
+   -10.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Gameplay/Zone_Z01_Hall": [
+   0.0,
+   3.25,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Geometry/D01_Debris": [
+   13.2,
+   1.3,
+   -3.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z01_ArrivalStation/Geometry/D02_Shutter": [
+   6.0,
+   1.3,
+   -8.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Box_Z03": [
+   49.5,
+   -8.0,
+   -6.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/D03_Buy": [
+   67.2,
+   -0.6,
+   -11.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/D04_Buy": [
+   52.0,
+   -6.5,
+   -13.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/D08_Buy": [
+   38.8,
+   -6.6,
+   -11.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/EE_Guestbook": [
+   54.5,
+   -6.9,
+   -6.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/L02": [
+   51.0,
+   -6.9,
+   -6.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/L03": [
+   56.0,
+   -4.0,
+   7.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/L13": [
+   36.0,
+   -4.0,
+   6.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Perk_Quickdraw": [
+   40.0,
+   -8.0,
+   1.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/R02": [
+   40.5,
+   -4.0,
+   7.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/S1_Bookcase": [
+   39.0,
+   -4.0,
+   7.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/S1_FreeTonicCrate": [
+   35.0,
+   -4.0,
+   4.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Spawn_Z03_Office": [
+   62.0,
+   -8.0,
+   -16.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Spawn_Z03_W1": [
+   47.1,
+   -8.0,
+   9.92,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Spawn_Z03_W2": [
+   55.1,
+   -8.0,
+   9.92,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Spawn_Z03_W3": [
+   36.08,
+   -8.0,
+   -5.9,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Spawn_Z03_WM": [
+   53.1,
+   -4.0,
+   9.92,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/WallBuy_MP40": [
+   44.0,
+   -6.5,
+   -13.8,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_Office_PlayerClip": [
+   62.0,
+   -6.7,
+   -14.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_Barricade": [
+   46.0,
+   -6.5,
+   8.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_Barricade/Plank0": [
+   46.0,
+   -7.0,
+   8.05,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_Barricade/Plank1": [
+   46.0,
+   -6.8,
+   8.05,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_Barricade/Plank2": [
+   46.0,
+   -6.6,
+   8.05,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_Barricade/Plank3": [
+   46.0,
+   -6.4,
+   8.05,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_Barricade/Plank4": [
+   46.0,
+   -6.2,
+   8.05,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_Barricade/Plank5": [
+   46.0,
+   -6.0,
+   8.05,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_Barricade/Repair": [
+   46.0,
+   -6.5,
+   7.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W1_PlayerClip": [
+   46.0,
+   -6.5,
+   8.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_Barricade": [
+   54.0,
+   -6.5,
+   8.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_Barricade/Plank0": [
+   54.0,
+   -7.0,
+   8.05,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_Barricade/Plank1": [
+   54.0,
+   -6.8,
+   8.05,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_Barricade/Plank2": [
+   54.0,
+   -6.6,
+   8.05,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_Barricade/Plank3": [
+   54.0,
+   -6.4,
+   8.05,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_Barricade/Plank4": [
+   54.0,
+   -6.2,
+   8.05,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_Barricade/Plank5": [
+   54.0,
+   -6.0,
+   8.05,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_Barricade/Repair": [
+   54.0,
+   -6.5,
+   7.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W2_PlayerClip": [
+   54.0,
+   -6.5,
+   8.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_Barricade": [
+   38.0,
+   -6.5,
+   -7.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_Barricade/Plank0": [
+   37.95,
+   -7.0,
+   -7.0,
+   0.0,
+   -1.5708,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_Barricade/Plank1": [
+   37.95,
+   -6.8,
+   -7.0,
+   0.0,
+   -1.5708,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_Barricade/Plank2": [
+   37.95,
+   -6.6,
+   -7.0,
+   0.0,
+   -1.5708,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_Barricade/Plank3": [
+   37.95,
+   -6.4,
+   -7.0,
+   0.0,
+   -1.5708,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_Barricade/Plank4": [
+   37.95,
+   -6.2,
+   -7.0,
+   0.0,
+   -1.5708,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_Barricade/Plank5": [
+   37.95,
+   -6.0,
+   -7.0,
+   0.0,
+   -1.5708,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_Barricade/Repair": [
+   38.6,
+   -6.5,
+   -7.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_W3_PlayerClip": [
+   38.0,
+   -6.5,
+   -7.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_Barricade": [
+   52.0,
+   -2.5,
+   8.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_Barricade/Plank0": [
+   52.0,
+   -3.0,
+   8.05,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_Barricade/Plank1": [
+   52.0,
+   -2.8,
+   8.05,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_Barricade/Plank2": [
+   52.0,
+   -2.6,
+   8.05,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_Barricade/Plank3": [
+   52.0,
+   -2.4,
+   8.05,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_Barricade/Plank4": [
+   52.0,
+   -2.2,
+   8.05,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_Barricade/Plank5": [
+   52.0,
+   -2.0,
+   8.05,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_Barricade/Repair": [
+   52.0,
+   -2.5,
+   7.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Z03_WM_PlayerClip": [
+   52.0,
+   -2.5,
+   8.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Zone_Z03_DirectorsOffice": [
+   35.4,
+   -2.75,
+   5.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Zone_Z03_Lobby": [
+   53.0,
+   -3.75,
+   -3.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Gameplay/Zone_Z03_Walkway": [
+   25.6,
+   -2.25,
+   -3.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Geometry/D03_Chandelier": [
+   68.0,
+   -0.6,
+   -11.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Geometry/D04_Terrace": [
+   52.0,
+   -6.5,
+   -14.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Geometry/D08_ServiceDoor": [
+   38.0,
+   -6.6,
+   -11.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z03_SanatoriumLobby/Geometry/S1_BookcaseDoor": [
+   38.0,
+   -2.8,
+   5.8,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Box_Z04": [
+   71.2,
+   -2.0,
+   -28.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/D05_Buy": [
+   75.0,
+   -0.6,
+   -61.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/EE_Room3_Notation": [
+   81.8,
+   -0.5,
+   -18.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/L04": [
+   71.2,
+   -0.9,
+   -26.8,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/MB2_Room12": [
+   80.5,
+   -2.0,
+   -53.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Part_Lens_B": [
+   80.5,
+   -2.0,
+   -41.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Perk_PackMule": [
+   71.2,
+   -2.0,
+   -32.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/S1_Mirror_R7": [
+   81.8,
+   -0.6,
+   -30.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Spawn_Z04_Linen": [
+   71.0,
+   -2.0,
+   -14.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Spawn_Z04_Vent1": [
+   70.6,
+   -2.0,
+   -21.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Spawn_Z04_Vent2": [
+   70.6,
+   -2.0,
+   -47.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Spawn_Z04_W_R12": [
+   83.92,
+   -2.0,
+   -55.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Spawn_Z04_W_R3": [
+   83.92,
+   -2.0,
+   -19.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Spawn_Z04_W_R9": [
+   83.92,
+   -2.0,
+   -41.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/T1_Console": [
+   76.8,
+   -0.8,
+   -36.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/T1_ElectroTherapy": [
+   75.0,
+   -2.0,
+   -45.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/WallBuy_Model37": [
+   73.2,
+   -0.5,
+   -50.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_Linen_PlayerClip": [
+   73.0,
+   -0.7,
+   -14.6,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_Vent1_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_Vent1_PlayerClip": [
+   73.0,
+   -1.4,
+   -22.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_Vent2_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_Vent2_PlayerClip": [
+   73.0,
+   -1.4,
+   -48.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_Barricade": [
+   82.0,
+   -0.5,
+   -54.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_Barricade/Plank0": [
+   82.05,
+   -1.0,
+   -54.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_Barricade/Plank1": [
+   82.05,
+   -0.8,
+   -54.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_Barricade/Plank2": [
+   82.05,
+   -0.6,
+   -54.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_Barricade/Plank3": [
+   82.05,
+   -0.4,
+   -54.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_Barricade/Plank4": [
+   82.05,
+   -0.2,
+   -54.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_Barricade/Plank5": [
+   82.05,
+   0.0,
+   -54.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_Barricade/Repair": [
+   81.4,
+   -0.5,
+   -54.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R12_PlayerClip": [
+   82.0,
+   -0.5,
+   -54.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_Barricade": [
+   82.0,
+   -0.5,
+   -18.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_Barricade/Plank0": [
+   82.05,
+   -1.0,
+   -18.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_Barricade/Plank1": [
+   82.05,
+   -0.8,
+   -18.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_Barricade/Plank2": [
+   82.05,
+   -0.6,
+   -18.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_Barricade/Plank3": [
+   82.05,
+   -0.4,
+   -18.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_Barricade/Plank4": [
+   82.05,
+   -0.2,
+   -18.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_Barricade/Plank5": [
+   82.05,
+   0.0,
+   -18.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_Barricade/Repair": [
+   81.4,
+   -0.5,
+   -18.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R3_PlayerClip": [
+   82.0,
+   -0.5,
+   -18.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_Barricade": [
+   82.0,
+   -0.5,
+   -40.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_Barricade/Plank0": [
+   82.05,
+   -1.0,
+   -40.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_Barricade/Plank1": [
+   82.05,
+   -0.8,
+   -40.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_Barricade/Plank2": [
+   82.05,
+   -0.6,
+   -40.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_Barricade/Plank3": [
+   82.05,
+   -0.4,
+   -40.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_Barricade/Plank4": [
+   82.05,
+   -0.2,
+   -40.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_Barricade/Plank5": [
+   82.05,
+   0.0,
+   -40.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_Barricade/Repair": [
+   81.4,
+   -0.5,
+   -40.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Z04_W_R9_PlayerClip": [
+   82.0,
+   -0.5,
+   -40.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Zone_Z04_Balcony": [
+   67.1,
+   -0.25,
+   -40.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Gameplay/Zone_Z04_Wing": [
+   75.1,
+   -0.25,
+   -35.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z04_EastWing/Geometry/D05_SurgicalDoors": [
+   75.0,
+   -0.6,
+   -62.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/CHT_GrateTarget": [
+   89.85,
+   4.9,
+   -81.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/CHT_GrateTarget/Hurtbox_TORSO": [
+   89.85,
+   4.9,
+   -81.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/CHT_LaundryChute": [
+   91.1,
+   5.0,
+   -81.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/D15_Buy": [
+   64.9,
+   8.4,
+   -88.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/EE_VargaSeat": [
+   65.5,
+   7.0,
+   -96.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/L05": [
+   66.0,
+   7.0,
+   -79.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Part_Lens_A": [
+   86.0,
+   4.0,
+   -79.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/R03": [
+   82.5,
+   7.0,
+   -96.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/R2_Relay": [
+   74.0,
+   5.8,
+   -88.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Spawn_Z05_Sky1": [
+   70.0,
+   12.0,
+   -81.9,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Spawn_Z05_Sky2": [
+   79.19,
+   12.0,
+   -94.569,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Spawn_Z05_Vent": [
+   61.6,
+   4.0,
+   -93.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Spawn_Z05_W_GalE": [
+   85.92,
+   7.0,
+   -91.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Spawn_Z05_W_GalS": [
+   72.9,
+   7.0,
+   -99.92,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_Sky1_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_Sky2_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_Vent_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_Vent_PlayerClip": [
+   64.0,
+   4.6,
+   -94.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_Barricade": [
+   84.0,
+   8.5,
+   -90.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_Barricade/Plank0": [
+   84.05,
+   8.0,
+   -90.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_Barricade/Plank1": [
+   84.05,
+   8.2,
+   -90.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_Barricade/Plank2": [
+   84.05,
+   8.4,
+   -90.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_Barricade/Plank3": [
+   84.05,
+   8.6,
+   -90.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_Barricade/Plank4": [
+   84.05,
+   8.8,
+   -90.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_Barricade/Plank5": [
+   84.05,
+   9.0,
+   -90.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_Barricade/Repair": [
+   83.4,
+   8.5,
+   -90.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalE_PlayerClip": [
+   84.0,
+   8.5,
+   -90.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_Barricade": [
+   74.0,
+   8.5,
+   -98.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_Barricade/Plank0": [
+   74.0,
+   8.0,
+   -98.05,
+   0.0,
+   -3.1416,
+   0.18
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_Barricade/Plank1": [
+   74.0,
+   8.2,
+   -98.05,
+   0.0,
+   -3.1416,
+   -0.14
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_Barricade/Plank2": [
+   74.0,
+   8.4,
+   -98.05,
+   0.0,
+   -3.1416,
+   0.18
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_Barricade/Plank3": [
+   74.0,
+   8.6,
+   -98.05,
+   0.0,
+   -3.1416,
+   -0.14
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_Barricade/Plank4": [
+   74.0,
+   8.8,
+   -98.05,
+   0.0,
+   -3.1416,
+   0.18
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_Barricade/Plank5": [
+   74.0,
+   9.0,
+   -98.05,
+   0.0,
+   -3.1416,
+   -0.14
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_Barricade/Repair": [
+   74.0,
+   8.5,
+   -97.4,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Z05_W_GalS_PlayerClip": [
+   74.0,
+   8.5,
+   -98.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Zone_Z05_Scrub": [
+   87.0,
+   5.75,
+   -81.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Zone_Z05_Stairwell": [
+   75.0,
+   2.25,
+   -70.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Gameplay/Zone_Z05_Theater": [
+   74.0,
+   8.75,
+   -88.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Geometry/CHT_Grate": [
+   90.0,
+   4.9,
+   -81.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z05_OperatingTheater/Geometry/D15_SkyBridge": [
+   64.0,
+   8.4,
+   -88.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Box_Z06": [
+   -4.0,
+   -8.0,
+   -46.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/D06_Buy": [
+   -6.0,
+   -6.6,
+   -77.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/D07_Buy": [
+   -9.2,
+   -6.7,
+   -24.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/EE_Coffins": [
+   -6.0,
+   -8.0,
+   -66.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/EE_FountainShard": [
+   28.0,
+   -3.0,
+   -49.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/H1_FuelDrums_Z06": [
+   -6.5,
+   -8.0,
+   -56.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/H2_Icicles_Arch": [
+   6.0,
+   -1.5,
+   -20.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/H2_Icicles_Terrace": [
+   52.0,
+   -1.5,
+   -20.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/L06": [
+   0.0,
+   -7.0,
+   -38.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/L14": [
+   -13.0,
+   -8.0,
+   -70.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/LFT_Console0": [
+   62.3,
+   -6.8,
+   -34.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/LFT_Console1": [
+   69.0,
+   -26.8,
+   -34.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/LFT_FreightLift": [
+   65.5,
+   -8.0,
+   -31.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/LFT_Gate0": [
+   63.0,
+   -6.5,
+   -31.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/LFT_Gate1": [
+   68.0,
+   -26.5,
+   -31.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/LFT_Link0": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/LFT_Link1": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/MB4_Grotto": [
+   -14.0,
+   -8.0,
+   -68.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Part_Stock_B": [
+   34.0,
+   -8.0,
+   -72.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Perk_Ironhide": [
+   -8.4,
+   -8.0,
+   -32.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Raven_2_Fountain": [
+   28.0,
+   -2.8,
+   -48.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Raven_3_Greenhouse": [
+   34.0,
+   -6.6,
+   -70.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/S2_Waterfall": [
+   -8.8,
+   -8.0,
+   -70.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Spawn_Z06_ClimbS": [
+   22.0,
+   -8.0,
+   -80.7,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Spawn_Z06_ClimbW": [
+   -12.7,
+   -8.0,
+   -58.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Spawn_Z06_R1": [
+   8.0,
+   -8.0,
+   -58.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Spawn_Z06_R2": [
+   18.0,
+   -8.0,
+   -36.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Spawn_Z06_R3": [
+   40.0,
+   -8.0,
+   -30.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Spawn_Z06_R4": [
+   50.0,
+   -8.0,
+   -56.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Spawn_Z06_R5": [
+   16.0,
+   -8.0,
+   -72.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Spawn_Z06_R6": [
+   24.0,
+   -8.0,
+   -71.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Spawn_Z06_W_Greenhouse": [
+   42.9,
+   -8.0,
+   -79.92,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/WallBuy_M16": [
+   -9.75,
+   -6.5,
+   -44.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/WallBuy_Tripmines": [
+   35.0,
+   -6.5,
+   -20.2,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_ClimbS_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_ClimbW_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_Barricade": [
+   44.0,
+   -6.5,
+   -78.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_Barricade/Plank0": [
+   44.0,
+   -7.0,
+   -78.05,
+   0.0,
+   -3.1416,
+   0.18
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_Barricade/Plank1": [
+   44.0,
+   -6.8,
+   -78.05,
+   0.0,
+   -3.1416,
+   -0.14
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_Barricade/Plank2": [
+   44.0,
+   -6.6,
+   -78.05,
+   0.0,
+   -3.1416,
+   0.18
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_Barricade/Plank3": [
+   44.0,
+   -6.4,
+   -78.05,
+   0.0,
+   -3.1416,
+   -0.14
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_Barricade/Plank4": [
+   44.0,
+   -6.2,
+   -78.05,
+   0.0,
+   -3.1416,
+   0.18
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_Barricade/Plank5": [
+   44.0,
+   -6.0,
+   -78.05,
+   0.0,
+   -3.1416,
+   -0.14
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_Barricade/Repair": [
+   44.0,
+   -6.5,
+   -77.4,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Z06_W_Greenhouse_PlayerClip": [
+   44.0,
+   -6.5,
+   -78.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Zone_Z06_CargoRamp": [
+   6.0,
+   -2.75,
+   -14.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Zone_Z06_Courtyard": [
+   28.0,
+   -4.25,
+   -49.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Zone_Z06_Grotto": [
+   -13.1,
+   -6.25,
+   -70.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Gameplay/Zone_Z06_LiftShed": [
+   67.0,
+   -5.75,
+   -31.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Geometry/D06_CheckpointGate": [
+   -6.0,
+   -6.6,
+   -78.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Geometry/D07_BoilerDoor": [
+   -10.0,
+   -6.7,
+   -24.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z06_FrozenCourtyard/Geometry/S2_WaterfallIce": [
+   -9.5,
+   -5.0,
+   -70.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Box_Z07": [
+   -6.0,
+   17.0,
+   -118.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/DeckClip_-105": [
+   20.1,
+   23.0,
+   -105.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/DeckClip_-110": [
+   14.0,
+   23.0,
+   -110.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/DeckClip_-99": [
+   14.0,
+   23.0,
+   -99.9,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/EE_FrozenOperator": [
+   12.5,
+   17.0,
+   -102.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/EE_RadioConsole": [
+   14.0,
+   17.0,
+   -107.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GND_Console_Z07": [
+   -2.6,
+   18.2,
+   -96.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Gondola_EdgeE": [
+   -2.5,
+   18.5,
+   -95.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Gondola_EdgeW": [
+   -6.5,
+   18.5,
+   -95.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Gondola_Gate1": [
+   -4.5,
+   18.5,
+   -95.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GuardClip_0": [
+   -8.2,
+   -6.0,
+   -80.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GuardClip_1": [
+   -3.8,
+   -6.0,
+   -82.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GuardClip_2": [
+   -14.9,
+   -6.0,
+   -86.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GuardClip_3": [
+   -19.2,
+   -6.0,
+   -81.8,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GuardClip_4": [
+   -30.2,
+   -6.0,
+   -83.9,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GuardClip_5": [
+   -30.2,
+   19.0,
+   -138.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GuardClip_6": [
+   -25.1,
+   19.0,
+   -140.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GuardClip_7": [
+   -23.0,
+   19.0,
+   -135.8,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/GuardClip_8": [
+   -20.0,
+   19.0,
+   -139.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/L07": [
+   11.0,
+   18.0,
+   -108.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/MB3_ObsLocker": [
+   18.5,
+   21.5,
+   -101.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/ParapetClip_0": [
+   -13.6,
+   19.0,
+   -100.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/ParapetClip_1": [
+   3.1,
+   19.0,
+   -100.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/ParapetClip_2": [
+   20.0,
+   19.0,
+   -105.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/ParapetClip_3": [
+   20.0,
+   19.0,
+   -125.8,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/ParapetClip_4": [
+   -17.5,
+   19.0,
+   -138.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/ParapetClip_5": [
+   3.5,
+   19.0,
+   -138.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/ParapetClip_6": [
+   -20.0,
+   19.0,
+   -117.8,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Part_Coil_A": [
+   10.0,
+   17.0,
+   -126.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Perk_MarathonMalt": [
+   -18.0,
+   17.0,
+   -104.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/R01": [
+   17.0,
+   18.0,
+   -108.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/R1_Relay": [
+   -12.0,
+   25.0,
+   -126.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/RampClip-1": [
+   -30.15,
+   6.289,
+   -110.106,
+   0.4636,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/RampClip1": [
+   -25.85,
+   6.289,
+   -110.106,
+   0.4636,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Raven_4_Antenna": [
+   -12.0,
+   37.0,
+   -126.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Raven_5_GondolaStation": [
+   -4.5,
+   21.6,
+   -99.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Spawn_Z07_ClimbS1": [
+   -8.0,
+   14.0,
+   -142.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Spawn_Z07_ClimbS2": [
+   10.0,
+   14.0,
+   -142.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Spawn_Z07_GenShed": [
+   -14.0,
+   17.0,
+   -140.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Spawn_Z07_R1": [
+   -12.0,
+   17.0,
+   -108.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Spawn_Z07_R2": [
+   0.0,
+   17.0,
+   -120.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Spawn_Z07_R3": [
+   12.0,
+   17.0,
+   -130.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Spawn_Z07_R4": [
+   -2.0,
+   17.0,
+   -133.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Spawn_Z07_W_Radio": [
+   17.1,
+   17.0,
+   -98.08,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/TowerClip_-12_-121": [
+   -12.9,
+   26.5,
+   -121.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/TowerClip_-12_-130": [
+   -12.0,
+   26.5,
+   -130.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/TowerClip_-16_-126": [
+   -16.4,
+   26.5,
+   -126.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/TowerClip_-7_-127": [
+   -7.6,
+   26.5,
+   -127.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/WallBuy_IceAxe": [
+   -19.8,
+   18.5,
+   -118.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/WallBuy_Kar98k": [
+   7.8,
+   18.5,
+   -106.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Z07_ClimbS1_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Z07_ClimbS2_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Z07_GenShed_PlayerClip": [
+   -14.0,
+   18.3,
+   -138.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_Barricade": [
+   16.0,
+   18.5,
+   -100.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_Barricade/Plank0": [
+   16.0,
+   18.0,
+   -99.95,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_Barricade/Plank1": [
+   16.0,
+   18.2,
+   -99.95,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_Barricade/Plank2": [
+   16.0,
+   18.4,
+   -99.95,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_Barricade/Plank3": [
+   16.0,
+   18.6,
+   -99.95,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_Barricade/Plank4": [
+   16.0,
+   18.8,
+   -99.95,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_Barricade/Plank5": [
+   16.0,
+   19.0,
+   -99.95,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_Barricade/Repair": [
+   16.0,
+   18.5,
+   -100.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Z07_W_Radio_PlayerClip": [
+   16.0,
+   18.5,
+   -100.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Zone_Z07_GondolaStation": [
+   -4.5,
+   19.25,
+   -97.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Zone_Z07_Plaza": [
+   0.0,
+   24.25,
+   -119.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Zone_Z07_Road": [
+   -25.0,
+   4.75,
+   -113.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Zone_Z07_RoadLow": [
+   -17.0,
+   -6.25,
+   -82.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z07_CommsArray/Gameplay/Zone_Z07_SkyBridge": [
+   42.0,
+   13.5,
+   -100.0,
+   0.0,
+   1.0714,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Box_Z08": [
+   -26.0,
+   -13.0,
+   -15.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/D09_Buy": [
+   -27.5,
+   -11.6,
+   -27.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/H1_FuelDrums_Z08": [
+   -42.0,
+   -13.0,
+   -26.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/L08": [
+   -27.0,
+   -12.0,
+   -26.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Part_Stock_A": [
+   -40.0,
+   -9.5,
+   -11.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Spawn_Z08_CoalChute": [
+   -34.0,
+   -8.8,
+   -26.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Spawn_Z08_VentS": [
+   -40.8,
+   -13.0,
+   -30.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Spawn_Z08_VentW": [
+   -48.4,
+   -13.0,
+   -23.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Spawn_Z08_W_Foreman": [
+   -34.9,
+   -13.0,
+   -8.08,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/WallBuy_GreaseGun": [
+   -45.8,
+   -11.5,
+   -23.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_CoalChute_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_VentS_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_VentS_PlayerClip": [
+   -40.0,
+   -12.4,
+   -28.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_VentW_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_VentW_PlayerClip": [
+   -46.0,
+   -12.4,
+   -24.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_Barricade": [
+   -36.0,
+   -11.5,
+   -10.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_Barricade/Plank0": [
+   -36.0,
+   -12.0,
+   -9.95,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_Barricade/Plank1": [
+   -36.0,
+   -11.8,
+   -9.95,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_Barricade/Plank2": [
+   -36.0,
+   -11.6,
+   -9.95,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_Barricade/Plank3": [
+   -36.0,
+   -11.4,
+   -9.95,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_Barricade/Plank4": [
+   -36.0,
+   -11.2,
+   -9.95,
+   0.0,
+   0.0,
+   0.18
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_Barricade/Plank5": [
+   -36.0,
+   -11.0,
+   -9.95,
+   0.0,
+   0.0,
+   -0.14
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_Barricade/Repair": [
+   -36.0,
+   -11.5,
+   -10.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Z08_W_Foreman_PlayerClip": [
+   -36.0,
+   -11.5,
+   -10.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Zone_Z08_Boiler": [
+   -34.0,
+   -10.0,
+   -19.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Gameplay/Zone_Z08_Stair": [
+   -16.0,
+   -9.0,
+   -24.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z08_BoilerHouse/Geometry/D09_Bulkhead": [
+   -27.5,
+   -11.6,
+   -28.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/D10_Buy": [
+   -14.0,
+   -16.6,
+   -40.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/D14_Buy": [
+   -6.8,
+   -16.6,
+   -42.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/EE_TallyMarks": [
+   -33.6,
+   -14.0,
+   -61.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/L09": [
+   -29.0,
+   -15.0,
+   -60.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/PWR_MainSwitch": [
+   -31.5,
+   -13.8,
+   -63.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Perk_TwinFire": [
+   -10.0,
+   -18.0,
+   -43.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/R04": [
+   -33.0,
+   -15.0,
+   -60.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Spawn_Z09_Burst": [
+   -8.0,
+   -18.0,
+   -66.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Spawn_Z09_Grate1": [
+   -17.0,
+   -21.2,
+   -47.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Spawn_Z09_Grate2": [
+   -9.0,
+   -21.2,
+   -58.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Spawn_Z09_VentS": [
+   -20.8,
+   -18.0,
+   -66.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Spawn_Z09_VentW": [
+   -36.4,
+   -18.0,
+   -47.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Z09_Burst_PlayerClip": [
+   -8.0,
+   -16.7,
+   -64.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Z09_Grate1_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Z09_Grate2_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Z09_VentS_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Z09_VentS_PlayerClip": [
+   -20.0,
+   -17.4,
+   -64.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Z09_VentW_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Z09_VentW_PlayerClip": [
+   -34.0,
+   -17.4,
+   -48.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Zone_Z09_Hall": [
+   -20.0,
+   -16.5,
+   -52.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Gameplay/Zone_Z09_Incline": [
+   -27.5,
+   -14.5,
+   -34.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Geometry/D10_BlastCurtain": [
+   -14.0,
+   -16.6,
+   -41.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z09_GeneratorHall/Geometry/D14_CatwalkHatch": [
+   -6.0,
+   -16.6,
+   -42.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/D11_Buy": [
+   49.2,
+   -14.6,
+   -19.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/EE_ChainedDrawer": [
+   21.0,
+   -15.4,
+   -10.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/EE_MorgueDrawers": [
+   19.3,
+   -14.7,
+   -10.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/EE_Symbol_1": [
+   4.2,
+   -14.0,
+   -12.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/EE_Symbol_2": [
+   -10.0,
+   -14.0,
+   -14.7,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/EE_Symbol_3": [
+   -15.3,
+   -14.0,
+   -24.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/EE_Symbol_4": [
+   46.0,
+   -14.0,
+   -18.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/L10": [
+   9.0,
+   -15.0,
+   -17.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/R05": [
+   13.5,
+   -15.0,
+   -17.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Spawn_Z10_Drawer1": [
+   8.0,
+   -16.0,
+   -8.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Spawn_Z10_Drawer2": [
+   14.0,
+   -16.0,
+   -8.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Spawn_Z10_Grate": [
+   19.0,
+   -19.2,
+   -20.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Spawn_Z10_VentE": [
+   40.8,
+   -16.0,
+   -15.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Spawn_Z10_VentS": [
+   -17.9,
+   -16.0,
+   -27.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Spawn_Z10_VentW": [
+   -5.2,
+   -16.0,
+   -12.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/T2_Console": [
+   27.0,
+   -14.8,
+   -18.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/T2_SteamPurge": [
+   38.0,
+   -16.0,
+   -19.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/WallBuy_Revolver": [
+   4.2,
+   -14.5,
+   -20.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Z10_Drawer1_PlayerClip": [
+   8.0,
+   -14.7,
+   -10.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Z10_Drawer2_PlayerClip": [
+   14.0,
+   -14.7,
+   -10.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Z10_Grate_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Z10_VentE_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Z10_VentE_PlayerClip": [
+   40.0,
+   -15.4,
+   -18.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Z10_VentS_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Z10_VentS_PlayerClip": [
+   -15.5,
+   -15.4,
+   -28.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Z10_VentW_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Z10_VentW_PlayerClip": [
+   -6.0,
+   -15.4,
+   -14.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Zone_Z10_Morgue": [
+   13.0,
+   -15.5,
+   -16.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Zone_Z10_Stair": [
+   30.0,
+   -12.0,
+   -11.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Zone_Z10_TunnelE": [
+   41.0,
+   -16.0,
+   -19.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Zone_Z10_TunnelS": [
+   -14.0,
+   -15.5,
+   -29.25,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Gameplay/Zone_Z10_TunnelW": [
+   -5.75,
+   -14.5,
+   -16.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z10_MorgueTunnels/Geometry/D11_LabBlastDoor": [
+   50.0,
+   -14.6,
+   -19.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Box_Z11": [
+   88.0,
+   -28.0,
+   -66.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/D12_Buy": [
+   80.0,
+   -26.6,
+   -48.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/EE_Chamber6_Claws": [
+   84.0,
+   -28.0,
+   -64.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/EE_SoulPod": [
+   66.0,
+   -28.0,
+   -60.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/GantryClip_57": [
+   53.0,
+   -26.5,
+   -57.9,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/GantryClip_62": [
+   53.0,
+   -26.5,
+   -62.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/H3_Breaker": [
+   91.6,
+   -26.7,
+   -58.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/H3_Puddles": [
+   80.0,
+   -28.0,
+   -60.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/L11": [
+   88.0,
+   -27.0,
+   -70.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/R06": [
+   86.5,
+   -27.0,
+   -70.4,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/R3_Relay": [
+   74.0,
+   -28.0,
+   -60.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Spawn_Z11_AirlockBurst": [
+   94.0,
+   -28.0,
+   -52.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Spawn_Z11_ChamberBroken1": [
+   64.0,
+   -28.0,
+   -74.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Spawn_Z11_ChamberBroken2": [
+   84.0,
+   -28.0,
+   -74.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Spawn_Z11_VentE": [
+   94.4,
+   -28.0,
+   -64.8,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Spawn_Z11_VentW": [
+   53.6,
+   -28.0,
+   -67.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/WB_LabWorkbench": [
+   88.0,
+   -28.0,
+   -60.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Z11_AirlockBurst_PlayerClip": [
+   92.0,
+   -26.7,
+   -52.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Z11_ChamberBroken1_PlayerClip": [
+   64.0,
+   -26.7,
+   -72.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Z11_ChamberBroken2_PlayerClip": [
+   84.0,
+   -26.7,
+   -72.0,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Z11_VentE_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Z11_VentE_PlayerClip": [
+   92.0,
+   -27.4,
+   -64.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Z11_VentW_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Z11_VentW_PlayerClip": [
+   56.0,
+   -27.4,
+   -68.0,
+   0.0,
+   -1.5708,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Zone_Z11_Airlock": [
+   80.0,
+   -26.5,
+   -47.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Zone_Z11_Labs": [
+   74.0,
+   -25.5,
+   -60.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Gameplay/Zone_Z11_Ramp": [
+   58.5,
+   -21.0,
+   -34.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Geometry/BRG_ReactorBridge": [
+   43.988,
+   -31.179,
+   -60.0,
+   -0.4571,
+   1.5708,
+   0.0
+  ],
+  "Z11_ContainmentLabs/Geometry/D12_Airlock": [
+   80.0,
+   -26.6,
+   -47.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Box_Z12": [
+   70.0,
+   -28.0,
+   -44.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/EE_ObservationGlass": [
+   64.0,
+   -26.5,
+   -44.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/L12": [
+   76.5,
+   -27.0,
+   -34.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Part_Coil_B": [
+   88.0,
+   -28.0,
+   -40.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Perk_Bullseye": [
+   89.5,
+   -28.0,
+   -44.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/R07": [
+   81.0,
+   -27.0,
+   -34.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Spawn_Z12_ShaftDrop": [
+   66.0,
+   -24.8,
+   -40.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Spawn_Z12_VentN1": [
+   75.8,
+   -28.0,
+   -26.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Spawn_Z12_VentN2": [
+   85.8,
+   -28.0,
+   -26.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Spawn_Z12_W_Gallery": [
+   92.92,
+   -28.0,
+   -37.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_ShaftDrop_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_VentN1_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_VentN1_PlayerClip": [
+   75.0,
+   -27.4,
+   -29.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_VentN2_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_VentN2_PlayerClip": [
+   85.0,
+   -27.4,
+   -29.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_Barricade": [
+   91.0,
+   -26.5,
+   -36.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_Barricade/Plank0": [
+   91.05,
+   -27.0,
+   -36.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_Barricade/Plank1": [
+   91.05,
+   -26.8,
+   -36.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_Barricade/Plank2": [
+   91.05,
+   -26.6,
+   -36.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_Barricade/Plank3": [
+   91.05,
+   -26.4,
+   -36.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_Barricade/Plank4": [
+   91.05,
+   -26.2,
+   -36.0,
+   0.0,
+   1.5708,
+   0.18
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_Barricade/Plank5": [
+   91.05,
+   -26.0,
+   -36.0,
+   0.0,
+   1.5708,
+   -0.14
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_Barricade/Repair": [
+   90.4,
+   -26.5,
+   -36.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Z12_W_Gallery_PlayerClip": [
+   91.0,
+   -26.5,
+   -36.0,
+   0.0,
+   1.5708,
+   0.0
+  ],
+  "Z12_SpecimenStorage/Gameplay/Zone_Z12_Store": [
+   77.0,
+   -25.5,
+   -37.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_CoreSocket": [
+   28.0,
+   -48.0,
+   -70.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_HaemmerCap": [
+   31.5,
+   -34.0,
+   -56.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_Node_1": [
+   32.596,
+   -44.0,
+   -45.404,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_Node_2": [
+   23.404,
+   -44.0,
+   -45.404,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_Node_3": [
+   23.404,
+   -44.0,
+   -54.596,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_Node_4": [
+   32.596,
+   -44.0,
+   -54.596,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_Pylon_1": [
+   39.75,
+   -48.0,
+   -29.648,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_Pylon_2": [
+   4.5,
+   -48.0,
+   -50.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_Pylon_3": [
+   39.75,
+   -48.0,
+   -70.352,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/EE_WardenRise": [
+   28.0,
+   -54.0,
+   -50.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/FRG_LazarusForge": [
+   33.5,
+   -34.0,
+   -60.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ForgeClip_29_60": [
+   29.9,
+   -32.5,
+   -60.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ForgeClip_34_55": [
+   34.0,
+   -32.5,
+   -55.9,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ForgeClip_34_64": [
+   34.0,
+   -32.5,
+   -64.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ForgeClip_38_57": [
+   38.1,
+   -32.5,
+   -57.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ForgeClip_38_63": [
+   38.1,
+   -32.5,
+   -63.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ObsClip_3_39": [
+   3.5,
+   -36.5,
+   -39.9,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ObsClip_3_45": [
+   3.5,
+   -36.5,
+   -45.1,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ObsClip_7_42": [
+   7.1,
+   -36.5,
+   -42.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/R08": [
+   4.0,
+   -38.0,
+   -42.5,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_00": [
+   47.059,
+   -46.0,
+   -48.751,
+   0.0,
+   1.5053,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_01": [
+   46.733,
+   -46.0,
+   -46.274,
+   0.0,
+   1.3744,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_02": [
+   46.086,
+   -46.0,
+   -43.861,
+   0.0,
+   1.2435,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_03": [
+   45.13,
+   -46.0,
+   -41.552,
+   0.0,
+   1.1126,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_04": [
+   43.881,
+   -46.0,
+   -39.389,
+   0.0,
+   0.9817,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_05": [
+   42.36,
+   -46.0,
+   -37.406,
+   0.0,
+   0.8508,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_06": [
+   40.594,
+   -46.0,
+   -35.64,
+   0.0,
+   0.7199,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_07": [
+   38.611,
+   -46.0,
+   -34.119,
+   0.0,
+   0.589,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_08": [
+   36.448,
+   -46.0,
+   -32.87,
+   0.0,
+   0.4581,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_09": [
+   34.139,
+   -46.0,
+   -31.914,
+   0.0,
+   0.3272,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_10": [
+   31.726,
+   -46.0,
+   -31.267,
+   0.0,
+   0.1963,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_11": [
+   29.249,
+   -46.0,
+   -30.941,
+   0.0,
+   0.0654,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_12": [
+   26.751,
+   -46.0,
+   -30.941,
+   0.0,
+   -0.0654,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_13": [
+   24.274,
+   -46.0,
+   -31.267,
+   0.0,
+   -0.1963,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_14": [
+   21.861,
+   -46.0,
+   -31.914,
+   0.0,
+   -0.3272,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_15": [
+   19.552,
+   -46.0,
+   -32.87,
+   0.0,
+   -0.4581,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_16": [
+   17.389,
+   -46.0,
+   -34.119,
+   0.0,
+   -0.589,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_17": [
+   15.406,
+   -46.0,
+   -35.64,
+   0.0,
+   -0.7199,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_18": [
+   13.64,
+   -46.0,
+   -37.406,
+   0.0,
+   -0.8508,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_19": [
+   12.119,
+   -46.0,
+   -39.389,
+   0.0,
+   -0.9817,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_20": [
+   10.87,
+   -46.0,
+   -41.552,
+   0.0,
+   -1.1126,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_21": [
+   9.914,
+   -46.0,
+   -43.861,
+   0.0,
+   -1.2435,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_22": [
+   9.267,
+   -46.0,
+   -46.274,
+   0.0,
+   -1.3744,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_23": [
+   8.941,
+   -46.0,
+   -48.751,
+   0.0,
+   -1.5053,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_24": [
+   8.941,
+   -46.0,
+   -51.249,
+   0.0,
+   -1.6362,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_25": [
+   9.267,
+   -46.0,
+   -53.726,
+   0.0,
+   -1.7671,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_26": [
+   9.914,
+   -46.0,
+   -56.139,
+   0.0,
+   -1.898,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_27": [
+   10.87,
+   -46.0,
+   -58.448,
+   0.0,
+   -2.0289,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_28": [
+   12.119,
+   -46.0,
+   -60.611,
+   0.0,
+   -2.1598,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_29": [
+   13.64,
+   -46.0,
+   -62.594,
+   0.0,
+   -2.2907,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_30": [
+   15.406,
+   -46.0,
+   -64.36,
+   0.0,
+   -2.4216,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_31": [
+   17.389,
+   -46.0,
+   -65.881,
+   0.0,
+   -2.5525,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_32": [
+   19.552,
+   -46.0,
+   -67.13,
+   0.0,
+   -2.6834,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_33": [
+   21.861,
+   -46.0,
+   -68.086,
+   0.0,
+   -2.8143,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_34": [
+   24.274,
+   -46.0,
+   -68.733,
+   0.0,
+   -2.9452,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_35": [
+   26.751,
+   -46.0,
+   -69.059,
+   0.0,
+   -3.0761,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_36": [
+   29.249,
+   -46.0,
+   -69.059,
+   0.0,
+   3.0761,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_37": [
+   31.726,
+   -46.0,
+   -68.733,
+   0.0,
+   2.9452,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_38": [
+   34.139,
+   -46.0,
+   -68.086,
+   0.0,
+   2.8143,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_39": [
+   36.448,
+   -46.0,
+   -67.13,
+   0.0,
+   2.6834,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_40": [
+   38.611,
+   -46.0,
+   -65.881,
+   0.0,
+   2.5525,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_41": [
+   40.594,
+   -46.0,
+   -64.36,
+   0.0,
+   2.4216,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_42": [
+   42.36,
+   -46.0,
+   -62.594,
+   0.0,
+   2.2907,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_43": [
+   43.881,
+   -46.0,
+   -60.611,
+   0.0,
+   2.1598,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_44": [
+   45.13,
+   -46.0,
+   -58.448,
+   0.0,
+   2.0289,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_45": [
+   46.086,
+   -46.0,
+   -56.139,
+   0.0,
+   1.898,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_46": [
+   46.733,
+   -46.0,
+   -53.726,
+   0.0,
+   1.7671,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/RailClip_47": [
+   47.059,
+   -46.0,
+   -51.249,
+   0.0,
+   1.6362,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ShaftClipBottomB": [
+   -1.5,
+   -46.5,
+   -64.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/ShaftClipTopB": [
+   -1.5,
+   -16.5,
+   -44.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Spawn_Z13_Rift1": [
+   41.856,
+   -51.0,
+   -42.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Spawn_Z13_Rift2": [
+   28.0,
+   -51.0,
+   -34.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Spawn_Z13_Rift3": [
+   14.144,
+   -51.0,
+   -42.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Spawn_Z13_Rift4": [
+   14.144,
+   -51.0,
+   -58.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Spawn_Z13_Rift5": [
+   28.0,
+   -51.0,
+   -66.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Spawn_Z13_Rift6": [
+   41.856,
+   -51.0,
+   -58.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Spawn_Z13_VentN": [
+   28.8,
+   -48.0,
+   -22.2,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Spawn_Z13_VentS": [
+   27.2,
+   -48.0,
+   -77.8,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/T3_Console": [
+   43.145,
+   -48.0,
+   -30.615,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/T3_CoolantPurge": [
+   50.0,
+   -48.0,
+   -50.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/VentN_WideClip": [
+   28.0,
+   -47.1,
+   -24.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/VentS_WideClip": [
+   28.0,
+   -47.1,
+   -75.4,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_Rift1_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_Rift2_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_Rift3_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_Rift4_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_Rift5_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_Rift6_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_VentN_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_VentN_PlayerClip": [
+   28.0,
+   -47.4,
+   -24.6,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_VentS_Link": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Z13_VentS_PlayerClip": [
+   28.0,
+   -47.4,
+   -75.4,
+   0.0,
+   -3.1416,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Zone_Z13_Chamber": [
+   28.0,
+   -34.5,
+   -50.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Z13_ReactorChamber/Gameplay/Zone_Z13_Shaft": [
+   -3.0,
+   -32.0,
+   -52.0,
+   0.0,
+   0.0,
+   0.0
+  ]
+ }
+}

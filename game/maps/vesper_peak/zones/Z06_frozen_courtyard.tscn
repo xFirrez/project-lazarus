@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://maps/vesper_peak/zones/Z06_frozen_courtyard.gd" id="1"]
+
+[node name="Z06_FrozenCourtyard" type="Node3D"]
+script = ExtResource("1")
+zone_id = &"Z06"
+display_name = "Frozen Courtyard"
+cascade = 2

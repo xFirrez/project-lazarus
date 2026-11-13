@@ -1,0 +1,37 @@
+{
+ "doc": "GAME_DESIGN.md §4.3 roster table (+ §3.4 Ice Axe) as data. Checked against content/weapons by tests/unit/test_weapons_spec.gd (AC-9.1). fire: semi|auto|burst|pump|bolt|single (pump/bolt/single = SEMI fire mode). splash = [centre damage, radius]. source: start|wall|box.",
+ "weapons": {
+  "m1911":      {"class": "PISTOL",    "damage": 40,  "rpm": 400,  "fire": "semi",  "mag": 8,   "reserve": 32,  "source": "start", "cost": 0},
+  "revolver":   {"class": "PISTOL",    "damage": 210, "rpm": 140,  "fire": "semi",  "mag": 6,   "reserve": 48,  "source": "wall",  "cost": 1000},
+  "mauser":     {"class": "PISTOL",    "damage": 50,  "rpm": 600,  "fire": "semi",  "mag": 10,  "reserve": 80,  "source": "box"},
+  "mp40":       {"class": "SMG",       "damage": 40,  "rpm": 550,  "fire": "auto",  "mag": 32,  "reserve": 192, "source": "wall",  "cost": 1000},
+  "grease_gun": {"class": "SMG",       "damage": 50,  "rpm": 450,  "fire": "auto",  "mag": 30,  "reserve": 180, "source": "wall",  "cost": 1000},
+  "skorpion":   {"class": "SMG",       "damage": 35,  "rpm": 850,  "fire": "auto",  "mag": 20,  "reserve": 200, "source": "box"},
+  "ppsh":       {"class": "SMG",       "damage": 40,  "rpm": 950,  "fire": "auto",  "mag": 71,  "reserve": 284, "source": "box"},
+  "m14":        {"class": "AR",        "damage": 105, "rpm": 320,  "fire": "semi",  "mag": 8,   "reserve": 92,  "source": "wall",  "cost": 500},
+  "m16":        {"class": "AR",        "damage": 100, "rpm": 750,  "fire": "burst", "mag": 30,  "reserve": 120, "source": "wall",  "cost": 1200, "burst": 3},
+  "ak47":       {"class": "AR",        "damage": 110, "rpm": 600,  "fire": "auto",  "mag": 30,  "reserve": 240, "source": "box"},
+  "fal":        {"class": "AR",        "damage": 120, "rpm": 500,  "fire": "semi",  "mag": 20,  "reserve": 160, "source": "box"},
+  "g3":         {"class": "AR",        "damage": 115, "rpm": 550,  "fire": "auto",  "mag": 20,  "reserve": 180, "source": "box"},
+  "coachgun":   {"class": "SHOTGUN",   "damage": 160, "pellets": 8, "fire": "semi", "mag": 2,   "reserve": 60,  "source": "wall",  "cost": 500},
+  "model37":    {"class": "SHOTGUN",   "damage": 160, "pellets": 8, "rpm": 70, "fire": "pump", "mag": 6, "reserve": 54, "source": "wall", "cost": 1500},
+  "auto12":     {"class": "SHOTGUN",   "damage": 110, "pellets": 8, "rpm": 250, "fire": "semi", "mag": 8, "reserve": 64, "source": "box"},
+  "rpd":        {"class": "LMG",       "damage": 110, "rpm": 700,  "fire": "auto",  "mag": 100, "reserve": 400, "source": "box"},
+  "m60":        {"class": "LMG",       "damage": 130, "rpm": 550,  "fire": "auto",  "mag": 100, "reserve": 300, "source": "box"},
+  "mg42":       {"class": "LMG",       "damage": 100, "rpm": 1200, "fire": "auto",  "mag": 125, "reserve": 375, "source": "box"},
+  "kar98k":     {"class": "PRECISION", "damage": 400, "rpm": 50,   "fire": "bolt",  "mag": 5,   "reserve": 50,  "source": "wall",  "cost": 1500},
+  "dragunov":   {"class": "PRECISION", "damage": 350, "rpm": 200,  "fire": "semi",  "mag": 10,  "reserve": 60,  "source": "box"},
+  "law":        {"class": "EXPLOSIVE", "damage": 1500, "fire": "single", "mag": 1, "reserve": 20, "source": "box", "splash": [600, 4.0], "projectile": "rocket"},
+  "china_lake": {"class": "EXPLOSIVE", "damage": 900, "rpm": 40, "fire": "pump", "mag": 2, "reserve": 20, "source": "box", "splash": [500, 3.5], "projectile": "grenade"},
+  "crossbow":   {"class": "EXPLOSIVE", "damage": 750, "fire": "single", "mag": 1, "reserve": 15, "source": "box", "splash": [700, 3.0], "projectile": "bolt", "fuse": 1.5}
+ },
+ "equipment": {
+  "frag":      {"class": "LETHAL",    "splash": [1200, 5.0], "edge": 250, "fuse": 3.5, "carry_start": 2, "carry_max": 4},
+  "decoy":     {"class": "TACTICAL",  "splash": [2000, 4.0], "attract_time": 8.0, "attract_radius": 25.0, "carry_start": 3, "carry_max": 3, "source": "box"},
+  "tripmines": {"class": "PLACEABLE", "splash": [2000, 4.0], "carry_start": 2, "carry_max": 2, "place_limit": 4, "source": "wall", "cost": 1000},
+  "knife":     {"class": "MELEE",     "damage": 150, "melee_time": 0.45},
+  "ice_axe":   {"class": "MELEE",     "damage": 1000, "melee_time": 0.35, "source": "wall", "cost": 3000}
+ },
+ "head_multiplier": {"PISTOL": 3.0, "PRECISION": 5.0, "SHOTGUN": 1.5, "default": 4.0},
+ "penetration": {"PISTOL": 1, "SMG": 1, "AR": 2, "LMG": 3, "PRECISION": 4, "SHOTGUN": 1, "EXPLOSIVE": 1}
+}

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="QualityPreset" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/render/quality_preset.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"low"
+order = 0
+display_name = "Low"
+render_scale = 0.75
+scaling = 1
+msaa = 0
+fxaa = true
+directional_shadow_size = 1024
+positional_shadow_atlas = 1024
+soft_shadow_quality = 1
+max_shadow_lights = 2
+ssao = false
+ssao_quality = 0
+glow = true
+volumetric_fog = false
+volumetric_fog_size = 32
+volumetric_fog_depth = 32
+particle_density = 0.35
+mesh_lod_threshold = 4.0
+view_distance = 120.0

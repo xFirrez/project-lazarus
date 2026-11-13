@@ -1,0 +1,72 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.0, 0.8, 0, 0, 0, 0, 0.05, 0.8)
+}
+point_count = 2
+
+[resource]
+script = ExtResource("1")
+id = &"lazarus_conduit_up"
+display_name = "Lazarus Requiem"
+weapon_class = 7
+cost = 0
+behavior = &"chain"
+fire_mode = 0
+rpm = 120.0
+damage = 2400.0
+max_range = 25.0
+range_min = 0.0
+range_max = 1.0
+min_damage_fraction = 1.0
+mag_size = 36
+reserve_max = 180
+reload_partial_time = 2.8
+reload_empty_time = 3.2
+ammo_in_partial = 2.0
+ammo_in_empty = 2.4
+raise_time = 0.55
+lower_time = 0.35
+ads_time = 0.25
+sprint_out_time = 0.25
+ads_fov_multiplier = 0.85
+move_speed_multiplier = 0.95
+spread_hip = 0.0
+spread_ads = 0.0
+spread_move = 0.0
+spread_per_shot = 0.0
+spread_max = 0.0
+recoil_random = 0.05
+view_kick = 0.8
+vm_kick_back = 0.04
+vm_kick_rot = 3.0
+viewmodel_style = &"conduit"
+viewmodel_color = Color(0.3, 0.27, 0.22, 1)
+viewmodel_offset = Vector3(0.14, -0.17, -0.3)
+sight_height = 0.07
+tracer_every = 0
+shell_size = 0.0
+muzzle_flash_scale = 0.6
+tracer_color = Color(0.85, 0.6, 1, 1)
+death_fx = &"char"
+fx_variant = 3
+chain_cone_deg = 4.0
+chain_jumps = 10
+chain_jump_range = 8.0
+chain_falloff = 0.75
+chain_full_jumps = 4
+chain_kill_arcs = 2
+stun_time = 2.5
+pulse_id = &"lazarus_conduit_pulse"
+pulse_hold_time = 1.0
+pulse_ammo = 3
+sound_body_hz = 95.0
+sound_mech_hz = 4200.0
+sound_tail_s = 0.8
+sound_volume_db = -2.0
+recoil_pattern = SubResource("recoil")
+base_id = &"lazarus_conduit"
+camo = &"vesperite"

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://maps/vesper_peak/zones/Z01_arrival_station.gd" id="1"]
+
+[node name="Z01_ArrivalStation" type="Node3D"]
+script = ExtResource("1")
+zone_id = &"Z01"
+display_name = "Arrival Station"
+cascade = 3

@@ -1,0 +1,53 @@
+[gd_resource type="Environment" load_steps=3 format=3]
+
+[sub_resource type="Gradient" id="g"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(0.0, 0.02, 0.01, 1, 0.38, 0.48, 0.4, 1, 0.95, 1.0, 0.95, 1)
+
+[sub_resource type="GradientTexture1D" id="lut"]
+gradient = SubResource("g")
+width = 128
+
+[resource]
+resource_name = "reactor"
+background_mode = 1
+background_color = Color(0.0, 0.01, 0.005, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.12, 0.22, 0.14, 1)
+ambient_light_energy = 0.3
+ambient_light_sky_contribution = 0.0
+tonemap_mode = 4
+tonemap_exposure = 1.0
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 1.2
+ssao_intensity = 1.6
+glow_enabled = true
+glow_levels/1 = 0.3
+glow_levels/2 = 0.6
+glow_levels/3 = 1.0
+glow_levels/5 = 0.6
+glow_intensity = 1.0
+glow_bloom = 0.060
+glow_blend_mode = 1
+glow_hdr_threshold = 0.9
+fog_enabled = true
+fog_mode = 0
+fog_light_color = Color(0.05, 0.12, 0.07, 1)
+fog_density = 0.008
+fog_aerial_perspective = 0.0
+fog_sky_affect = 0.0
+fog_height = 0.0
+fog_height_density = 0.0
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.03
+volumetric_fog_albedo = Color(0.5, 0.9, 0.6, 1)
+volumetric_fog_emission = Color(0.004, 0.02, 0.008, 1)
+volumetric_fog_anisotropy = 0.2
+volumetric_fog_length = 64.0
+volumetric_fog_ambient_inject = 0.4
+adjustment_enabled = true
+adjustment_contrast = 1.1
+adjustment_saturation = 1.0
+adjustment_color_correction = SubResource("lut")
+metadata/description = "Lazarus Reactor: black stone and brass under vesperite green haze; heavy glow."

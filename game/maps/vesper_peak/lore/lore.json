@@ -1,0 +1,712 @@
+{
+ "map": "vesper_peak",
+ "doc": "Vesper Peak lore: documents, reels and quest VO (VESPER_PEAK §6, §7). Runtime source for LoreLibrary; maps/vesper_peak/lore/script.md is generated from it (tools/gen_lore_script.py).",
+ "speakers": {
+  "VARGA": {
+   "name": "Dr. Elise Varga",
+   "pitch": 1.18
+  },
+  "HAEMMER": {
+   "name": "Col. Aldric Haemmer",
+   "pitch": 0.78
+  },
+  "RADIO": {
+   "name": "Radio",
+   "pitch": 1.1
+  },
+  "KEMPER": {
+   "name": "Nurse Ilse Kemper",
+   "pitch": 1.12
+  },
+  "OPERATOR": {
+   "name": "Radio Operator",
+   "pitch": 0.95
+  },
+  "CALLOWAY": {
+   "name": "Calloway",
+   "pitch": 1.05
+  },
+  "ORLOV": {
+   "name": "Orlov",
+   "pitch": 0.88
+  },
+  "BRANDT": {
+   "name": "Anneliese",
+   "pitch": 1.14
+  },
+  "ASHCOMBE": {
+   "name": "Ashcombe",
+   "pitch": 0.98
+  }
+ },
+ "entries": [
+  {
+   "id": "L01",
+   "kind": "doc",
+   "zone": "Arrival Station",
+   "title": "Cable car timetable, winter 1963",
+   "body": "VESPER PEAK AERIAL TRAMWAY — WINTER SERVICE\n\nValley station dep. 07:10 / 10:40 / 14:15 / 17:50\nSummit station dep. 08:00 / 11:30 / 15:05 / 18:40\n\nService suspended in high wind. Passengers for the Sanatorium report to the porter's desk. Luggage is carried up separately and will be delivered to your room.\n\nAcross the bottom of the card, in heavy pencil, pressed hard enough to tear the paper:\nLAST CABIN: 23 DEC — DO NOT RETURN"
+  },
+  {
+   "id": "L02",
+   "kind": "doc",
+   "zone": "Sanatorium Lobby",
+   "title": "\"Breathe the Light of Vesper\" — brochure, 1908",
+   "body": "The Vesper Peak Sanatorium welcomes guests of refinement to the purest air in Europe. Two thousand metres above the fog of the cities, our patients take the cure on sunlit terraces, sleep in rooms of Alpine larch and wake to the famous green glow that crowns the summit on clear winter nights — a phenomenon our physicians believe to be the source of the mountain's remarkable healing properties.\n\nElectric lighting throughout. Hydrotherapy. A cable car of the most modern Swiss design.\n\nThe mountain gives back what the world has taken."
+  },
+  {
+   "id": "L03",
+   "kind": "doc",
+   "zone": "Sanatorium Lobby",
+   "title": "Acquisition memorandum — Group Vesper, 1951",
+   "body": "MEMORANDUM — EYES ONLY\nRe: Purchase of the Vesper Peak property through ██████ Holdings AG\n\nThe sanatorium has been acquired in full, including the 1938 rail tunnel and the sealed cavern. Funding is confirmed from both principal subscribers. Neither is to learn of the other. Correspondence to the first is to be typed on the enclosed letterhead (Langley); to the second, on the enclosed letterhead (Lubyanka). The Director will maintain both sets of books personally.\n\nThe staff will be told this is a private research foundation. That is, in a manner of speaking, true.\n\n— Col. A. Haemmer, Director"
+  },
+  {
+   "id": "L04",
+   "kind": "doc",
+   "zone": "East Wing",
+   "title": "Night nurse's log, ward 2",
+   "body": "3 Nov. — Patient 11 (room 4) awake at 02:00 humming. Says the walls are singing and he is only keeping the tune. Sedated.\n5 Nov. — Rooms 2, 3, 4 and 9 report the singing. Same melody. I have checked the pipes, the radiators, the lift shaft. Nothing.\n9 Nov. — Patient 11 has drawn the melody on the walls of room 3 in charcoal. Six lines of it. Dr. Varga came to see it and stood there a long time. She told me not to wash it off.\n12 Nov. — I heard it myself tonight. It is very beautiful. I am requesting a transfer."
+  },
+  {
+   "id": "L05",
+   "kind": "doc",
+   "zone": "Operating Theater",
+   "title": "Surgical note — Subject 31",
+   "body": "Subject 31 (male, approx. 40, cause of death: exposure). Time of death established 19 Oct, 06:10. Vesperite lattice electrodes placed 21 Oct along the spinal column.\n\n23 Oct. — Cardiac activity restored at 03:42.\n25 Oct. — Subject 31 opened his eyes, turned his head toward the cavern side of the building and spoke for the first time. Four days dead, and his first word was a question: \"Who is singing?\"\n\nI have not told the Colonel what the subject said afterwards. I am not sure I heard it correctly. — E.V."
+  },
+  {
+   "id": "L06",
+   "kind": "doc",
+   "zone": "Frozen Courtyard",
+   "title": "Motor pool requisition form",
+   "body": "REQUISITION — MOTOR POOL / STORES\nItem: Coffins, pine, standard\nQuantity: 200\nPriority: URGENT\nDeliver to: Morgue, south tunnels. Use the freight lift, not the main road. Drivers are not to enter the sanatorium.\n\nRequested by: Col. A. Haemmer\nCountersigned: —\n\nStores clerk's note in the margin: Two hundred? We have twelve patients. What does he expect?"
+  },
+  {
+   "id": "L07",
+   "kind": "doc",
+   "zone": "Communications Array",
+   "title": "Radio log, transcript fragment",
+   "body": "[TRANSCRIPT — LONG-RANGE SET 2 — 22 DEC 1963 — 23:40]\nHAEMMER: ...is cooperative. I repeat, the Choir is cooperative. Output has doubled without a single new rod. Dr. Varga's objections are noted and overruled.\nUNKNOWN: Confirm readiness for the Requiem.\nHAEMMER: Confirmed. Two hundred subjects. Midnight on the twenty-fourth. You will have your army by Christmas.\nUNKNOWN: Which of us, Colonel?\n[pause — 6 seconds]\nHAEMMER: Both of you. As agreed.\n[END]"
+  },
+  {
+   "id": "L08",
+   "kind": "doc",
+   "zone": "Boiler House",
+   "title": "Letter from the boiler foreman",
+   "body": "Dear Marta,\n\nThe work is good and the money is better, and I have told you I cannot say more. But I will tell you this, because it is the boilers and not a secret: they run hot when nobody feeds them. We bank the fires at night and in the morning the gauges are in the red and the coal is untouched. Kessler says it is the mountain. Kessler says a great many things now. He sleeps in the coal store because he says it is quieter there.\n\nIt is not quieter there. I went to see. I could hear it through the floor.\n\nKiss the children. Do not come up for Christmas. — Your Josef"
+  },
+  {
+   "id": "L09",
+   "kind": "doc",
+   "zone": "Generator Hall",
+   "title": "Engineering report — reactor output",
+   "body": "ENGINEERING REPORT 63/41 — LAZARUS REACTOR, WEEKLY\n\nCore temperature: nominal. Containment rings: nominal. Fuel rods inserted: none since week 30.\nOutput: rising (+3.1 % week on week; cumulative +240 % since spring).\n\nThe reactor is producing power without input. I have checked the instruments twice and had Orlov check them a third time. He agrees with the readings and asked to be relieved of duty, which I refused.\n\nRecommendation: shut down the reactor and seal the cavern.\nDirector's response (attached): Recommendation declined. Increase load."
+  },
+  {
+   "id": "L10",
+   "kind": "doc",
+   "zone": "Morgue",
+   "title": "Morgue intake ledger, 24 December 1963",
+   "body": "INTAKE — 24 DEC 1963\n21:05  No. 188  male  —  exposure       drawer 41\n21:12  No. 189  female —  unknown        drawer 42\n21:30  No. 190  male  —  gunshot        drawer 43\n22:48  No. 191–197 — transferred from the labs, no papers\n23:55  No. 198  male  —  \n23:57  Drawers are warm. All of them. Requesting the Colonel postpone the\n\n(The entry stops. The pen has gone through the page.)"
+  },
+  {
+   "id": "L11",
+   "kind": "doc",
+   "zone": "Containment Labs",
+   "title": "Varga's notebook: \"Not a fuel\"",
+   "body": "I have been calling it a fuel for eleven years because the Colonel needed a word he could sign. It is not a fuel. Fuel burns. Vesperite carries. Every sample we have cut is a fibre of something larger, and every fibre still answers to the whole.\n\nVesperite is not a fuel. It is a nerve.\n\nAnd the reactor is not a furnace. It is a stimulus. Every watt we draw from it is a pinprick on something that has been asleep beneath this mountain since before there were mountains. It is waking up. It is learning our voices. It sings back."
+  },
+  {
+   "id": "L12",
+   "kind": "doc",
+   "zone": "Specimen Storage",
+   "title": "Specimen catalogue (extract)",
+   "body": "SPECIMEN CATALOGUE — COLD STORE B\nItem 14: vesperite fibre in saline, 3 cm. Inert.\nItem 15: canine brain, 1952 trial. Twitches when the reactor is under load.\nItem 22: Subject 31, left hand. Do not open.\nItem 0: sample from the deep cavern, recovered 1938 by the tunnel crew. IT MOVED.\n\n(Item 0's shelf is empty. The glass in front of it is broken outward.)"
+  },
+  {
+   "id": "L13",
+   "kind": "doc",
+   "zone": "Director's Office",
+   "title": "Order: the Requiem Test",
+   "body": "ORDER No. 1 / 1963 — MOST SECRET\nFrom: The Director\nTo: Dr. E. Varga, Chief Physician; Engineering; Morgue\n\n1. At 00:00 on 25 December the reactor will be brought to full output and held there.\n2. The field will be extended through the morgue conduits to all two hundred subjects simultaneously.\n3. Dr. Varga's request to be excused is refused. She will supervise from the core.\n4. Staff not essential to the Test will remain in their quarters. Doors will be locked from outside.\n5. This is the Requiem. Afterwards there will be no more funerals.\n\n— Haemmer"
+  },
+  {
+   "id": "L14",
+   "kind": "doc",
+   "zone": "Ice Grotto",
+   "title": "Diary of Tomas Brandt, guide",
+   "body": "18 Dec. — Hired to guide two engineers down from the summit. Good money. They would not say what they had seen. One of them cried the whole way.\n20 Dec. — Came back up for my pay. The Colonel's men would not let me leave. They say the road is closed. The road is not closed.\n23 Dec. — Took the last cabin's cable as a line and climbed down behind the waterfall. There is a cave here. It is warm. Green light in the ice.\n24 Dec. — Midnight. The whole mountain sang. I watched the sanatorium windows go dark one by one.\n25 Dec. — I can hear them walking above me. I am not going back up.\nAnneliese — if you find this, don't look for me. Look after Mother. I am sorry I was late."
+  },
+  {
+   "id": "guestbook",
+   "kind": "clue",
+   "zone": "Sanatorium Lobby",
+   "title": "Sanatorium guestbook",
+   "body": "A leather guestbook open on the reception desk. Most entries are gushing thanks from patients of the 1920s. One, from 1958, is underlined twice in fresh ink:\n\n\"A delightful stay — though the Director insists on keeping the best room for himself! His favourite, he tells me, is number seven in the East Wing, where the mirror shows a man as he truly is. He spends whole evenings there. — Dr. J.A.\""
+  },
+  {
+   "id": "R01",
+   "kind": "reel",
+   "zone": "Communications Array",
+   "title": "Varga's research diary — 1952",
+   "lines": [
+    [
+     "VARGA",
+     "Research diary. Elise Varga. The ninth of March, 1952."
+    ],
+    [
+     "VARGA",
+     "The rat was dead for six hours. I placed a vesperite fibre against the spinal cord and it breathed. Not a reflex. It looked at me."
+    ],
+    [
+     "VARGA",
+     "The crystal is warm. It hums at forty-seven cycles, always forty-seven. The animals in the lab will not sleep near it."
+    ],
+    [
+     "VARGA",
+     "Colonel Haemmer has asked for a demonstration. I said it is too early. He said there is no such thing."
+    ]
+   ]
+  },
+  {
+   "id": "R02",
+   "kind": "reel",
+   "zone": "Sanatorium Lobby",
+   "title": "Staff dictation — Nurse Kemper",
+   "lines": [
+    [
+     "KEMPER",
+     "Dictation for the Director's office. Ilse Kemper, head nurse. Ward rounds, the second of November."
+    ],
+    [
+     "KEMPER",
+     "Twelve patients, all stable, all asking the same question. They want to know who is singing in the cellar."
+    ],
+    [
+     "KEMPER",
+     "I have told them it is the wind in the cable car wires. I would like to be told what to tell them, sir. I would like to be told the truth."
+    ]
+   ]
+  },
+  {
+   "id": "R03",
+   "kind": "reel",
+   "zone": "Operating Theater",
+   "title": "Varga's research diary — Subject 31",
+   "lines": [
+    [
+     "VARGA",
+     "Subject thirty-one. Day four. He speaks. Short sentences, perfect German, a voice like gravel."
+    ],
+    [
+     "VARGA",
+     "He says he was somewhere warm and crowded, and that everyone there was singing the same song, and that he was happy."
+    ],
+    [
+     "VARGA",
+     "Then he asked me to send him back. I could not. I do not know how. I am beginning to think we did not bring him back at all. Something else came up with him."
+    ]
+   ]
+  },
+  {
+   "id": "R04",
+   "kind": "reel",
+   "zone": "Generator Hall",
+   "title": "Haemmer's briefing — output",
+   "lines": [
+    [
+     "HAEMMER",
+     "Gentlemen, the engineers are frightened of good news. Output is rising without fuel. That is not a fault. That is a gift."
+    ],
+    [
+     "HAEMMER",
+     "Our two benefactors each believe this mountain will win them the next war. Let them believe it. They are both paying for the same army."
+    ],
+    [
+     "HAEMMER",
+     "Increase the load. If the mountain wants to sing, we will give it an audience."
+    ]
+   ]
+  },
+  {
+   "id": "R05",
+   "kind": "reel",
+   "zone": "Morgue",
+   "title": "Varga's research diary — the Choir",
+   "lines": [
+    [
+     "VARGA",
+     "I went down into the cavern tonight, alone. The walls are fibres, all of it, a single body as big as the range."
+    ],
+    [
+     "VARGA",
+     "The patients call it the Choir. They are right. It is not one voice. It is every mind that vesperite has ever touched, singing together, and it wants more voices."
+    ],
+    [
+     "VARGA",
+     "If the Colonel runs the reactor at full output, it will not raise an army. It will open a door."
+    ]
+   ]
+  },
+  {
+   "id": "R06",
+   "kind": "reel",
+   "zone": "Containment Labs",
+   "title": "Haemmer's briefing — the Requiem",
+   "lines": [
+    [
+     "HAEMMER",
+     "Doctor Varga has resigned. Her resignation is refused. She will supervise the Test from the core, where she can do the least harm."
+    ],
+    [
+     "HAEMMER",
+     "At midnight on the twenty-fourth we raise two hundred. Soldiers who cannot die, cannot defect and cannot be bribed by either side."
+    ],
+    [
+     "HAEMMER",
+     "They will call it a requiem. I call it the last funeral this world will ever need."
+    ]
+   ]
+  },
+  {
+   "id": "R07",
+   "kind": "reel",
+   "zone": "Specimen Storage",
+   "title": "The night of the Requiem Test",
+   "lines": [
+    [
+     "OPERATOR",
+     "Control, reactor at ninety percent. Rings holding. Morgue field engaged."
+    ],
+    [
+     "HAEMMER",
+     "Full output. Now."
+    ],
+    [
+     "OPERATOR",
+     "One hundred. The drawers — sir, the drawers are opening. All of them. The lights, the singing, I can hear it in the headset —"
+    ],
+    [
+     "VARGA",
+     "Shut it down! Aldric, it is not listening to you, it is listening through you —"
+    ],
+    [
+     "OPERATOR",
+     "Cascade, cascade through every circuit — oh God, the staff quarters —"
+    ],
+    [
+     "HAEMMER",
+     "Hold the rings. Hold — it is beautiful —"
+    ]
+   ]
+  },
+  {
+   "id": "R08",
+   "kind": "reel",
+   "zone": "Reactor Chamber",
+   "title": "Varga's last recording",
+   "lines": [
+    [
+     "VARGA",
+     "If anyone hears this: I am at the core. Everyone above me is dead, and everyone above me is walking."
+    ],
+    [
+     "VARGA",
+     "Aldric is still down here. He is changing. The Choir has dressed him in the reactor's armour and he does not stop smiling."
+    ],
+    [
+     "VARGA",
+     "I am going to bind myself into the containment field. Mind and crystal. It should hold the door shut a while."
+    ],
+    [
+     "VARGA",
+     "Tune to my frequency if you want to find me. I will be the voice that is not singing."
+    ]
+   ]
+  },
+  {
+   "id": "R09",
+   "kind": "reel",
+   "zone": "Reactor Chamber",
+   "title": "Varga's farewell",
+   "lines": [
+    [
+     "VARGA",
+     "You did it. The rings are closing. I can feel the Choir falling back into the dark like a tide going out."
+    ],
+    [
+     "VARGA",
+     "Thank you for carrying my heart. I have been holding this door for so long I forgot what my own voice sounded like."
+    ],
+    [
+     "VARGA",
+     "Listen carefully, because I will not be able to say it twice. Before the rings closed, the Choir sang. Not to us. Outward."
+    ],
+    [
+     "VARGA",
+     "Somewhere else, very far from this mountain, something heard it and sang back. Find it before it learns to open its own door."
+    ],
+    [
+     "VARGA",
+     "Goodbye. Breathe the light."
+    ]
+   ]
+  },
+  {
+   "id": "requiem",
+   "kind": "story",
+   "zone": "Reactor Chamber",
+   "title": "Requiem for Lazarus",
+   "body": "On a night of storms, four strangers tuned an abandoned radio to a dead woman's frequency, gathered the shards of her vesperite heart from ice, a chained drawer and a fleeing Galvanic, fed it with lightning and carried it down through the mountain to the reactor core.\n\nThe nodes broke under the Forge's fire. The pylons held. Colonel Haemmer — the Warden — fell at the edge of the pit, and Dr. Elise Varga closed the containment rings at last.\n\nThe Choir is silent beneath Vesper Peak. But it was not silent before the end."
+  },
+  {
+   "id": "vo_broadcast",
+   "kind": "vo",
+   "zone": "Map-wide radio, stage 0",
+   "title": "",
+   "lines": [
+    [
+     "RADIO",
+     "...is anyone — on this frequency — please —"
+    ],
+    [
+     "VARGA",
+     "...the red ink... the papers... tune the dials... I am still here..."
+    ]
+   ]
+  },
+  {
+   "id": "vo_contact",
+   "kind": "vo",
+   "zone": "Radio console, stage 1",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "You found me. Thank God. My name is Elise Varga. I was the chief physician here, before."
+    ],
+    [
+     "VARGA",
+     "I am inside the containment field. I am what is holding the reactor shut. And I am slipping."
+    ],
+    [
+     "VARGA",
+     "I need an anchor. My heart-crystal. The cascade shattered it in three: one froze in the courtyard fountain, one is chained in the morgue, one is inside a Galvanic."
+    ],
+    [
+     "VARGA",
+     "Bring the pieces to the soul pod in the labs. Please. Hurry."
+    ]
+   ]
+  },
+  {
+   "id": "vo_wrong",
+   "kind": "vo",
+   "zone": "Radio console, wrong frequency",
+   "title": "",
+   "lines": [
+    [
+     "RADIO",
+     "*a piercing shriek of static*"
+    ],
+    [
+     "VARGA",
+     "No — not that — that is the Choir's — they heard you —"
+    ]
+   ]
+  },
+  {
+   "id": "vo_shard",
+   "kind": "vo",
+   "zone": "Shard collected",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "Yes. That is a piece of me. I can feel it in your hand. Bring the others."
+    ]
+   ]
+  },
+  {
+   "id": "vo_marked",
+   "kind": "vo",
+   "zone": "The marked Galvanic",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "That one — the bright one. It carries a shard of me. Kill it before it reaches a rift!"
+    ]
+   ]
+  },
+  {
+   "id": "vo_marked_escaped",
+   "kind": "vo",
+   "zone": "The marked Galvanic escaped",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "It is gone into the storm. It will come back when the storm does. Be ready."
+    ]
+   ]
+  },
+  {
+   "id": "vo_drawers_wrong",
+   "kind": "vo",
+   "zone": "Morgue drawers, wrong order",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "Not that one! The symbols — follow the painted symbols —"
+    ]
+   ]
+  },
+  {
+   "id": "vo_pod_start",
+   "kind": "vo",
+   "zone": "Soul pod, stage 3",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "The pod must drink. Not just death — lightning. Kill them close to it with the Conduit, and the pod will keep what it takes."
+    ]
+   ]
+  },
+  {
+   "id": "vo_cable",
+   "kind": "vo",
+   "zone": "Soul pod cable loose",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "A surge — a cable has torn loose! Reseat it, or the charge will bleed away!"
+    ]
+   ]
+  },
+  {
+   "id": "vo_pod_done",
+   "kind": "vo",
+   "zone": "Heart charged",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "It beats. My heart beats again. Now carry it to the core — but not across the bridge."
+    ]
+   ]
+  },
+  {
+   "id": "vo_escort_start",
+   "kind": "vo",
+   "zone": "Escort, stage 4",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "The Choir is watching the bridge. Take the long way down: the maintenance tunnels, the generator hall, the shaft. Four minutes before the heart goes cold."
+    ]
+   ]
+  },
+  {
+   "id": "vo_escort_fail",
+   "kind": "vo",
+   "zone": "Escort failed",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "Too long — it has gone cold. It will find its way back to the pod. Try again when the next storm breaks."
+    ]
+   ]
+  },
+  {
+   "id": "vo_socket",
+   "kind": "vo",
+   "zone": "Heart socketed, stage 5",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "The core accepts it. Now the nodes. Four of them will grow from the rings — only metal that has been through the Forge can break them."
+    ]
+   ]
+  },
+  {
+   "id": "vo_node",
+   "kind": "vo",
+   "zone": "Node broken",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "Good. Another."
+    ]
+   ]
+  },
+  {
+   "id": "vo_calibrated",
+   "kind": "vo",
+   "zone": "Calibration complete",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "Calibrated. When the next storm comes, I will open the reactor. He will come up to stop us. Be ready."
+    ]
+   ]
+  },
+  {
+   "id": "vo_finale",
+   "kind": "vo",
+   "zone": "Finale begins",
+   "title": "",
+   "lines": [
+    [
+     "HAEMMER",
+     "The Requiem is not finished, Elise. It was never yours to finish."
+    ],
+    [
+     "VARGA",
+     "Protect the pylons! If they fall, the field fails and he walks free!"
+    ]
+   ]
+  },
+  {
+   "id": "vo_pylon",
+   "kind": "vo",
+   "zone": "Pylon lost",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "A pylon is down! Hold the others!"
+    ]
+   ]
+  },
+  {
+   "id": "vo_finale_fail",
+   "kind": "vo",
+   "zone": "The pylons fell",
+   "title": "",
+   "lines": [
+    [
+     "HAEMMER",
+     "Another time, Doctor. The Choir is patient."
+    ],
+    [
+     "VARGA",
+     "He has gone back into the pit. The heart is still in the socket. Next round, we try again."
+    ]
+   ]
+  },
+  {
+   "id": "vo_phase2",
+   "kind": "vo",
+   "zone": "Warden core exposed",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "His core is open! The Conduit — burn it with my lightning!"
+    ]
+   ]
+  },
+  {
+   "id": "vo_phase3",
+   "kind": "vo",
+   "zone": "Warden enraged",
+   "title": "",
+   "lines": [
+    [
+     "HAEMMER",
+     "ENOUGH!"
+    ],
+    [
+     "VARGA",
+     "He is desperate. The coolant — freeze him!"
+    ]
+   ]
+  },
+  {
+   "id": "vo_victory",
+   "kind": "vo",
+   "zone": "Victory",
+   "title": "",
+   "lines": [
+    [
+     "HAEMMER",
+     "Elise... the singing... it has stopped..."
+    ],
+    [
+     "VARGA",
+     "Rest now, Aldric. It is over."
+    ]
+   ]
+  },
+  {
+   "id": "vo_grotto",
+   "kind": "vo",
+   "zone": "The Ice Grotto",
+   "title": "",
+   "lines": [
+    [
+     "VARGA",
+     "Someone sheltered here, the night of the cascade. The ice remembers him."
+    ]
+   ]
+  },
+  {
+   "id": "vo_grotto_brandt",
+   "kind": "vo",
+   "zone": "Anneliese in the Ice Grotto",
+   "title": "",
+   "lines": [
+    [
+     "BRANDT",
+     "Tomas? This is his knot. This is his rope."
+    ],
+    [
+     "BRANDT",
+     "You stupid, brave idiot. You climbed down behind the falls. Just like when we were children."
+    ],
+    [
+     "VARGA",
+     "He was not taken, Anneliese. The ice kept him. He was never one of them."
+    ],
+    [
+     "BRANDT",
+     "Then I'll finish what he started. For both of us."
+    ]
+   ]
+  },
+  {
+   "id": "vo_snowblind",
+   "kind": "vo",
+   "zone": "Snowblind",
+   "title": "",
+   "lines": [
+    [
+     "ASHCOMBE",
+     "Do you hear that? Someone has wound up every music box on the mountain. How delightfully morbid."
+    ]
+   ]
+  },
+  {
+   "id": "vo_office",
+   "kind": "vo",
+   "zone": "Director's Office opens",
+   "title": "",
+   "lines": [
+    [
+     "ORLOV",
+     "A bookcase that moves. Of course. The Colonel always liked a secret door."
+    ]
+   ]
+  }
+ ]
+}

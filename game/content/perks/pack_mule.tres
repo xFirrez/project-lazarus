@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="PerkDefinition" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://core/perks/perk_definition.gd" id="1"]
+[ext_resource type="Script" path="res://core/perks/stat_modifier.gd" id="2"]
+
+[sub_resource type="Resource" id="mod_0"]
+script = ExtResource("2")
+stat = &"weapon_slots"
+op = 2
+value = 1.0
+
+[resource]
+script = ExtResource("1")
+id = &"pack_mule"
+display_name = "Pack Mule Cream Soda"
+tagline = "Third weapon slot"
+cost = 4000
+cost_coop = -1
+requires_power = true
+marker_id = &"Perk_PackMule"
+modifiers = Array[ExtResource("2")]([SubResource("mod_0")])
+sort_order = 6
+color = Color(0.75, 0.95, 0.45, 1)
+accent = Color(0.86, 0.8, 0.62, 1)
+silhouette = 6
+cap_letter = "P"
+jingle_root_hz = 147.0
+jingle_notes = PackedInt32Array(0, 5, 0, 5, 7, 5, 4, 2, 0)
+jingle_beats = PackedFloat32Array(1.0, 1.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 3.0)
+jingle_beat_seconds = 0.22
+jingle_wave = 3

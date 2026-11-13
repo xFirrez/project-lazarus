@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"lazarus_conduit_pulse"
+display_name = "Conduit Pulse"
+weapon_class = 7
+behavior = &"pulse"
+rpm = 30.0
+damage = 0.0
+mag_size = 999
+reserve_max = 0
+splash_radius = 8.0
+stun_time = 3.0
+attachment_of = &"lazarus_conduit"
+viewmodel_style = &"conduit"
+tracer_every = 0
+fx_variant = 2

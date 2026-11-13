@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"tripmines"
+display_name = "Tripmines"
+weapon_class = 11
+cost = 1000
+behavior = &"projectile"
+fire_mode = 0
+damage = 0.0
+mag_size = 0
+reserve_max = 0
+splash_radius = 4.0
+splash_damage_centre = 2000.0
+splash_damage_edge = 0.0
+self_damage_max = 60.0
+carry_start = 2
+carry_max = 2
+viewmodel_color = Color(0.25, 0.3, 0.22, 1)
+trigger_radius = 2.0
+place_limit = 4
+fuse_time = 0.25
+sound_body_hz = 700.0
+sound_mech_hz = 2600.0
+sound_tail_s = 0.2
+sound_volume_db = -8.0

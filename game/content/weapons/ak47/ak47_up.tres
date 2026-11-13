@@ -1,0 +1,74 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.000, 0.850, 0, 0, 0, 0, -0.241, 0.816, 0, 0, 0, 0, 0.273, 0.782, 0, 0, 0, 0, -0.304, 0.748, 0, 0, 0, 0, 0.336, 0.714, 0, 0, 0, 0, -0.367, 0.680, 0, 0, 0, 0, 0.399, 0.646, 0, 0, 0, 0, -0.430, 0.612)
+}
+point_count = 8
+
+[resource]
+script = ExtResource("1")
+id = &"ak47_up"
+display_name = "\"Iron Curtain\""
+weapon_class = 2
+cost = 0
+behavior = &"hitscan"
+fire_mode = 1
+rpm = 600.0
+burst_count = 3
+damage = 220.0
+pellets = 1
+pellet_spread_deg = 0.0
+max_range = 150.0
+head_multiplier = 4.0
+neck_multiplier = 2.0
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 25.0
+range_max = 60.0
+min_damage_fraction = 0.65
+penetration = 4
+penetration_loss = 0.25
+mag_size = 60
+reserve_max = 480
+reload_partial_time = 2.4
+reload_empty_time = 3.0
+ammo_in_partial = 1.6
+ammo_in_empty = 2.1
+raise_time = 0.5
+lower_time = 0.35
+ads_time = 0.26
+sprint_out_time = 0.25
+ads_fov_multiplier = 0.8
+move_speed_multiplier = 0.94
+spread_hip = 2.5
+spread_ads = 0.1
+spread_move = 1.8
+spread_per_shot = 0.3
+spread_max = 5.0
+spread_recovery = 8.0
+recoil_random = 0.21
+recoil_ads_multiplier = 0.65
+recoil_recovery = 0.6
+recoil_recovery_speed = 6.0
+view_kick = 0.6
+vm_kick_back = 0.032
+vm_kick_rot = 2.7
+viewmodel_style = &"rifle"
+viewmodel_color = Color(0.33, 0.2, 0.1, 1)
+viewmodel_offset = Vector3(0.14, -0.17, -0.3)
+sight_height = 0.07
+viewmodel_fov = 65.0
+scope_sway = 0.0
+tracer_every = 3
+shell_size = 0.013
+muzzle_flash_scale = 1.15
+sound_body_hz = 135.0
+sound_mech_hz = 2200.0
+sound_tail_s = 0.75
+sound_volume_db = -1.0
+recoil_pattern = SubResource("recoil")
+base_id = &"ak47"
+camo = &"vesperite"

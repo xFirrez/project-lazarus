@@ -1,0 +1,36 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://core/player/player_character.gd" id="1"]
+[ext_resource type="Script" path="res://core/player/motor_component.gd" id="2"]
+[ext_resource type="Script" path="res://core/player/camera_rig.gd" id="3"]
+[ext_resource type="Script" path="res://core/player/health_component.gd" id="4"]
+[ext_resource type="Script" path="res://core/player/footstep_component.gd" id="5"]
+[ext_resource type="Resource" path="res://content/player/player_tuning.tres" id="6"]
+
+[sub_resource type="CapsuleShape3D" id="capsule"]
+radius = 0.35
+height = 1.8
+
+[node name="PlayerCharacter" type="CharacterBody3D"]
+script = ExtResource("1")
+tuning = ExtResource("6")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("capsule")
+
+[node name="Motor" type="Node" parent="."]
+script = ExtResource("2")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.62, 0)
+script = ExtResource("3")
+
+[node name="Camera" type="Camera3D" parent="Head"]
+fov = 90.0
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("4")
+
+[node name="Footsteps" type="Node" parent="."]
+script = ExtResource("5")

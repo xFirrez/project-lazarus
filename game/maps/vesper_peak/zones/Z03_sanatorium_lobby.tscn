@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://maps/vesper_peak/zones/Z03_sanatorium_lobby.gd" id="1"]
+
+[node name="Z03_SanatoriumLobby" type="Node3D"]
+script = ExtResource("1")
+zone_id = &"Z03"
+display_name = "Sanatorium Lobby"
+cascade = 2

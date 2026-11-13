@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://content/shaders/zombie_skin.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://content/materials/textures/noise_detail.tres" id="2"]
+
+[resource]
+resource_name = "zombie_skin_pallid"
+shader = ExtResource("1")
+shader_parameter/detail_noise = ExtResource("2")
+shader_parameter/skin_tint = Color(0.66, 0.64, 0.6, 1)
+shader_parameter/rot_amount = 0.3
+shader_parameter/wound_amount = 0.35
+shader_parameter/pattern_seed = 1.0
+metadata/surface = &"flesh"

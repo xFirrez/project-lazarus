@@ -1,0 +1,16 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://content/shaders/lazarus_surface.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://content/materials/textures/noise_detail.tres" id="2"]
+
+[resource]
+resource_name = "canvas_olive"
+shader = ExtResource("1")
+shader_parameter/detail_noise = ExtResource("2")
+shader_parameter/albedo = Color(0.31, 0.32, 0.21, 1)
+shader_parameter/roughness = 0.95
+shader_parameter/detail_scale = 1.8
+shader_parameter/snow_amount = 0.9
+shader_parameter/snow_threshold = 0.5
+shader_parameter/sway_strength = 0.04
+metadata/surface = &"wood"

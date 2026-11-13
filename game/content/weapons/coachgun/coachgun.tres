@@ -1,0 +1,73 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.0, 6.0)
+}
+point_count = 1
+
+[resource]
+script = ExtResource("1")
+id = &"coachgun"
+display_name = "Coachgun"
+weapon_class = 3
+cost = 500
+behavior = &"pellet"
+fire_mode = 0
+rpm = 300.0
+damage = 160.0
+pellets = 8
+pellet_spread_deg = 4.5
+max_range = 50.0
+head_multiplier = 1.5
+neck_multiplier = 1.25
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 5.0
+range_max = 15.0
+min_damage_fraction = 0.3
+penetration = 1
+penetration_loss = 0.25
+mag_size = 2
+reserve_max = 60
+reload_per_shell = false
+reload_start_time = 0.4
+shell_insert_time = 0.5
+reload_end_time = 0.45
+reload_partial_time = 3.2
+reload_empty_time = 3.2
+ammo_in_partial = 2.4
+ammo_in_empty = 2.4
+raise_time = 0.5
+lower_time = 0.35
+ads_time = 0.25
+sprint_out_time = 0.25
+ads_fov_multiplier = 0.9
+spread_hip = 1.5
+spread_ads = 0.3
+spread_move = 1.0
+spread_per_shot = 0.0
+spread_max = 3.0
+spread_recovery = 10.0
+recoil_random = 0.6
+recoil_ads_multiplier = 0.8
+recoil_recovery = 0.8
+recoil_recovery_speed = 5.0
+view_kick = 3.0
+vm_kick_back = 0.09
+vm_kick_rot = 10.0
+viewmodel_style = &"shotgun"
+viewmodel_color = Color(0.17, 0.17, 0.18, 1)
+viewmodel_offset = Vector3(0.15, -0.17, -0.28)
+sight_height = 0.05
+viewmodel_fov = 65.0
+tracer_every = 1
+shell_size = 0.016
+muzzle_flash_scale = 1.6
+sound_body_hz = 70.0
+sound_mech_hz = 1100.0
+sound_tail_s = 1.2
+sound_volume_db = 0.0
+recoil_pattern = SubResource("recoil")

@@ -1,0 +1,87 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.000, 2.000, 0, 0, 0, 0, -0.138, 1.920, 0, 0, 0, 0, 0.156, 1.840, 0, 0, 0, 0, -0.174, 1.760, 0, 0, 0, 0, 0.192, 1.680, 0, 0, 0, 0, -0.210, 1.600, 0, 0, 0, 0, 0.228, 1.520, 0, 0, 0, 0, -0.246, 1.440)
+}
+point_count = 8
+
+[resource]
+script = ExtResource("1")
+id = &"china_lake"
+display_name = "China Lake"
+weapon_class = 6
+cost = 0
+behavior = &"projectile"
+fire_mode = 0
+rpm = 40.0
+burst_count = 3
+damage = 900.0
+pellets = 1
+pellet_spread_deg = 0.0
+max_range = 150.0
+head_multiplier = 4.0
+neck_multiplier = 2.0
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 0.0
+range_max = 1.0
+min_damage_fraction = 1.0
+penetration = 1
+penetration_loss = 0.25
+mag_size = 2
+reserve_max = 20
+reload_partial_time = 3.0
+reload_empty_time = 3.0
+ammo_in_partial = 2.2
+ammo_in_empty = 2.2
+reload_per_shell = true
+reload_start_time = 0.4
+shell_insert_time = 0.6
+reload_end_time = 0.4
+raise_time = 0.6
+lower_time = 0.4
+ads_time = 0.3
+sprint_out_time = 0.3
+ads_fov_multiplier = 0.8
+move_speed_multiplier = 0.92
+spread_hip = 1.8
+spread_ads = 0.1
+spread_move = 1.0
+spread_per_shot = 0.0
+spread_max = 3.0
+spread_recovery = 8.0
+recoil_random = 0.12
+recoil_ads_multiplier = 0.65
+recoil_recovery = 0.6
+recoil_recovery_speed = 6.0
+view_kick = 2.2
+vm_kick_back = 0.064
+vm_kick_rot = 5.9
+splash_radius = 3.5
+splash_damage_centre = 500.0
+splash_damage_edge = 0.0
+self_damage_max = 60.0
+fuse_time = 2.5
+projectile_kind = &"grenade"
+projectile_speed = 24.0
+projectile_gravity = 9.8
+projectile_bounce = 0.45
+projectile_radius = 0.05
+projectile_arm_distance = 0.0
+viewmodel_style = &"launcher"
+viewmodel_color = Color(0.2, 0.21, 0.19, 1)
+viewmodel_offset = Vector3(0.16, -0.17, -0.3)
+sight_height = 0.09
+viewmodel_fov = 65.0
+scope_sway = 0.0
+tracer_every = 0
+shell_size = 0.01
+muzzle_flash_scale = 1.6
+sound_body_hz = 95.0
+sound_mech_hz = 1100.0
+sound_tail_s = 0.7
+sound_volume_db = -1.0
+recoil_pattern = SubResource("recoil")

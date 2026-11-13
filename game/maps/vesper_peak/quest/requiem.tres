@@ -1,0 +1,112 @@
+[gd_resource type="Resource" script_class="QuestGraph" load_steps=23 format=3]
+
+[ext_resource type="Script" path="res://core/quest/quest_graph.gd" id="graph"]
+[ext_resource type="Script" path="res://core/quest/quest_step.gd" id="step"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage0_stirs.gd" id="stage0_stirs"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage1_frequency.gd" id="stage1_frequency"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage2a_frozen_heart.gd" id="stage2a_frozen_heart"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage2b_chained_drawer.gd" id="stage2b_chained_drawer"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage2c_marked_one.gd" id="stage2c_marked_one"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage3_charging.gd" id="stage3_charging"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage4_descent.gd" id="stage4_descent"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage5_calibration.gd" id="stage5_calibration"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage6_requiem.gd" id="stage6_requiem"]
+[ext_resource type="Script" path="res://maps/vesper_peak/scripts/quest/stage_blessing.gd" id="stage_blessing"]
+
+[sub_resource type="Resource" id="stage0"]
+script = ExtResource("step")
+id = &"stage0"
+title = "The Mountain Stirs"
+prerequisites = Array[StringName]([])
+objective = ExtResource("stage0_stirs")
+hint = "Power on and all three relays; next round the radio wakes."
+completes_graph = false
+
+[sub_resource type="Resource" id="stage1"]
+script = ExtResource("step")
+id = &"stage1"
+title = "The Frequency"
+prerequisites = Array[StringName]([&"stage0"])
+objective = ExtResource("stage1_frequency")
+hint = "Red-ink digits on three documents; tune the Comms Array radio."
+completes_graph = false
+
+[sub_resource type="Resource" id="stage2a"]
+script = ExtResource("step")
+id = &"stage2a"
+title = "Frozen Heart"
+prerequisites = Array[StringName]([&"stage1"])
+objective = ExtResource("stage2a_frozen_heart")
+hint = "A big explosion at the frozen fountain's top tier."
+completes_graph = false
+
+[sub_resource type="Resource" id="stage2b"]
+script = ExtResource("step")
+id = &"stage2b"
+title = "The Chained Drawer"
+prerequisites = Array[StringName]([&"stage1"])
+objective = ExtResource("stage2b_chained_drawer")
+hint = "Flip the lab breaker; read the morgue's glowing symbols."
+completes_graph = false
+
+[sub_resource type="Resource" id="stage2c"]
+script = ExtResource("step")
+id = &"stage2c"
+title = "The Marked One"
+prerequisites = Array[StringName]([&"stage1"])
+objective = ExtResource("stage2c_marked_one")
+hint = "Kill the bright Galvanic of a special round within 40 s."
+completes_graph = false
+
+[sub_resource type="Resource" id="stage3"]
+script = ExtResource("step")
+id = &"stage3"
+title = "Charging the Heart"
+prerequisites = Array[StringName]([&"stage2a", &"stage2b", &"stage2c"])
+objective = ExtResource("stage3_charging")
+hint = "Conduit kills near the Soul Pod; reseat loose cables."
+completes_graph = false
+
+[sub_resource type="Resource" id="stage4"]
+script = ExtResource("step")
+id = &"stage4"
+title = "The Descent"
+prerequisites = Array[StringName]([&"stage3"])
+objective = ExtResource("stage4_descent")
+hint = "Carry the Heart to the core socket via the tunnels in 4 minutes."
+completes_graph = false
+
+[sub_resource type="Resource" id="stage5"]
+script = ExtResource("step")
+id = &"stage5"
+title = "Calibration"
+prerequisites = Array[StringName]([&"stage4"])
+objective = ExtResource("stage5_calibration")
+hint = "Break four vesperite nodes with Forge-upgraded weapons."
+completes_graph = false
+
+[sub_resource type="Resource" id="stage6"]
+script = ExtResource("step")
+id = &"stage6"
+title = "Requiem"
+prerequisites = Array[StringName]([&"stage5"])
+objective = ExtResource("stage6_requiem")
+hint = "Next round: defend the pylons and defeat the Warden."
+completes_graph = true
+
+[sub_resource type="Resource" id="blessing"]
+script = ExtResource("step")
+id = &"blessing"
+title = "Lazarus Blessing"
+prerequisites = Array[StringName]([&"stage6"])
+objective = ExtResource("stage_blessing")
+hint = "All tonics restored on every revive."
+completes_graph = false
+
+[resource]
+script = ExtResource("graph")
+id = &"requiem"
+title = "Requiem for Lazarus"
+steps = Array[QuestStep]([SubResource("stage0"), SubResource("stage1"), SubResource("stage2a"), SubResource("stage2b"), SubResource("stage2c"), SubResource("stage3"), SubResource("stage4"), SubResource("stage5"), SubResource("stage6"), SubResource("blessing")])
+badge = &"requiem"
+journal_unlocks = Array[StringName]([&"R09", &"requiem"])

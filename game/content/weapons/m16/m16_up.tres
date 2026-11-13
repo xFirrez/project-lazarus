@@ -1,0 +1,75 @@
+[gd_resource type="Resource" script_class="WeaponDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://core/weapons/weapon_definition.gd" id="1"]
+
+[sub_resource type="Curve2D" id="recoil"]
+_data = {
+"points": PackedVector2Array(0, 0, 0, 0, 0.000, 0.550, 0, 0, 0, 0, -0.083, 0.528, 0, 0, 0, 0, 0.094, 0.506, 0, 0, 0, 0, -0.104, 0.484, 0, 0, 0, 0, 0.115, 0.462, 0, 0, 0, 0, -0.126, 0.440, 0, 0, 0, 0, 0.137, 0.418, 0, 0, 0, 0, -0.148, 0.396)
+}
+point_count = 8
+
+[resource]
+script = ExtResource("1")
+id = &"m16_up"
+display_name = "\"Skullcrusher\""
+weapon_class = 2
+cost = 1200
+behavior = &"hitscan"
+fire_mode = 2
+rpm = 750.0
+burst_count = 3
+damage = 200.0
+pellets = 1
+pellet_spread_deg = 0.0
+max_range = 150.0
+head_multiplier = 4.0
+neck_multiplier = 2.0
+torso_multiplier = 1.0
+limb_multiplier = 0.75
+range_min = 25.0
+range_max = 60.0
+min_damage_fraction = 0.65
+penetration = 2
+penetration_loss = 0.25
+mag_size = 45
+reserve_max = 240
+reload_partial_time = 2.4
+reload_empty_time = 3.0
+ammo_in_partial = 1.6
+ammo_in_empty = 2.1
+raise_time = 0.5
+lower_time = 0.35
+ads_time = 0.26
+sprint_out_time = 0.25
+ads_fov_multiplier = 0.8
+move_speed_multiplier = 0.95
+spread_hip = 2.5
+spread_ads = 0.1
+spread_move = 1.8
+spread_per_shot = 0.3
+spread_max = 5.0
+spread_recovery = 8.0
+recoil_random = 0.072
+recoil_ads_multiplier = 0.65
+recoil_recovery = 0.6
+recoil_recovery_speed = 6.0
+view_kick = 0.45
+vm_kick_back = 0.029
+vm_kick_rot = 2.4
+viewmodel_style = &"rifle"
+viewmodel_color = Color(0.13, 0.13, 0.13, 1)
+viewmodel_offset = Vector3(0.14, -0.17, -0.3)
+sight_height = 0.07
+viewmodel_fov = 65.0
+scope_sway = 0.0
+tracer_every = 3
+shell_size = 0.013
+muzzle_flash_scale = 1.15
+sound_body_hz = 165.0
+sound_mech_hz = 2900.0
+sound_tail_s = 0.7
+sound_volume_db = -2.0
+recoil_pattern = SubResource("recoil")
+base_id = &"m16"
+camo = &"vesperite"
+alt_fire_id = &"m16_up_gl"

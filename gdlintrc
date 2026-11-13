@@ -1,0 +1,10 @@
+# gdtoolkit (gdlint) configuration for Project Lazarus.
+excluded_directories: !!set
+  .git: null
+  addons: null
+  .godot: null
+max-line-length: 120
+max-file-lines: 1500
+max-public-methods: 40
+max-returns: 8
+function-arguments-number: 8

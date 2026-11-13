@@ -1,0 +1,16 @@
+# Godot
+game/.godot/
+game/**/*.translation
+*.import.tmp
+# Exports / builds
+build/
+export/
+*.pck
+# Test & tool output
+game/tests/results/
+.test-results/
+__pycache__/
+*.pyc
+# OS
+.DS_Store
+game/build_info.json

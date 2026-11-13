@@ -1,0 +1,120 @@
+[gd_resource type="Resource" script_class="HitboxProfile" load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://core/enemies/hitbox_profile.gd" id="1"]
+[ext_resource type="Script" path="res://core/enemies/hitbox_def.gd" id="2"]
+
+[sub_resource type="Resource" id="h0"]
+script = ExtResource("2")
+bone = &"Head"
+zone = 0
+radius = 0.12
+height = 0.24
+offset = Vector3(0, 0.12, 0)
+
+[sub_resource type="Resource" id="h1"]
+script = ExtResource("2")
+bone = &"Neck"
+zone = 1
+radius = 0.07
+height = 0.16
+offset = Vector3(0, 0.05, 0)
+
+[sub_resource type="Resource" id="h2"]
+script = ExtResource("2")
+bone = &"UpperChest"
+zone = 2
+radius = 0.19
+height = 0.4
+offset = Vector3(0, 0.05, 0)
+
+[sub_resource type="Resource" id="h3"]
+script = ExtResource("2")
+bone = &"Chest"
+zone = 2
+radius = 0.18
+height = 0.36
+offset = Vector3(0, 0.07, 0)
+
+[sub_resource type="Resource" id="h4"]
+script = ExtResource("2")
+bone = &"Spine"
+zone = 2
+radius = 0.17
+height = 0.34
+offset = Vector3(0, 0.07, 0)
+
+[sub_resource type="Resource" id="h5"]
+script = ExtResource("2")
+bone = &"Hips"
+zone = 2
+radius = 0.17
+height = 0.34
+offset = Vector3(0, 0.0, 0)
+
+[sub_resource type="Resource" id="h6"]
+script = ExtResource("2")
+bone = &"LeftUpperArm"
+zone = 3
+radius = 0.07
+height = 0.36
+offset = Vector3(0, 0.16, 0)
+
+[sub_resource type="Resource" id="h7"]
+script = ExtResource("2")
+bone = &"LeftLowerArm"
+zone = 3
+radius = 0.055
+height = 0.36
+offset = Vector3(0, 0.17, 0)
+
+[sub_resource type="Resource" id="h8"]
+script = ExtResource("2")
+bone = &"LeftUpperLeg"
+zone = 3
+radius = 0.09
+height = 0.48
+offset = Vector3(0, 0.22, 0)
+
+[sub_resource type="Resource" id="h9"]
+script = ExtResource("2")
+bone = &"LeftLowerLeg"
+zone = 3
+radius = 0.07
+height = 0.48
+offset = Vector3(0, 0.22, 0)
+
+[sub_resource type="Resource" id="h10"]
+script = ExtResource("2")
+bone = &"RightUpperArm"
+zone = 3
+radius = 0.07
+height = 0.36
+offset = Vector3(0, 0.16, 0)
+
+[sub_resource type="Resource" id="h11"]
+script = ExtResource("2")
+bone = &"RightLowerArm"
+zone = 3
+radius = 0.055
+height = 0.36
+offset = Vector3(0, 0.17, 0)
+
+[sub_resource type="Resource" id="h12"]
+script = ExtResource("2")
+bone = &"RightUpperLeg"
+zone = 3
+radius = 0.09
+height = 0.48
+offset = Vector3(0, 0.22, 0)
+
+[sub_resource type="Resource" id="h13"]
+script = ExtResource("2")
+bone = &"RightLowerLeg"
+zone = 3
+radius = 0.07
+height = 0.48
+offset = Vector3(0, 0.22, 0)
+
+[resource]
+script = ExtResource("1")
+entries = Array[ExtResource("2")]([SubResource("h0"), SubResource("h1"), SubResource("h2"), SubResource("h3"), SubResource("h4"), SubResource("h5"), SubResource("h6"), SubResource("h7"), SubResource("h8"), SubResource("h9"), SubResource("h10"), SubResource("h11"), SubResource("h12"), SubResource("h13")])

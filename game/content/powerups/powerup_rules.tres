@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="PowerUpRules" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://core/powerups/powerup_rules.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"default"
+threshold_start = 600.0
+threshold_growth = 1.06
+growth_stop_round = 20
+max_per_round = 4
+bag = Array[StringName]([&"max_ammo", &"insta_kill", &"double_points", &"nuke", &"carpenter", &"fire_sale"])
+nuke_min_round = 4
+carpenter_min_missing = 5
+lifetime = 26.0
+blink_time = 6.0
+bob_height = 0.3
+pickup_radius = 1.4
+timed_duration = 30.0
+nuke_points = 400
+nuke_stagger = 2.0
+carpenter_points = 200
+boss_insta_multiplier = 10.0
