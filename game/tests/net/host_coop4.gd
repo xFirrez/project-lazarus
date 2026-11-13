@@ -7,16 +7,21 @@
 # requires 30 / 30 matches (round, zones, doors, barricades, flags, points, weapons, zombie count).
 extends "res://tests/net/autotest_base.gd"
 
-const ROUNDS: int = 10
 const ROUND_LIMIT: float = 14.0
 const CLIENTS: int = 3
 
+# Step 16 soak: `--rounds=N` (tools/net_tests.sh: COOP4_ROUNDS) plays N rounds instead of 10 and
+# checks the host's memory growth (<= 10 %) between round 5 and the end (AC-16.2).
+var rounds_target: int = 10
 var _clients: Array[int] = []
 var _round_t0: float = 0.0
+var _mem_r5: float = 0.0
+var _orphans_r5: int = 0
 
 
 func _ready() -> void:
-	timeout = 480.0
+	rounds_target = maxi(CommandLine.get_value("rounds", "10").to_int(), 1)
+	timeout = 480.0 + maxf(0.0, rounds_target - 10.0) * 22.0
 	_run()
 
 
@@ -92,7 +97,18 @@ func _run() -> void:
 		if rd.phase == RoundDirector.Phase.ACTIVE and rd.current_round != last_round:
 			last_round = rd.current_round
 			_round_t0 = elapsed()
-			if last_round > ROUNDS:
+			if last_round == 5:
+				_mem_r5 = Performance.get_monitor(Performance.MEMORY_STATIC)
+				_orphans_r5 = int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT))
+			if last_round % 25 == 0:
+				Log.info(
+					&"autotest",
+					(
+						"soak round %d t=%.0f s mem %.1f MB"
+						% [last_round, elapsed(), Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0]
+					)
+				)
+			if last_round > rounds_target:
 				break
 		if rd.phase == RoundDirector.Phase.ACTIVE and elapsed() - _round_t0 > ROUND_LIMIT:
 			rd.host_skip_round()
@@ -100,7 +116,7 @@ func _run() -> void:
 			await _buy_for(m, _clients[0], "D01_Buy", Vector3(11.6, 0.05, -3))
 		if rd.phase == RoundDirector.Phase.INTERMISSION and rd.current_round == 4 and _clients.size() >= 2:
 			await _buy_for(m, _clients[1], "D02_Buy", Vector3(6.6, 0.05, -6.6))
-	check("played_10_rounds", last_round > ROUNDS, last_round)
+	check("played_all_rounds", last_round > rounds_target, last_round)
 	await _wait(2.0)  # last hash reports in flight
 	var per_round: Dictionary = {}
 	for e: Variant in m.session.hash_log:
@@ -108,12 +124,24 @@ func _run() -> void:
 		if bool(row[2]):
 			per_round[int(row[0])] = int(per_round.get(int(row[0]), 0)) + 1
 	var full: int = 0
-	for r: int in range(1, ROUNDS + 1):
+	for r: int in range(1, rounds_target + 1):
 		if int(per_round.get(r, 0)) == CLIENTS:
 			full += 1
 	check("hash_mismatches_0", m.session.hash_mismatches == 0, m.session.hash_mismatches)
-	check("all_peers_agree_every_round", full == ROUNDS, "%d / %d rounds, %s" % [full, ROUNDS, str(per_round)])
+	var detail: String = "%d / %d rounds" % [full, rounds_target]
+	if full != rounds_target and rounds_target <= 20:
+		detail += ", %s" % str(per_round)
+	check("all_peers_agree_every_round", full == rounds_target, detail)
 	result["hash_matches"] = m.session.hash_matches
+	result["rounds"] = rounds_target
+	result["soak_seconds"] = snappedf(elapsed(), 1.0)
+	if rounds_target >= 20 and _mem_r5 > 0.0:
+		var mem_end: float = Performance.get_monitor(Performance.MEMORY_STATIC)
+		var growth: float = (mem_end - _mem_r5) / _mem_r5
+		result["host_memory_growth"] = snappedf(growth, 0.001)
+		check("host_memory_growth_le_10pct", growth <= 0.10, [_mem_r5, mem_end])
+		var orphans: int = int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT))
+		check("host_orphans_flat", orphans <= _orphans_r5 + 5, [_orphans_r5, orphans])
 	var d01: PurchasableDoor = m.interaction.find_by_name("D01_Buy") as PurchasableDoor
 	var d02: PurchasableDoor = m.interaction.find_by_name("D02_Buy") as PurchasableDoor
 	check("doors_bought", d01.is_open() and d02.is_open())

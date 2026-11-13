@@ -200,6 +200,7 @@ func _controls_tab() -> void:
 func _gamepad_tab() -> void:
 	var g: GridContainer = _page("GAMEPAD")
 	_row(g, "Look sensitivity", _slider(&"input", &"gamepad_sensitivity", 0.2, 3.0, 0.05))
+	_row(g, "Aim slowdown on targets", _check(&"input", &"aim_slowdown", true))
 	var hdr: Label = UiTheme.type_label(
 		"GAMEPAD — select, then press a button / move a stick or trigger", 18, UiTheme.MANILA
 	)

@@ -5,11 +5,14 @@
 class_name PlayerInputSource
 extends RefCounted
 
+const AIM_SLOWDOWN: float = 0.55  # gamepad look rate while the crosshair is on a zombie (GAME_DESIGN §18)
+
 # Menus over a running match (the co-op pause menu, Step 15) block gameplay input: gather() returns
 # an idle frame and look input is dropped.
 static var ui_blocked: bool = false
 
 var tuning: PlayerTuning = null
+var aim_probe: Callable = Callable()  # -> bool: is the crosshair on an enemy (set by PlayerCharacter)
 var mouse_captured_required: bool = true
 
 var _mouse_accum: Vector2 = Vector2.ZERO
@@ -109,6 +112,8 @@ func consume_look(delta: float) -> Vector2:
 	if shaped != Vector2.ZERO:
 		var pad_sens: float = float(Config.get_value(&"input", &"gamepad_sensitivity", 1.0))
 		var rate: float = deg_to_rad(tuning.gamepad_look_speed_deg) * pad_sens * delta
+		if bool(Config.get_value(&"input", &"aim_slowdown", true)) and aim_probe.is_valid() and bool(aim_probe.call()):
+			rate *= AIM_SLOWDOWN
 		look += Vector2(-shaped.x, -shaped.y * invert) * rate
 	return look
 

@@ -43,6 +43,7 @@ const DEFAULTS: Dictionary = {
 		"ads_sensitivity_multiplier": 0.8,
 		"invert_y": false,
 		"gamepad_sensitivity": 1.0,
+		"aim_slowdown": true,
 		"toggle_ads": false,
 		"toggle_crouch": true,
 		"toggle_sprint": false,

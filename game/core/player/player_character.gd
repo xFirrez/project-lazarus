@@ -83,6 +83,7 @@ func _ready() -> void:
 		collision_mask = 1 << 0 | MotorComponent.PLAYER_CLIP_LAYER  # world + player clip
 	if is_local:
 		input_source = PlayerInputSource.new(tuning)
+		input_source.aim_probe = crosshair_on_enemy
 		camera.current = true
 		_visual.visible = false
 		motor.landed.connect(_on_landed)
@@ -374,3 +375,17 @@ func _update_tag() -> void:
 	c.a = a
 	_tag.modulate = c
 	_tag.outline_modulate = Color(0, 0, 0, 0.8 * a)
+
+
+# Gamepad aim slowdown (Step 16): a ray from the camera hits a zombie hurtbox within 40 m.
+func crosshair_on_enemy() -> bool:
+	if camera == null or not is_inside_tree():
+		return false
+	var from: Vector3 = camera.global_position
+	var q: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(
+		from, from - camera.global_basis.z * 40.0, Hurtbox.LAYER | 1
+	)
+	q.collide_with_areas = true
+	q.exclude = [get_rid()]
+	var hit: Dictionary = get_world_3d().direct_space_state.intersect_ray(q)
+	return not hit.is_empty() and hit["collider"] is Hurtbox

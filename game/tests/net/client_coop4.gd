@@ -12,7 +12,8 @@ var _bw: PackedFloat32Array = []
 
 
 func _ready() -> void:
-	timeout = 470.0
+	var rounds: int = maxi(CommandLine.get_value("rounds", "10").to_int(), 1)
+	timeout = 470.0 + maxf(0.0, rounds - 10.0) * 22.0
 	Net.register_message(&"_t_phase", func(_s: int, p: Array) -> void: _phase = String(p[0]))
 	Net.register_message(&"_t_done", func(_s: int, _p: Array) -> void: _done = true)
 	_run()
@@ -61,7 +62,11 @@ func _run() -> void:
 		avg <= BANDWIDTH_BUDGET,
 		"avg %.1f KB/s, peak %.1f KB/s" % [avg / 1024.0, peak / 1024.0]
 	)
-	await _until(func() -> bool: return _done, 440.0)
+	var mem0: float = Performance.get_monitor(Performance.MEMORY_STATIC)
+	await _until(func() -> bool: return _done, timeout - 30.0)
+	var growth: float = (Performance.get_monitor(Performance.MEMORY_STATIC) - mem0) / maxf(mem0, 1.0)
+	result["memory_growth"] = snappedf(growth, 0.001)
+	check("memory_growth_le_10pct", growth <= 0.10, growth)
 	result["kills"] = m.points.stat(me.peer_id, &"kills")
 	result["points"] = m.points.get_points(me.peer_id)
 	result["rtt_ms"] = Net.rtt_ms()

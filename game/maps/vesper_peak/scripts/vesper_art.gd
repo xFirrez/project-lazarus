@@ -75,7 +75,13 @@ func on_match_setup(m: Match) -> void:
 	if m.rounds != null and not m.rounds.round_started.is_connected(_on_round_started):
 		m.rounds.round_started.connect(_on_round_started)
 	# Machines / wall-buys / relays are built during Match.setup: distance-cull them once they exist.
-	get_tree().create_timer(0.5).timeout.connect(cull_gameplay_meshes.bind(get_parent()))
+	# (The map can be freed first — leaving within 0.5 s — so the root is re-checked when it fires.)
+	var root: Node = get_parent()
+	get_tree().create_timer(0.5).timeout.connect(
+		func() -> void:
+			if is_instance_valid(root) and root.is_inside_tree():
+				cull_gameplay_meshes(root)
+	)
 
 
 # Gives every gameplay mesh (perk machines, wall-buys, relays, the Forge, barricade planks …)

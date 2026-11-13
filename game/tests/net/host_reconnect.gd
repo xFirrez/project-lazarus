@@ -7,9 +7,12 @@ extends "res://tests/net/autotest_base.gd"
 var _restored_peer: int = 0
 var _retained: Dictionary = {}
 
+var _cycles: int = 1  # Step 16 reconnect stress: --reconnect-cycles=N kills / relaunches the client N times
+
 
 func _ready() -> void:
-	timeout = 120.0
+	_cycles = maxi(CommandLine.get_value("reconnect-cycles", "1").to_int(), 1)
+	timeout = 120.0 + 25.0 * (_cycles - 1)
 	_run()
 
 
@@ -70,6 +73,21 @@ func _run() -> void:
 	var back: bool = await _until(func() -> bool: return _restored_peer != 0, 40.0)
 	check("rejoined_and_restored", back)
 	if not back:
+		finish(false)
+		return
+	# Reconnect stress: every further kill / relaunch must retain and restore the same state.
+	var cycles_ok: int = 1
+	for c: int in range(1, _cycles):
+		_retained = {}
+		_restored_peer = 0
+		var kept: bool = await _until(func() -> bool: return not _retained.is_empty(), 30.0)
+		var again: bool = await _until(func() -> bool: return _restored_peer != 0, 40.0)
+		if kept and again and m.points.get_points(_restored_peer) == 3210 and int(_retained.get("points", 0)) == 3210:
+			cycles_ok += 1
+		Log.info(&"autotest", "reconnect cycle %d: retained %s restored %s" % [c + 1, kept, again])
+	result["reconnect_cycles"] = [cycles_ok, _cycles]
+	check("every_reconnect_restored", cycles_ok == _cycles, [cycles_ok, _cycles])
+	if _restored_peer == 0:
 		finish(false)
 		return
 	var p: int = _restored_peer

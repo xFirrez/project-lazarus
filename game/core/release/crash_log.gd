@@ -53,13 +53,23 @@ static func _collect_stale_locks() -> void:
 		if not (f.begins_with("running_") and f.ends_with(".lock")):
 			continue
 		var pid: int = f.trim_prefix("running_").trim_suffix(".lock").to_int()
-		if pid > 0 and pid != OS.get_process_id() and OS.is_process_running(pid):
+		if pid > 0 and pid != OS.get_process_id() and _alive(pid):
 			continue  # another live instance
 		var lock: String = "%s/%s" % [dir, f]
 		var started: String = FileAccess.get_file_as_string(lock)
 		last_crash_path = _save_crash_report(started)
 		DirAccess.remove_absolute(lock)
 	_prune()
+
+
+# OS.is_process_running only works for child processes on Unix (and logs an error otherwise),
+# so Linux checks /proc; Windows' implementation handles any pid.
+static func _alive(pid: int) -> bool:
+	if OS.get_name() == "Windows":
+		return OS.is_process_running(pid)
+	if DirAccess.dir_exists_absolute("/proc/self"):
+		return DirAccess.dir_exists_absolute("/proc/%d" % pid)
+	return false  # unknown platform: treat the lock as stale
 
 
 # The newest rotated log (the previous run) is what the crashed instance wrote.

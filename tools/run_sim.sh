@@ -100,7 +100,7 @@ case "$SCENARIO" in
     fi
     echo "[sim:$SCENARIO] PASS"
     ;;
-  round_flow|survival)
+  round_flow|survival|high_rounds)
     LOG="$OUT/$SCENARIO.log"; JSON="$OUT/$SCENARIO.json"; rm -f "$JSON"
     set +e
     "$GODOT" --headless --fixed-fps 60 --path "$GAME_DIR" -- --solo --map="${MAP:-vesper_peak}" --profile=sim \

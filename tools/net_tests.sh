@@ -14,9 +14,11 @@
 #                starting round, late join off refuses a 3rd client, game over -> return to lobby (Step 7)
 #   late_join    a client joins mid-round 3: full state < 2 s, spectates, spawns next round with
 #                500 + 250 x 3 points, correct doors / barricades; pings (AC-7.2)
-#   reconnect    a client is SIGKILLed and relaunched: points, weapons, perks restored by uid (AC-7.3)
+#   reconnect    a client is SIGKILLed and relaunched: points, weapons, perks restored by uid (AC-7.3);
+#                RECONNECT_CYCLES=N repeats the kill / relaunch N times (Step 16 reconnect stress)
 #   coop4        host + 3 clients at 150 ms / 30 ms / 3 %: 32-zombie bandwidth phase, then 10 bot rounds
-#                with state-hash convergence at every round end (AC-7.1, AC-7.4)
+#                with state-hash convergence at every round end (AC-7.1, AC-7.4); COOP4_ROUNDS=N plays N
+#                rounds and checks memory growth <= 10 % on every peer (Step 16 soak, AC-16.2)
 # Usage: tools/net_tests.sh [replication|host_loss|solo|speedhack|course|weapons|zombies|survival|lobby|
 #        late_join|reconnect|coop4|traversal|box|perks|progression|wonder|quest]... (default: all)
 #   traversal    vesper_peak at --netsim: power on before join (late join), gondola + lift (with a
@@ -266,7 +268,8 @@ test_reconnect() {
   local port; port="$(free_port)"
   rm -f "$OUT"/reconnect_*.json
   launch host "$OUT/reconnect_host.log" -- --host="$port" --map=vesper_peak --netsim="$NETSIM" \
-    --autotest=res://tests/net/host_reconnect.gd --autotest-out="$OUT/reconnect_host.json" --profile=nethost
+    --autotest=res://tests/net/host_reconnect.gd --autotest-out="$OUT/reconnect_host.json" --profile=nethost \
+    --reconnect-cycles="${RECONNECT_CYCLES:-1}"
   wait_for_log "$OUT/reconnect_host.log" "AUTOTEST READY host" 40
   launch client "$OUT/reconnect_client_a.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
     --autotest=res://tests/net/client_reconnect.gd --reconnect-phase=a --profile=netclient1
@@ -274,6 +277,16 @@ test_reconnect() {
   kill -9 "$PID_client"
   wait "$PID_client" 2>/dev/null || true
   sleep "${RECONNECT_DELAY:-1}"  # 1 s: rejoin before the host's timeout; 6 s: after it
+  # Step 16 reconnect stress: RECONNECT_CYCLES=N relaunches + SIGKILLs the client N-1 more times.
+  local c
+  for ((c = 2; c <= ${RECONNECT_CYCLES:-1}; c++)); do
+    launch client "$OUT/reconnect_client_a$c.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
+      --autotest=res://tests/net/client_reconnect.gd --reconnect-phase=a --profile=netclient1
+    wait_for_log "$OUT/reconnect_client_a$c.log" "AUTOTEST READY client-a" 40
+    kill -9 "$PID_client"
+    wait "$PID_client" 2>/dev/null || true
+    sleep "${RECONNECT_DELAY:-1}"
+  done
   launch client "$OUT/reconnect_client_b.log" -- --join="127.0.0.1:$port" --netsim="$NETSIM" \
     --autotest=res://tests/net/client_reconnect.gd --reconnect-phase=b \
     --autotest-out="$OUT/reconnect_client.json" --profile=netclient1
@@ -308,12 +321,14 @@ test_coop4() {
   local port netsim="${COOP_NETSIM:-150,30,0.03}"; port="$(free_port)"
   rm -f "$OUT"/coop4_*.json
   launch host "$OUT/coop4_host.log" -- --host="$port" --map=vesper_peak --netsim="$netsim" \
-    --autotest=res://tests/net/host_coop4.gd --autotest-out="$OUT/coop4_host.json" --profile=nethost
+    --autotest=res://tests/net/host_coop4.gd --autotest-out="$OUT/coop4_host.json" --profile=nethost \
+    --rounds="${COOP4_ROUNDS:-10}"
   wait_for_log "$OUT/coop4_host.log" "AUTOTEST READY host" 40
   local i
   for i in 1 2 3; do
     launch "c$i" "$OUT/coop4_c$i.log" -- --join="127.0.0.1:$port" --netsim="$netsim" \
-      --autotest=res://tests/net/client_coop4.gd --autotest-out="$OUT/coop4_c$i.json" --profile="netclient$i"
+      --autotest=res://tests/net/client_coop4.gd --autotest-out="$OUT/coop4_c$i.json" --profile="netclient$i" \
+      --rounds="${COOP4_ROUNDS:-10}"
     wait_for_log "$OUT/coop4_host.log" "slot $i" 30
   done
   wait "$PID_c1" || true; wait "$PID_c2" || true; wait "$PID_c3" || true
