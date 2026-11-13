@@ -84,6 +84,16 @@ func _build(c: VBoxContainer) -> void:
 	)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_multi.add_child(hint)
+	var ver: Label = UiTheme.type_label(BuildInfo.describe(), 13, UiTheme.TEXT_LIGHT)
+	ver.name = "Version"
+	ver.modulate.a = 0.6
+	c.add_child(ver)
+	if CrashLog.last_crash_path != "":
+		_status.text = (
+			"The last session ended unexpectedly. A crash log was saved to %s"
+			% ProjectSettings.globalize_path(CrashLog.last_crash_path)
+		)
+		CrashLog.last_crash_path = ""  # shown once
 
 
 func _named(b: Button, n: String) -> Button:

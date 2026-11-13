@@ -12,6 +12,10 @@ static func register(reg: CommandRegistry) -> void:
 		"quality", _cmd_quality, [["preset", TYPE_STRING, ""]], "Show or set the video quality preset (runtime)"
 	)
 	reg.register("quality_info", _cmd_quality_info, [], "Applied quality settings in detail")
+	reg.register(
+		"hitches", _cmd_hitches, [["reset", TYPE_BOOL, false]], "Frame-time stats since the warm-up (p99, > 50 ms)"
+	)
+	reg.register("version", _cmd_version, [], "Build version, commit and channel")
 	reg.register("render_stats", _cmd_render_stats, [], "Draw calls / objects / primitives / shadow lights this frame")
 	reg.register("env", _cmd_env, [["preset", TYPE_STRING, ""]], "Swap the active WorldEnvironment preset (look-dev)")
 	reg.register("snow", _cmd_snow, [["intensity", TYPE_FLOAT]], "Camera snow intensity (0 = off, 1 = storm)")
@@ -32,6 +36,28 @@ static func _cmd_quality(args: Array) -> String:
 		return "Unknown preset '%s' (available: %s)" % [id, ", ".join(Graphics.preset_ids())]
 	Config.set_value(&"video", &"quality_preset", id)
 	return "quality -> %s (applied at runtime; renderer changes need a restart)" % Graphics.preset.display_name
+
+
+static func _cmd_hitches(args: Array) -> String:
+	var m: Match = Match.current
+	if m == null or m.hitches == null:
+		return "No match"
+	if bool(args[0]):
+		m.hitches.reset()
+		return "hitch stats reset"
+	var w: String = (
+		"warm-up %s (%d materials, %d particle systems)"
+		% [
+			"done" if m.warmup != null and m.warmup.done else "pending",
+			m.warmup.material_count if m.warmup != null else 0,
+			m.warmup.particle_count if m.warmup != null else 0
+		]
+	)
+	return "%s\n%s" % [w, m.hitches.describe()]
+
+
+static func _cmd_version(_args: Array) -> String:
+	return "Project Lazarus %s, Godot %s" % [BuildInfo.describe(), Engine.get_version_info()["string"]]
 
 
 static func _cmd_quality_info(_args: Array) -> String:

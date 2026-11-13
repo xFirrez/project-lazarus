@@ -45,6 +45,8 @@ var wonder_fx: WonderFx = null
 var buildables: BuildableSystem = null
 var specials: SpecialRoundDirector = null
 var quest: QuestSystem = null
+var hitches: HitchMonitor = null  # Step 16: frame-time watchdog (armed after the warm-up)
+var warmup: ShaderWarmup = null
 var started_at: float = 0.0  # Net.now() at setup (game-over "time played")
 var session_joined_at: float = -1.0  # client: Net.now() at the session welcome (join timing)
 
@@ -217,6 +219,17 @@ func setup(def: MapDefinition, from_lobby: bool = false, first_round: int = 1) -
 	pause_menu.leave_requested.connect(func() -> void: Game.leave_game(""))
 	pause_menu.quit_requested.connect(func() -> void: get_tree().quit())
 	pause_layer.add_child(pause_menu)
+	# Step 16: compile the map's / actors' pipelines behind a loading card, then watch frame times.
+	hitches = HitchMonitor.new()
+	add_child(hitches)
+	warmup = ShaderWarmup.new()
+	warmup.roots = [map_root, players]
+	for a: ZombieArchetype in zombies.archetypes:
+		for v: PackedScene in a.variants:
+			if not warmup.extra_scenes.has(v):
+				warmup.extra_scenes.append(v)
+	warmup.finished.connect(func(_m: int, _p: int, _ms: int) -> void: hitches.arm_after_settle())
+	add_child(warmup)
 	session.on_match_ready(from_lobby)
 	if Net.is_host() or not Net.is_active():
 		rules.on_match_start()

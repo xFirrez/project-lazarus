@@ -15,6 +15,25 @@ var echo_to_stdout: bool = true
 var _ring: Array[Dictionary] = []
 
 
+func _ready() -> void:
+	# Crash capture (Step 16) only for real (windowed) runs: headless tests kill processes on purpose.
+	if DisplayServer.get_name() != "headless":
+		CrashLog.begin()
+		if CrashLog.last_crash_path != "":
+			warn(&"crash", "The previous session ended unexpectedly; log saved to %s" % CrashLog.last_crash_path)
+	info(
+		&"build",
+		(
+			"Project Lazarus %s on %s / Godot %s"
+			% [BuildInfo.describe(), OS.get_name(), Engine.get_version_info()["string"]]
+		)
+	)
+
+
+func _exit_tree() -> void:
+	CrashLog.end()
+
+
 func debug(category: StringName, message: String) -> void:
 	_write(Level.DEBUG, category, message)
 

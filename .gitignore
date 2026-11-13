@@ -13,3 +13,4 @@ __pycache__/
 *.pyc
 # OS
 .DS_Store
+game/build_info.json

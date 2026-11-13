@@ -381,6 +381,8 @@ func _start_host(p_transport: NetTransport, port: int) -> Error:
 		)
 	)
 	session_started.emit(true)
+	if state != State.ACTIVE or not peers.has(local_id()):
+		return OK  # a session_started handler already closed the session (e.g. a `quit` command)
 	peer_joined.emit(local_id(), peers[local_id()])
 	return OK
 
@@ -447,7 +449,7 @@ func _on_peer_disconnected(id: int) -> void:
 func _on_connected_to_server() -> void:
 	Log.info(&"net", "Transport connected; sending hello")
 	_last_host_contact = now()
-	send_reliable(1, &"_hello", [local_uid, local_name])
+	send_reliable(1, &"_hello", [local_uid, local_name, BuildInfo.version()])
 
 
 func _on_connection_failed() -> void:
@@ -462,7 +464,12 @@ func _on_msg_hello(sender: int, payload: Array) -> void:
 	if not is_host() or payload.size() < 2:
 		return
 	var info: Dictionary = {"uid": String(payload[0]), "name": String(payload[1])}
-	var reason: String = String(join_filter.call(info["uid"], info["name"])) if join_filter.is_valid() else ""
+	var peer_version: String = String(payload[2]) if payload.size() > 2 else "unknown"
+	var reason: String = ""
+	if not BuildInfo.compatible(peer_version, BuildInfo.version()):
+		reason = "Version mismatch: host v%s, you v%s" % [BuildInfo.version(), peer_version]
+	elif join_filter.is_valid():
+		reason = String(join_filter.call(info["uid"], info["name"]))
 	if reason != "":
 		Log.info(&"net", "Refused peer %d (%s): %s" % [sender, info["name"], reason])
 		refused_joins += 1
@@ -491,12 +498,15 @@ func _on_msg_welcome(_sender: int, payload: Array) -> void:
 	_ping_timer = 0.0
 	Log.info(&"net", "Joined session as peer %d" % local_id())
 	session_started.emit(false)
+	if state != State.ACTIVE:
+		return  # closed by a session_started handler
 	for entry: Variant in payload[0]:
 		var pair: Array = entry
 		var id: int = int(pair[0])
 		peers[id] = pair[1]
 		peer_joined.emit(id, pair[1])
-	peer_joined.emit(local_id(), peers[local_id()])
+	if state == State.ACTIVE and peers.has(local_id()):
+		peer_joined.emit(local_id(), peers[local_id()])
 
 
 # Host: disconnects a peer now and processes its departure immediately (stale connection of a

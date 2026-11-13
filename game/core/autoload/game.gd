@@ -10,6 +10,8 @@
 #   --exec="cmd; cmd"                            console commands once in a match/menu
 #   --autotest=res://path.gd                     attach a scripted test driver node
 #   --screenshot=<map_id> --screenshot-out=<dir> capture the map's shot cameras and quit
+#   --version                                    print the build version and quit
+#   --quit-after=<s>                             quit cleanly s seconds after the match started
 # Authority: the host chooses the map and tells peers (reliable `_match_start` [map, from_lobby,
 # first_round]; late joiners get it on join).
 extends Node
@@ -60,6 +62,10 @@ func _ready() -> void:
 
 
 func boot() -> void:
+	if CommandLine.has_flag("version"):
+		Log.info(&"build", "Project Lazarus %s" % BuildInfo.describe())
+		get_tree().quit()
+		return
 	var autotest: String = CommandLine.get_value("autotest", "")
 	if autotest != "":
 		var script: GDScript = load(autotest) as GDScript
@@ -216,8 +222,8 @@ func go_to_main_menu(message: String) -> void:
 	menu.credits_requested.connect(show_credits)
 	menu.quit_requested.connect(func() -> void: get_tree().quit())
 	_set_screen(menu)
-	menu.set_status(message)
-	if message != "":
+	if message != "":  # empty keeps a crash notice (CrashLog) the menu may show
+		menu.set_status(message)
 		Audio.play_event(&"ui_error")
 		Log.info(&"game", "Main menu: %s" % message)
 
@@ -284,6 +290,9 @@ func _start_match(map_id: StringName, from_lobby: bool = false, first_round: int
 	_set_state(State.IN_MATCH)
 	EventBus.match_started.emit(map_id)
 	_run_pending_exec()
+	var quit_after: float = CommandLine.get_value("quit-after", "0").to_float()
+	if quit_after > 0.0:  # release smoke tests: play N seconds, then quit cleanly
+		get_tree().create_timer(quit_after, true, false, true).timeout.connect(func() -> void: Debug.run("quit"))
 
 
 func _end_match(reason: String) -> void:
