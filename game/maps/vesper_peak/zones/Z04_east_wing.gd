@@ -101,6 +101,7 @@ func build() -> void:
 
 func dress() -> void:
 	trim = "military"
+	furnish = "ward"
 	var cold: Color = Color(0.82, 0.95, 1.0)
 	skin("NurseDesk", &"desk", Vector3.ZERO, PI / 2.0)
 	skin("Wheelchair", &"wheelchair", Vector3.ZERO, 0.6)
@@ -156,8 +157,8 @@ func dress() -> void:
 			&"caged_bulb",
 			Vector3(79.5, Y + 3.8, float(ROOMS[r])),
 			Color(1.0, 0.8, 0.55),
-			0.5,
-			5.0,
+			1.1,
+			7.5,
 			PoweredLight.Pattern.NONE,
 			true
 		)

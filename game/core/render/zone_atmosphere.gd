@@ -7,6 +7,8 @@
 class_name ZoneAtmosphere
 extends Node
 
+signal sky_visibility_changed(visible: bool)
+
 const STORM_FOG_SCALE: float = 1.8
 const STORM_COLOR: Color = Color(0.35, 0.75, 0.5)
 
@@ -21,6 +23,9 @@ var current: AtmosphereProfile = AtmosphereProfile.new()
 var current_zone: StringName = &""
 var forced_zone: StringName = &""  # debug / screenshots: pin a profile
 var exposure_scale: float = 1.0  # map presenters dip it (energy pulses)
+## False while the blended profile is underground (`sky` < 0.5): the background is solid rock
+## colour; map presenters listen to `sky_visibility_changed` to hide their distant backdrop.
+var sky_visible: bool = true
 
 var _volumes: Array[ZoneVolume] = []
 var _moon_energy: float = 1.0
@@ -101,6 +106,13 @@ func _apply() -> void:
 	env.volumetric_fog_density = current.vol_fog_density * (1.0 + 0.6 * gust * outdoor)
 	env.volumetric_fog_albedo = current.vol_fog_albedo
 	env.volumetric_fog_emission = current.vol_fog_emission
+	var show_sky: bool = current.sky >= 0.5
+	if show_sky != sky_visible:
+		sky_visible = show_sky
+		env.background_mode = Environment.BG_SKY if show_sky else Environment.BG_COLOR
+		sky_visibility_changed.emit(show_sky)
+	if not show_sky:
+		env.background_color = (current.fog_color * 0.35).lerp(Color(0.02, 0.02, 0.025), 0.5)
 	if moon != null:
 		moon.light_energy = _moon_energy * current.moon_energy
 		moon.visible = current.moon_energy > 0.01

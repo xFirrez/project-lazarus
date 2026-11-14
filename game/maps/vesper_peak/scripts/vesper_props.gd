@@ -685,3 +685,201 @@ func _p_searchlight(b: MeshBatch) -> void:
 func _p_beacon(b: MeshBatch) -> void:
 	b.cyl(0.07, 0.06, Vector3(0, 0.03, 0), m(&"metal"))
 	b.sphere(0.08, Vector3(0, 0.1, 0), m(&"red_lit"))
+
+
+# --- map quality pass: furnishing kit (auto-placed along walls by VesperZoneArt._auto_furnish) ---
+
+
+func _p_radiator(b: MeshBatch) -> void:
+	for i: int in 9:
+		b.box(Vector3(0.07, 0.72, 0.14), Vector3(-0.44 + i * 0.11, 0.46, 0.0), m(&"enamel"))
+	b.box(Vector3(1.04, 0.05, 0.08), Vector3(0, 0.12, 0), m(&"metal"))
+	b.box(Vector3(1.04, 0.05, 0.08), Vector3(0, 0.8, 0), m(&"metal"))
+	for x: float in [-0.46, 0.46]:
+		b.box(Vector3(0.05, 0.12, 0.05), Vector3(x, 0.06, 0), m(&"metal"))
+
+
+func _p_locker(b: MeshBatch) -> void:
+	for i: int in 3:
+		var x: float = -0.3 + i * 0.3
+		b.box(Vector3(0.29, 1.9, 0.48), Vector3(x, 0.95, 0), m(&"olive"))
+		for k: int in 4:
+			b.box(Vector3(0.18, 0.015, 0.01), Vector3(x, 1.65 + k * 0.04, 0.245), m(&"black"))
+		b.box(Vector3(0.02, 0.12, 0.03), Vector3(x + 0.1, 1.0, 0.25), m(&"metal"))
+	b.box(Vector3(0.92, 0.04, 0.5), Vector3(0, 1.92, 0), m(&"olive"))
+
+
+func _p_barrel(b: MeshBatch) -> void:
+	b.cyl(0.29, 0.88, Vector3(0, 0.44, 0), m(&"rust"))
+	for y: float in [0.2, 0.68]:
+		b.cyl(0.3, 0.04, Vector3(0, y, 0), m(&"metal"))
+	b.cyl(0.26, 0.02, Vector3(0, 0.885, 0), m(&"black"))
+
+
+func _p_barrel_cluster(b: MeshBatch) -> void:
+	for p: Vector3 in [Vector3(-0.32, 0, 0), Vector3(0.32, 0, 0.05), Vector3(0.0, 0, -0.5)]:
+		b.cyl(0.29, 0.88, p + Vector3(0, 0.44, 0), m(&"rust" if p.x <= 0.0 else &"olive"))
+		b.cyl(0.3, 0.04, p + Vector3(0, 0.7, 0), m(&"metal"))
+	b.cyl(0.29, 0.88, Vector3(0.75, 0.29, 0.25), m(&"rust"), Vector3(0, 0.4, PI / 2.0))
+
+
+func _p_rocks(b: MeshBatch) -> void:
+	b.sphere(0.7, Vector3(0, 0.3, 0), m(&"stone"), Vector3(1.2, 0.7, 1.0))
+	b.sphere(0.45, Vector3(0.7, 0.2, 0.25), m(&"stone"), Vector3(1.0, 0.8, 1.2))
+	b.sphere(0.35, Vector3(-0.65, 0.15, 0.3), m(&"stone"), Vector3(1.3, 0.7, 1.0))
+	b.box(Vector3(0.4, 0.3, 0.35), Vector3(0.3, 0.12, 0.6), m(&"stone"), Vector3(0.3, 0.7, 0.2))
+
+
+func _p_rubble(b: MeshBatch) -> void:
+	var pts: Array = [
+		[Vector3(0, 0.1, 0), Vector3(0.5, 0.2, 0.4), 0.3],
+		[Vector3(0.45, 0.07, 0.2), Vector3(0.35, 0.14, 0.3), 1.1],
+		[Vector3(-0.4, 0.08, 0.25), Vector3(0.4, 0.16, 0.25), 2.0],
+		[Vector3(-0.1, 0.05, -0.35), Vector3(0.6, 0.1, 0.2), 0.7],
+		[Vector3(0.2, 0.22, -0.05), Vector3(0.25, 0.18, 0.25), 2.6],
+		[Vector3(-0.55, 0.04, -0.15), Vector3(0.18, 0.08, 0.2), 0.4],
+	]
+	for p: Array in pts:
+		b.box(p[1], p[0], m(&"stone"), Vector3(0.15, float(p[2]), 0.1))
+	b.box(Vector3(0.9, 0.04, 0.12), Vector3(0.1, 0.03, 0.45), m(&"wood"), Vector3(0, 0.5, 0.06))
+
+
+func _p_papers(b: MeshBatch) -> void:
+	for i: int in 7:
+		var a: float = i * 1.9
+		b.box(
+			Vector3(0.21, 0.004, 0.29),
+			Vector3(sin(a) * 0.35 * (i % 3), 0.003 + i * 0.002, cos(a * 1.3) * 0.3),
+			m(&"paper"),
+			Vector3(0, a, 0)
+		)
+	b.box(Vector3(0.24, 0.03, 0.32), Vector3(0.3, 0.015, -0.2), m(&"book_green"), Vector3(0, 0.4, 0))
+
+
+func _p_pipe_stack(b: MeshBatch) -> void:
+	for i: int in 3:
+		b.cyl(0.12, 2.2, Vector3(-0.26 + i * 0.26, 0.12, 0), m(&"rust"), Vector3(PI / 2.0, 0, 0))
+	for i: int in 2:
+		b.cyl(0.12, 2.2, Vector3(-0.13 + i * 0.26, 0.34, 0), m(&"metal"), Vector3(PI / 2.0, 0, 0))
+	b.box(Vector3(0.9, 0.08, 0.1), Vector3(0, 0.0, 0.7), m(&"wood"))
+	b.box(Vector3(0.9, 0.08, 0.1), Vector3(0, 0.0, -0.7), m(&"wood"))
+
+
+func _p_crate(b: MeshBatch) -> void:
+	b.box(Vector3(0.9, 0.8, 0.8), Vector3(0, 0.4, 0), m(&"crate"))
+	for x: float in [-0.43, 0.43]:
+		b.box(Vector3(0.06, 0.82, 0.82), Vector3(x, 0.4, 0), m(&"wood"))
+	b.box(Vector3(0.5, 0.1, 0.01), Vector3(0, 0.55, 0.405), m(&"black"))
+
+
+func _p_pallet(b: MeshBatch) -> void:
+	for z: float in [-0.5, 0.0, 0.5]:
+		b.box(Vector3(1.2, 0.1, 0.1), Vector3(0, 0.05, z), m(&"wood"))
+	for x: float in [-0.5, -0.17, 0.17, 0.5]:
+		b.box(Vector3(0.14, 0.03, 1.1), Vector3(x, 0.115, 0), m(&"wood"))
+	b.box(Vector3(1.0, 0.7, 0.9), Vector3(0, 0.48, 0), m(&"canvas"))
+	b.box(Vector3(1.04, 0.04, 0.94), Vector3(0, 0.6, 0), m(&"rubber"))
+
+
+func _p_trolley(b: MeshBatch) -> void:
+	for y: float in [0.3, 0.85]:
+		b.box(Vector3(0.8, 0.03, 0.5), Vector3(0, y, 0), m(&"enamel"))
+	for x: float in [-0.38, 0.38]:
+		for z: float in [-0.23, 0.23]:
+			b.box(Vector3(0.025, 0.9, 0.025), Vector3(x, 0.47, z), m(&"metal"))
+			b.cyl(0.04, 0.03, Vector3(x, 0.04, z), m(&"rubber"), Vector3(0, 0, PI / 2.0))
+	b.cyl(0.05, 0.16, Vector3(-0.2, 0.95, 0.05), m(&"glass_clear"))
+	b.box(Vector3(0.3, 0.05, 0.2), Vector3(0.15, 0.9, -0.05), m(&"metal"))
+	b.box(Vector3(0.25, 0.08, 0.18), Vector3(0.1, 0.36, 0.0), m(&"cloth_white"))
+
+
+func _p_sink(b: MeshBatch) -> void:
+	b.box(Vector3(0.6, 0.18, 0.45), Vector3(0, 0.82, 0.02), m(&"enamel"))
+	b.box(Vector3(0.5, 0.06, 0.35), Vector3(0, 0.89, 0.04), m(&"black"))
+	b.box(Vector3(0.06, 0.7, 0.06), Vector3(0, 0.36, -0.1), m(&"metal"))
+	b.cyl(0.02, 0.18, Vector3(0, 1.02, -0.12), m(&"metal"))
+	b.box(Vector3(0.4, 0.55, 0.02), Vector3(0, 1.45, -0.21), m(&"glass_clear"))
+
+
+func _p_notice_board(b: MeshBatch) -> void:
+	b.box(Vector3(1.2, 0.85, 0.04), Vector3(0, 1.6, 0.0), m(&"wood"))
+	b.box(Vector3(1.1, 0.75, 0.01), Vector3(0, 1.6, 0.025), m(&"canvas_paint"))
+	for i: int in 5:
+		b.box(
+			Vector3(0.21, 0.29, 0.005),
+			Vector3(-0.38 + i * 0.19, 1.62 + (i % 2) * 0.12 - 0.06, 0.035),
+			m(&"paper"),
+			Vector3(0, 0, (i - 2) * 0.06)
+		)
+
+
+func _p_extinguisher(b: MeshBatch) -> void:
+	b.box(Vector3(0.24, 0.05, 0.06), Vector3(0, 1.2, -0.03), m(&"metal"))
+	b.cyl(0.08, 0.5, Vector3(0, 1.0, 0.06), m(&"red_paint"))
+	b.cyl(0.03, 0.08, Vector3(0, 1.29, 0.06), m(&"black"))
+	b.box(Vector3(0.3, 0.3, 0.01), Vector3(0, 1.55, -0.04), m(&"red_paint"))
+
+
+func _p_mop_bucket(b: MeshBatch) -> void:
+	b.cyl(0.18, 0.3, Vector3(0, 0.15, 0), m(&"metal"))
+	b.cyl(0.02, 1.3, Vector3(0.05, 0.75, -0.02), m(&"wood"), Vector3(0.15, 0, 0.1))
+	b.box(Vector3(0.25, 0.08, 0.1), Vector3(0.0, 0.15, 0.0), m(&"cloth_white"))
+
+
+func _p_stalactites(b: MeshBatch) -> void:
+	# origin = the ceiling point; hangs down (-Y)
+	var pts: Array = [[0.0, 0.0, 1.8, 0.35], [0.6, 0.3, 1.1, 0.22], [-0.5, 0.4, 1.4, 0.26], [0.2, -0.6, 0.9, 0.18]]
+	for p: Array in pts:
+		var h: float = float(p[2])
+		b.add(
+			MeshBatch.Shape.CYLINDER,
+			Vector3(float(p[3]) * 2.0, h, float(p[3]) * 2.0),
+			Transform3D(Basis.IDENTITY.scaled(Vector3(1.0, 1.0, 1.0)), Vector3(float(p[0]), -h * 0.5, float(p[1]))),
+			m(&"stone")
+		)
+		b.sphere(float(p[3]) * 0.7, Vector3(float(p[0]), -h, float(p[1])), m(&"stone"), Vector3(1, 1.6, 1))
+
+
+func _p_rock_pillar(b: MeshBatch) -> void:
+	# a broad rock buttress against the cavern wall, origin = foot centre
+	b.sphere(1.6, Vector3(0, 1.2, 0), m(&"stone"), Vector3(1.0, 1.4, 0.7))
+	b.sphere(1.3, Vector3(0.3, 3.6, -0.1), m(&"stone"), Vector3(0.9, 1.6, 0.6))
+	b.sphere(1.0, Vector3(-0.2, 6.0, -0.2), m(&"stone"), Vector3(0.8, 1.8, 0.5))
+	b.sphere(0.8, Vector3(0.8, 0.4, 0.5), m(&"stone"), Vector3(1.0, 0.6, 0.8))
+
+
+func _p_scaffold(b: MeshBatch) -> void:
+	for x: float in [-1.0, 1.0]:
+		for z: float in [-0.4, 0.4]:
+			b.box(Vector3(0.06, 4.0, 0.06), Vector3(x, 2.0, z), m(&"rust"))
+	for y: float in [1.3, 2.7]:
+		b.box(Vector3(2.1, 0.06, 1.0), Vector3(0, y, 0), m(&"wood"))
+		b.box(Vector3(2.0, 0.04, 0.04), Vector3(0, y + 0.9, 0.4), m(&"rust"))
+	b.box(Vector3(2.0, 0.04, 0.04), Vector3(0, 1.0, 0.45), m(&"rust"), Vector3(0, 0, 0.6))
+	b.box(Vector3(0.4, 0.3, 0.3), Vector3(0.5, 2.88, 0), m(&"crate"))
+
+
+func _p_wall_pipes(b: MeshBatch) -> void:
+	# a vertical riser + valve bank on a wall (origin floor at the wall face, +Z out)
+	for x: float in [-0.25, 0.0, 0.25]:
+		b.cyl(0.07, 3.2, Vector3(x, 1.6, 0.12), m(&"rust" if x != 0.0 else &"metal"))
+	b.box(Vector3(0.8, 0.08, 0.2), Vector3(0, 0.5, 0.1), m(&"metal"))
+	b.box(Vector3(0.8, 0.08, 0.2), Vector3(0, 2.6, 0.1), m(&"metal"))
+	b.cyl(0.14, 0.04, Vector3(0.0, 1.3, 0.24), m(&"red_paint"), Vector3(PI / 2.0, 0, 0))
+	b.box(Vector3(0.24, 0.3, 0.1), Vector3(0.25, 1.6, 0.2), m(&"olive"))
+
+
+func _p_desk_cluttered(b: MeshBatch) -> void:
+	_p_desk(b)
+	b.box(Vector3(0.38, 0.12, 0.3), Vector3(-0.3, 0.85, 0.05), m(&"black"))
+	b.box(Vector3(0.3, 0.04, 0.22), Vector3(-0.3, 0.8, 0.25), m(&"black"))
+	for i: int in 4:
+		b.box(
+			Vector3(0.21, 0.004, 0.29),
+			Vector3(0.25 + i * 0.05, 0.79 + i * 0.004, 0.05),
+			m(&"paper"),
+			Vector3(0, i * 0.3, 0)
+		)
+	b.cyl(0.05, 0.1, Vector3(0.55, 0.84, -0.15), m(&"enamel"))
+	b.cyl(0.08, 0.02, Vector3(0.55, 1.15, -0.25), m(&"brass"))
+	b.box(Vector3(0.02, 0.36, 0.02), Vector3(0.55, 0.97, -0.25), m(&"brass"))

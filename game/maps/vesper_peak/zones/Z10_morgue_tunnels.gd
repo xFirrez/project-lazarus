@@ -39,6 +39,8 @@ func build() -> void:
 		[&"concrete", &"concrete"]
 	)
 	corridor("D10Ramp", Vector3(-14, Y, -34), Vector3(-14, -18.0, -41.0), 3.0, 3.5, &"concrete")
+	# Header over the ramp mouth: the tunnel roof stops where the pitched ramp roof starts to drop.
+	box_mm("D10RampHeader", Vector3(-15.9, -12.75, -34.7), Vector3(-12.1, -12.0, -34.2), &"concrete")
 	# East tunnel (x 22..60) to D11; the ramp down to the labs is Z11's.
 	room(
 		"TunnelE",

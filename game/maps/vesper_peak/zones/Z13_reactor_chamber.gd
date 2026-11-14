@@ -201,7 +201,75 @@ func _cavern() -> void:
 				&"stone"
 			)
 	box_mm("CavernRoof", Vector3(0.5, -18.5, -77.5), Vector3(55.5, -18.0, -22.5), &"stone")
+	_seal_openings()
 	occluder("Occ_Roof", Vector3(28, -15.5, -50), Vector3(54, 4, 54))
+
+
+# Map quality pass: each wall opening is two 7.5° segments (~6.9 m) wide while the vents (4.4 m),
+# the east alcove (4.4 m) and the WSW spoke corridor (3 m) behind them are narrower, which left
+# slits through to the void beside them. Rock pockets close the openings around what's behind.
+func _seal_openings() -> void:
+	for deg: float in [90.0, -90.0, 0.0]:
+		var a: float = deg_to_rad(deg)
+		var out: Vector3 = Vector3(cos(a), 0, sin(a))
+		var tan_dir: Vector3 = Vector3(-out.z, 0, out.x)
+		var bs: Basis = Basis(Vector3.UP, atan2(out.x, out.z))
+		var base: Vector3 = C + out * WALL_R
+		# back face (behind the vent / alcove), side cheeks and a lid under the lintel
+		slab(
+			"SealBack_%d" % int(deg),
+			Transform3D(bs, base + out * 4.0 + Vector3(0, 3.5, 0)),
+			Vector3(8.4, 8.0, 0.6),
+			&"stone"
+		)
+		for sd: float in [-1.0, 1.0]:
+			slab(
+				"SealSide_%d_%d" % [int(deg), int(sd)],
+				Transform3D(bs, base + out * 2.15 + tan_dir * sd * 4.0 + Vector3(0, 3.5, 0)),
+				Vector3(0.6, 8.0, 3.9),
+				&"stone"
+			)
+		slab(
+			"SealLid_%d" % int(deg),
+			Transform3D(bs, base + out * 2.15 + Vector3(0, 4.3, 0)),
+			Vector3(8.4, 0.5, 3.9),
+			&"stone"
+		)
+	# Below the ring at the openings (the wall segments there start at the ring floor).
+	var step: float = TAU / SEGMENTS
+	var seg_len: float = 2.0 * WALL_R * tan(step * 0.5) + 0.2
+	var half: float = rad_to_deg(step) * 0.5 + 0.5
+	for i: int in SEGMENTS:
+		var a2: float = step * (i + 0.5)
+		if not _gap_at(rad_to_deg(wrapf(a2, -PI, PI)), LOWER_GAPS, half):
+			continue
+		var d2: Vector3 = Vector3(cos(a2), 0, sin(a2))
+		slab(
+			"WallLowFoot_%02d" % i,
+			Transform3D(Basis(Vector3.UP, atan2(d2.x, d2.z)), C + d2 * (WALL_R + 0.3) + Vector3(0, -4.0, 0)),
+			Vector3(seg_len, 7.0, 0.6),
+			&"stone"
+		)
+	# The pit: a rock shaft under the ring's inner edge down to the vesperite pool, so looking over
+	# the railing shows the shaft wall instead of the space under the ring. Its top stays 1.1 m under
+	# the ring so the rift climbs (pad r 16.5 -> ring r 20.6) pass over it.
+	var pit_len: float = 2.0 * (RING_IN + 0.4) * tan(step * 0.5) + 0.12
+	for i: int in SEGMENTS:
+		var a3: float = step * (i + 0.5)
+		var d3: Vector3 = Vector3(cos(a3), 0, sin(a3))
+		slab(
+			"PitWall_%02d" % i,
+			Transform3D(Basis(Vector3.UP, atan2(d3.x, d3.z)), C + d3 * (RING_IN + 0.4) + Vector3(0, -6.15, 0)),
+			Vector3(pit_len, 9.1, 0.6),
+			&"stone"
+		)
+	box("PitFloor", C + Vector3(0, -10.6, 0), Vector3(40.0, 0.6, 40.0), &"stone")
+	# WSW spoke: rock either side of the corridor where it pierces the wall.
+	box_mm("SealSpokeN", Vector3(3.5, -48.5, -63.8), Vector3(10.5, -43.0, -61.0), &"stone")
+	box_mm("SealSpokeS", Vector3(3.5, -48.5, -70.0), Vector3(10.5, -43.0, -67.2), &"stone")
+	box_mm("SealSpokeTop", Vector3(3.5, -44.8, -70.0), Vector3(10.5, -43.0, -61.0), &"stone")
+	# Shaft balcony opening: the shaft's north wall stops at z -40.8; the opening runs to ~-39.4.
+	box_mm("SealShaftN", Vector3(0.0, -39.0, -40.8), Vector3(4.2, -33.6, -38.2), &"stone")
 
 
 func _core_and_forge() -> void:
@@ -346,5 +414,90 @@ func dress() -> void:
 	)
 	prop(&"cap", Vector3(0, 0.0, 0), 0.6, v)
 	fixture_light(&"", Vector3(31.5, -31.5, -56.6), Color(1.0, 0.85, 0.6), 0.4, 3.0, PoweredLight.Pattern.NONE, false)
+	_dress_cavern()
 	reverb(&"Reverb_Cavern", Vector3(0, -52, -78), Vector3(56, -17, -22))
 	reverb(&"Reverb_Tunnel", Vector3(-6, -49, -67), Vector3(0, -15, -37))
+
+
+# Map quality pass: the cavern read as a smooth green cylinder. Rock outcrops break up the wall
+# above head height, stalactites hang from the roof, pipe risers and supply clutter line the ring
+# between the gameplay spots, and vesperite crystals glow in the pit.
+func _dress_cavern() -> void:
+	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+	rng.seed = 1313
+	var holder: Node3D = _art_group("Cavern")
+	var keep_clear: Array = [52.0, 60.0, 180.0, -60.0, -90.0, 0.0, 90.0, -142.2, 163.3, -24.4, 11.25]
+	for i: int in SEGMENTS:
+		var a_deg: float = 360.0 * (i + 0.5) / SEGMENTS
+		var a: float = deg_to_rad(a_deg)
+		var dir: Vector3 = Vector3(cos(a), 0, sin(a))
+		var yaw: float = atan2(-dir.x, -dir.z)
+		var w_deg: float = rad_to_deg(wrapf(a, -PI, PI))
+		var near_gap: bool = _gap_at(w_deg, UPPER_GAPS, 11.0)
+		if i % 2 == 0 and not near_gap:
+			var rp: MeshInstance3D = prop(
+				&"rock_pillar",
+				C + dir * (WALL_R - 0.1) + Vector3(0, 3.8 + rng.randf_range(0.0, 9.0), 0),
+				yaw + rng.randf_range(-0.3, 0.3),
+				holder
+			)
+			rp.scale = Vector3.ONE * rng.randf_range(0.8, 1.5)
+		var clear: bool = true
+		for k: float in keep_clear:
+			if absf(wrapf(w_deg - k, -180.0, 180.0)) < 9.0:
+				clear = false
+		if not clear:
+			continue
+		match i % 4:
+			0:
+				prop(&"wall_pipes", C + dir * (WALL_R - 0.05), yaw, holder)
+			1:
+				prop(&"crate", C + dir * (WALL_R - 0.5), yaw + rng.randf_range(-0.2, 0.2), holder)
+			2:
+				prop(&"barrel_cluster", C + dir * (WALL_R - 0.7), yaw, holder)
+			3:
+				prop(&"rubble", C + dir * (WALL_R - 0.8), yaw + rng.randf(), holder)
+	# Stalactites from the roof (outside the core's column).
+	for k: int in 26:
+		var r: float = rng.randf_range(9.0, 24.0)
+		var ang: float = rng.randf() * TAU
+		var st: MeshInstance3D = prop(
+			&"stalactites", C + Vector3(cos(ang) * r, 29.5, sin(ang) * r), rng.randf() * TAU, holder
+		)
+		st.scale = Vector3.ONE * rng.randf_range(1.0, 2.6)
+	# Vesperite crystals on the pit floor and wall foot: emissive, they light the shaft from below.
+	for k: int in 22:
+		var r2: float = rng.randf_range(3.0, 18.0)
+		var ang2: float = rng.randf() * TAU
+		var h: float = rng.randf_range(0.8, 3.2)
+		deco(
+			"PitCrystal_%d" % k,
+			C + Vector3(cos(ang2) * r2, -10.3 + h * 0.5, sin(ang2) * r2),
+			Vector3(0.35, h, 0.35) * rng.randf_range(0.7, 1.4),
+			&"vesperite",
+			Vector3(rng.randf_range(-0.5, 0.5), rng.randf() * TAU, rng.randf_range(-0.5, 0.5))
+		)
+	# Service shaft: a work lamp over every landing (it was unlit).
+	for lp: Vector3 in [
+		Vector3(-1.2, -15.8, -42.5),
+		Vector3(-4.8, -15.8, -42.5),
+		Vector3(-1.2, -25.6, -65.5),
+		Vector3(-4.8, -25.6, -65.5),
+		Vector3(-1.2, -35.6, -42.5),
+		Vector3(-4.8, -35.6, -42.5),
+		Vector3(-1.2, -45.6, -65.5),
+		Vector3(-4.8, -45.6, -65.5),
+	]:
+		fixture_light(&"caged_bulb", lp, Color(1.0, 0.74, 0.45), 1.4, 11.0, PoweredLight.Pattern.NONE, true)
+	# Warm work lamps on the outer ring between the caged bulbs.
+	for k: int in 4:
+		var a3: float = deg_to_rad(112.0 + 90.0 * k)
+		fixture_light(
+			&"caged_bulb",
+			C + Vector3(cos(a3), 0, sin(a3)) * (WALL_R - 0.3) + Vector3(0, 2.6, 0),
+			Color(1.0, 0.72, 0.42),
+			1.0,
+			9.0,
+			PoweredLight.Pattern.FLICKER,
+			true
+		)

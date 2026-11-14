@@ -24,6 +24,7 @@ var sky_mat: ShaderMaterial = null
 var searchlights: Array[Node3D] = []
 var shadows: ShadowBudget = null
 var pulses: int = 0
+var terrain: VesperTerrain = null
 
 var _pulse: float = 0.0
 var _t: float = 0.0
@@ -46,6 +47,7 @@ func build(map_root: Node3D) -> void:
 		atmosphere.default_profile = set_res.fallback
 	atmosphere.storm = storm
 	add_child(atmosphere)
+	atmosphere.sky_visibility_changed.connect(_on_sky_visibility)
 	_searchlights()
 	shadows = ShadowBudget.new()
 	shadows.name = "ShadowBudget"
@@ -56,6 +58,13 @@ func build(map_root: Node3D) -> void:
 
 # Zones exist by now (map _ready): collect their volumes for the zone lookup.
 func finish(map_root: Node3D) -> void:
+	# The mountain the complex is built into (map quality pass): needs the zones' colliders.
+	var zones: Array = []
+	for c: Node in map_root.get_children():
+		if c is VesperZone:
+			zones.append(c)
+	terrain = VesperTerrain.new()
+	terrain.build(self, zones)
 	atmosphere.setup(map_root, env, moon)
 	add_to_group(&"map_art")
 	# The art pass replaces the greybox marker posts / labels (debug: `markers_visible 1`).
@@ -102,6 +111,14 @@ static func cull_gameplay_meshes(map_root: Node, distance: float = GAMEPLAY_CULL
 				gi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
 				n += 1
 	return n
+
+
+# Underground (no-sky profiles): the mountain ring, cloud sea and searchlight beams are hidden so a
+# crack in the rock reads as darkness, never as the outside of the map.
+func _on_sky_visibility(visible: bool) -> void:
+	for c: Node in get_children():
+		if c is MeshInstance3D or String(c.name).begins_with("Searchlight"):
+			(c as Node3D).visible = visible
 
 
 func _on_round_started(_r: int) -> void:
@@ -172,43 +189,63 @@ func _environment(map_root: Node3D) -> void:
 	sky_mat.set_shader_parameter(&"moon_dir", moon.global_transform.basis.z.normalized())
 
 
-# Distant peaks: a ring of jagged ridges (snow above ~60 % height) 230–420 m from the map centre,
-# plus the near ridge masses behind the Comms Array and the Courtyard cliff. One mesh, vertex
-# colours, no collision.
+# Distant peaks (map quality pass): a polar heightfield range 290–720 m from the map centre —
+# ridged noise peaks with snow on the gentler faces and rock on the steep ones, shaded toward the
+# haze colour with distance (aerial perspective baked into vertex colours, so the scene fog can't
+# flatten it into a pale wall). It replaces the earlier ring of flat triangle "teeth". The valleys
+# between it and the massif (VesperTerrain) sink into the cloud sea. One mesh, no collision.
 func _backdrop() -> void:
-	var st: SurfaceTool = SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
-	rng.seed = 1952
-	var rock: Color = Color(0.09, 0.1, 0.12)
-	var snow: Color = Color(0.62, 0.68, 0.78)
-	for ring: int in 3:
-		var r0: float = 230.0 + ring * 85.0
-		var segs: int = 72
-		var heights: PackedFloat32Array = PackedFloat32Array()
+	var n: FastNoiseLite = FastNoiseLite.new()
+	n.seed = 1952
+	n.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	n.fractal_type = FastNoiseLite.FRACTAL_RIDGED
+	n.fractal_octaves = 5
+	n.frequency = 0.0042
+	var segs: int = 200
+	var rings: int = 34
+	var r_in: float = 290.0
+	var r_out: float = 720.0
+	var rock: Color = Color(0.05, 0.06, 0.08)
+	var snow: Color = Color(0.36, 0.41, 0.5)
+	var haze: Color = Color(0.13, 0.16, 0.23)
+	var pts: PackedVector3Array = PackedVector3Array()
+	for j: int in rings + 1:
+		var t: float = float(j) / rings
+		var r: float = lerpf(r_in, r_out, t * t * 0.6 + t * 0.4)
 		for i: int in segs:
 			var a: float = TAU * float(i) / segs
-			var h: float = 40.0 + ring * 35.0 + rng.randf_range(0.0, 70.0 + ring * 30.0)
-			h += 50.0 * maxf(sin(a * 3.0 + ring), 0.0)
-			heights.append(h)
+			var x: float = CENTRE.x + cos(a) * r
+			var z: float = CENTRE.z + sin(a) * r
+			var ridge: float = n.get_noise_2d(x, z) * 0.5 + 0.5
+			var rise: float = smoothstep(r_in, r_in + 110.0, r) * (1.0 - smoothstep(560.0, r_out, r) * 0.55)
+			var h: float = -150.0 + rise * (150.0 + 60.0 + 230.0 * ridge * ridge)
+			pts.append(Vector3(x, h, z))
+	var st: SurfaceTool = SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for j: int in rings:
 		for i: int in segs:
-			var a0: float = TAU * float(i) / segs
-			var a1: float = TAU * float(i + 1) / segs
-			var am: float = (a0 + a1) * 0.5
-			var h0: float = heights[i]
-			var h1: float = heights[(i + 1) % segs]
-			var hm: float = maxf(h0, h1) + rng.randf_range(5.0, 30.0)
-			var base_y: float = -160.0
-			var p0: Vector3 = CENTRE + Vector3(cos(a0) * r0, base_y, sin(a0) * r0)
-			var p1: Vector3 = CENTRE + Vector3(cos(a1) * r0, base_y, sin(a1) * r0)
-			var q0: Vector3 = CENTRE + Vector3(cos(a0) * r0, h0, sin(a0) * r0)
-			var q1: Vector3 = CENTRE + Vector3(cos(a1) * r0, h1, sin(a1) * r0)
-			var peak: Vector3 = CENTRE + Vector3(cos(am) * (r0 + 12.0), hm, sin(am) * (r0 + 12.0))
-			var c0: Color = snow if h0 > 95.0 else rock
-			var c1: Color = snow if h1 > 95.0 else rock
-			_tri(st, p0, q0, p1, rock, c0, rock)
-			_tri(st, p1, q0, q1, rock, c0, c1)
-			_tri(st, q0, peak, q1, c0, snow if hm > 85.0 else rock, c1)
+			var i1: int = (i + 1) % segs
+			var a: Vector3 = pts[j * segs + i]
+			var b: Vector3 = pts[j * segs + i1]
+			var c: Vector3 = pts[(j + 1) * segs + i]
+			var d: Vector3 = pts[(j + 1) * segs + i1]
+			for tri: Array in [[a, c, b], [b, c, d]]:
+				var nrm: Vector3 = (
+					((tri[1] as Vector3) - (tri[0] as Vector3))
+					. cross((tri[2] as Vector3) - (tri[0] as Vector3))
+					. normalized()
+				)
+				if nrm.y < 0.0:
+					nrm = -nrm
+				for v: Vector3 in tri:
+					var snowy: float = smoothstep(0.45, 0.7, nrm.y) * smoothstep(20.0, 90.0, v.y)
+					var col: Color = rock.lerp(snow, snowy)
+					var far: float = clampf(
+						(Vector2(v.x, v.z).distance_to(Vector2(CENTRE.x, CENTRE.z)) - r_in) / (r_out - r_in), 0.0, 1.0
+					)
+					st.set_color(col.lerp(haze, 0.25 + far * 0.55))
+					st.add_vertex(v)
+	st.index()
 	st.generate_normals()
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.name = "MountainRing"
@@ -217,24 +254,16 @@ func _backdrop() -> void:
 	mat.vertex_color_use_as_albedo = true
 	mat.roughness = 1.0
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.disable_fog = true
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.extra_cull_margin = 50.0
 	add_child(mi)
 
 
-static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color) -> void:
-	st.set_color(ca)
-	st.add_vertex(a)
-	st.set_color(cb)
-	st.add_vertex(b)
-	st.set_color(cc)
-	st.add_vertex(c)
-
-
 func _cloud_sea() -> void:
 	var shader: Shader = load(CLOUD_SHADER) as Shader
-	for layer: Array in [[-70.0, 0.62, 0.004, 0.9], [-40.0, 0.38, 0.006, 0.5], [62.0, 0.42, 0.003, 0.45]]:
+	for layer: Array in [[-70.0, 0.62, 0.004, 0.9], [-40.0, 0.38, 0.006, 0.5], [240.0, 0.42, 0.003, 0.45]]:
 		var mi: MeshInstance3D = MeshInstance3D.new()
 		mi.name = "CloudLayer_%d" % int(layer[0])
 		var pm: PlaneMesh = PlaneMesh.new()
